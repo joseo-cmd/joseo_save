@@ -1,0 +1,21 @@
+node_modules/
+dist/
+build/
+coverage/
+
+# Runtime data store (persisted saves)
+server/data/*.json
+!server/data/.gitkeep
+
+# Logs
+*.log
+npm-debug.log*
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/
+*.local
+.env
+.env.*
+!.env.example

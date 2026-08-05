@@ -1,0 +1,24 @@
+{
+  "name": "joseo_save",
+  "install": "npm install",
+  "terminals": [
+    {
+      "name": "api",
+      "command": "npm run dev:api"
+    },
+    {
+      "name": "web",
+      "command": "npm run dev:web"
+    }
+  ],
+  "ports": [
+    {
+      "name": "api",
+      "port": 3001
+    },
+    {
+      "name": "web",
+      "port": 5173
+    }
+  ]
+}
