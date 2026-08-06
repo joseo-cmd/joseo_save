@@ -1,0 +1,1409 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>판교런치 — 판교 직장인 점심 가이드</title>
+  <meta name="description" content="점심만 되면 무엇을 먹어야 하나, 고민하는 판교 직장인들을 위해 판교지역 점심메뉴 추천해드립니다." />
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+  <style>
+    :root {
+      --ink: #1a1f2e;
+      --ink-soft: #4a5168;
+      --muted: #8b92a8;
+      --line: #e4e7ef;
+      --paper: #f7f8fb;
+      --white: #ffffff;
+      --blue: #1a3a6b;
+      --blue-deep: #0f2749;
+      --blue-soft: #e8eef8;
+      --accent: #2d6cdf;
+      --good: #1f7a4c;
+      --warn: #b45309;
+      --radius: 4px;
+      --shadow: 0 12px 40px rgba(26, 58, 107, 0.08);
+      --font: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, sans-serif;
+      --max: 1120px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font);
+      color: var(--ink);
+      background:
+        radial-gradient(1200px 600px at 10% -10%, #e8eef8 0%, transparent 55%),
+        radial-gradient(900px 500px at 100% 0%, #f0f3f9 0%, transparent 50%),
+        var(--paper);
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    img { display: block; max-width: 100%; }
+    a { color: inherit; text-decoration: none; }
+    button { font-family: inherit; cursor: pointer; border: none; background: none; }
+    ul { list-style: none; }
+
+    .wrap {
+      width: min(100% - 2rem, var(--max));
+      margin-inline: auto;
+    }
+
+    /* —— Header —— */
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: blur(14px);
+      background: rgba(247, 248, 251, 0.85);
+      border-bottom: 1px solid transparent;
+      transition: border-color 0.25s, background 0.25s;
+    }
+    .header.scrolled {
+      border-bottom-color: var(--line);
+      background: rgba(255, 255, 255, 0.92);
+    }
+    .header-inner {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      height: 64px;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      flex-shrink: 0;
+    }
+    .logo-mark {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--blue);
+      position: relative;
+    }
+    .logo-mark::after {
+      content: "";
+      position: absolute;
+      inset: 7px 9px 9px 9px;
+      border: 2px solid #fff;
+      border-top: 0;
+      border-radius: 0 0 10px 10px;
+    }
+    .logo-text {
+      font-weight: 800;
+      font-size: 1.2rem;
+      letter-spacing: -0.03em;
+      color: var(--blue);
+    }
+    .search {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      max-width: 420px;
+      margin-left: auto;
+      padding: 0.55rem 0.9rem;
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .search:focus-within {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(45, 108, 223, 0.12);
+    }
+    .search svg { flex-shrink: 0; color: var(--muted); }
+    .search input {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-size: 0.9rem;
+      background: transparent;
+      color: var(--ink);
+      min-width: 0;
+    }
+    .search input::placeholder { color: var(--muted); }
+    .wish-nav {
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.5rem 0.9rem;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--blue);
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      transition: background 0.2s, border-color 0.2s, color 0.2s;
+    }
+    .wish-nav:hover,
+    .wish-nav.active {
+      background: var(--blue);
+      border-color: var(--blue);
+      color: #fff;
+    }
+    .wish-nav .badge {
+      min-width: 1.25rem;
+      height: 1.25rem;
+      padding: 0 0.35rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      font-weight: 800;
+      border-radius: 999px;
+      background: var(--blue-soft);
+      color: var(--blue);
+    }
+    .wish-nav:hover .badge,
+    .wish-nav.active .badge {
+      background: rgba(255, 255, 255, 0.25);
+      color: #fff;
+    }
+    .wish-nav .badge:empty,
+    .wish-nav .badge[data-count="0"] { display: none; }
+
+    /* —— Hero —— */
+    .hero {
+      position: relative;
+      min-height: min(88vh, 720px);
+      display: grid;
+      align-items: end;
+      overflow: hidden;
+      color: #fff;
+    }
+    .hero-media {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+    }
+    .hero-media img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scale(1.04);
+      animation: heroZoom 18s ease-out forwards;
+    }
+    @keyframes heroZoom {
+      to { transform: scale(1); }
+    }
+    .hero-media::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(180deg, rgba(15, 39, 73, 0.25) 0%, rgba(15, 39, 73, 0.55) 45%, rgba(15, 39, 73, 0.88) 100%);
+    }
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      padding: 3.5rem 0 4rem;
+      animation: riseIn 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    @keyframes riseIn {
+      from { opacity: 0; transform: translateY(28px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .hero-brand {
+      display: inline-block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      opacity: 0.85;
+      margin-bottom: 1rem;
+    }
+    .hero h1 {
+      font-size: clamp(2.4rem, 6vw, 4.2rem);
+      font-weight: 800;
+      letter-spacing: -0.045em;
+      line-height: 1.08;
+      max-width: 12ch;
+      margin-bottom: 1rem;
+    }
+    .hero p {
+      font-size: clamp(1rem, 2vw, 1.15rem);
+      opacity: 0.9;
+      max-width: 36ch;
+      margin-bottom: 1.75rem;
+      font-weight: 400;
+    }
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.45rem;
+      padding: 0.85rem 1.35rem;
+      font-size: 0.95rem;
+      font-weight: 700;
+      border-radius: 999px;
+      transition: transform 0.2s, background 0.2s, color 0.2s, box-shadow 0.2s;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn-primary {
+      background: #fff;
+      color: var(--blue-deep);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+    }
+    .btn-primary:hover { background: #f0f4ff; }
+    .btn-ghost {
+      background: rgba(255, 255, 255, 0.12);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      backdrop-filter: blur(6px);
+    }
+    .btn-ghost:hover { background: rgba(255, 255, 255, 0.2); }
+
+    /* —— Sections —— */
+    section { padding: 3.25rem 0; }
+    .section-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+    }
+    .section-head h2 {
+      font-size: 1.35rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+    }
+    .section-head .hint {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    /* —— Category chips —— */
+    .chips-rail {
+      display: flex;
+      gap: 0.55rem;
+      overflow-x: auto;
+      padding-bottom: 0.35rem;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    .chips-rail::-webkit-scrollbar { display: none; }
+    .chip {
+      flex-shrink: 0;
+      padding: 0.55rem 1rem;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--ink-soft);
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      transition: background 0.2s, color 0.2s, border-color 0.2s, transform 0.2s;
+    }
+    .chip:hover {
+      border-color: var(--blue);
+      color: var(--blue);
+      transform: translateY(-1px);
+    }
+    .chip.active {
+      background: var(--blue);
+      border-color: var(--blue);
+      color: #fff;
+    }
+
+    /* —— Quick filters —— */
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 1.25rem;
+    }
+    .filter {
+      padding: 0.45rem 0.85rem;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--ink-soft);
+      background: transparent;
+      border: 1px dashed var(--line);
+      border-radius: var(--radius);
+      transition: all 0.2s;
+    }
+    .filter:hover { border-color: var(--accent); color: var(--accent); }
+    .filter.active {
+      background: var(--blue-soft);
+      border-style: solid;
+      border-color: var(--accent);
+      color: var(--blue);
+    }
+
+    /* —— Today's pick —— */
+    .today {
+      padding-top: 1.5rem;
+    }
+    .today-card {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+      gap: 0;
+      background: var(--white);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      min-height: 320px;
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 0.45s ease, transform 0.45s ease;
+    }
+    .today-card.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .today-card.swap {
+      animation: swapPulse 0.45s ease;
+    }
+    @keyframes swapPulse {
+      0% { opacity: 0.4; transform: translateY(8px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    .today-visual {
+      position: relative;
+      min-height: 280px;
+      overflow: hidden;
+    }
+    .today-visual img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .today-badge {
+      position: absolute;
+      top: 1rem;
+      left: 1rem;
+      padding: 0.35rem 0.7rem;
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      background: var(--blue);
+      color: #fff;
+    }
+    .today-body {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 2rem 2.25rem;
+    }
+    .today-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 0.85rem;
+      font-size: 0.8rem;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    .today-meta span {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+    .today-meta span + span::before {
+      content: "·";
+      margin-right: 0.5rem;
+      color: var(--line);
+    }
+    .today-body h3 {
+      font-size: clamp(1.5rem, 3vw, 2rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin-bottom: 0.65rem;
+    }
+    .today-body .reason {
+      color: var(--ink-soft);
+      font-size: 1rem;
+      margin-bottom: 1.5rem;
+      max-width: 36ch;
+    }
+    .btn-outline {
+      align-self: flex-start;
+      padding: 0.7rem 1.2rem;
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--blue);
+      border: 1.5px solid var(--blue);
+      border-radius: 999px;
+      transition: background 0.2s, color 0.2s;
+    }
+    .btn-outline:hover {
+      background: var(--blue);
+      color: #fff;
+    }
+
+    /* —— Restaurant list —— */
+    .list-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+      flex-wrap: wrap;
+    }
+    .result-count {
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+    .result-count strong { color: var(--ink); font-weight: 700; }
+    .list-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      flex-wrap: wrap;
+    }
+    .view-tabs {
+      display: inline-flex;
+      padding: 0.2rem;
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+    }
+    .view-tab {
+      padding: 0.4rem 0.85rem;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--ink-soft);
+      border-radius: 999px;
+      transition: background 0.2s, color 0.2s;
+    }
+    .view-tab.active {
+      background: var(--blue);
+      color: #fff;
+    }
+    .clear-wish {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+      display: none;
+    }
+    .clear-wish.show { display: inline; }
+    .clear-wish:hover { color: var(--blue); }
+    .sort-note {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+    .save-btn {
+      position: absolute;
+      top: 0.55rem;
+      right: 0.55rem;
+      z-index: 2;
+      width: 34px;
+      height: 34px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.92);
+      color: var(--muted);
+      box-shadow: 0 2px 10px rgba(15, 39, 73, 0.12);
+      transition: color 0.2s, background 0.2s, transform 0.2s;
+    }
+    .save-btn:hover { transform: scale(1.06); color: var(--blue); }
+    .save-btn.active {
+      color: #fff;
+      background: var(--blue);
+    }
+    .save-btn svg { width: 16px; height: 16px; }
+    .today-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.65rem;
+      align-items: center;
+    }
+    .btn-save-today {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.7rem 1.15rem;
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--ink-soft);
+      border: 1.5px solid var(--line);
+      border-radius: 999px;
+      transition: background 0.2s, color 0.2s, border-color 0.2s;
+    }
+    .btn-save-today:hover {
+      border-color: var(--blue);
+      color: var(--blue);
+    }
+    .btn-save-today.active {
+      background: var(--blue-soft);
+      border-color: var(--blue);
+      color: var(--blue);
+    }
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 1.5rem;
+      z-index: 100;
+      transform: translateX(-50%) translateY(120%);
+      padding: 0.75rem 1.2rem;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: #fff;
+      background: var(--blue-deep);
+      border-radius: 999px;
+      box-shadow: 0 10px 30px rgba(15, 39, 73, 0.25);
+      opacity: 0;
+      pointer-events: none;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.25rem;
+    }
+    .place {
+      display: grid;
+      grid-template-columns: 140px 1fr;
+      gap: 0;
+      background: var(--white);
+      border: 1px solid var(--line);
+      overflow: hidden;
+      transition: border-color 0.2s, box-shadow 0.25s, transform 0.25s;
+      opacity: 0;
+      transform: translateY(12px);
+      animation: cardIn 0.5s ease forwards;
+    }
+    .place:hover {
+      border-color: #c5cedf;
+      box-shadow: var(--shadow);
+      transform: translateY(-2px);
+    }
+    @keyframes cardIn {
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .place-thumb {
+      position: relative;
+      min-height: 140px;
+      overflow: hidden;
+      background: var(--blue-soft);
+    }
+    .place-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.45s ease;
+    }
+    .place:hover .place-thumb img { transform: scale(1.06); }
+    .place-body {
+      padding: 1rem 1.1rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-width: 0;
+    }
+    .place-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+      margin-bottom: 0.4rem;
+    }
+    .tag {
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 0.18rem 0.45rem;
+      background: var(--blue-soft);
+      color: var(--blue);
+      letter-spacing: -0.01em;
+    }
+    .tag.quiet {
+      background: #f0f1f5;
+      color: var(--ink-soft);
+    }
+    .place-body h3 {
+      font-size: 1.05rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.25rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .place-desc {
+      font-size: 0.82rem;
+      color: var(--ink-soft);
+      margin-bottom: 0.65rem;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .place-stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.65rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--muted);
+    }
+    .place-stats .ok { color: var(--good); }
+    .place-stats .mid { color: var(--warn); }
+
+    .empty {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 3.5rem 1rem;
+      color: var(--muted);
+      background: var(--white);
+      border: 1px dashed var(--line);
+    }
+    .empty strong {
+      display: block;
+      color: var(--ink);
+      font-size: 1.05rem;
+      margin-bottom: 0.35rem;
+    }
+
+    /* —— Areas —— */
+    .areas {
+      background: linear-gradient(180deg, transparent, rgba(232, 238, 248, 0.55));
+    }
+    .area-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.85rem;
+    }
+    .area {
+      padding: 1.35rem 1.15rem;
+      background: var(--white);
+      border: 1px solid var(--line);
+      text-align: left;
+      transition: border-color 0.2s, background 0.2s, transform 0.2s;
+    }
+    .area:hover,
+    .area.active {
+      border-color: var(--blue);
+      background: var(--blue-soft);
+      transform: translateY(-2px);
+    }
+    .area strong {
+      display: block;
+      font-size: 1rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.3rem;
+      color: var(--blue);
+    }
+    .area span {
+      font-size: 0.8rem;
+      color: var(--ink-soft);
+    }
+
+    /* —— Footer —— */
+    .footer {
+      padding: 2.5rem 0 3rem;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+    .footer-inner {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 1rem;
+      align-items: center;
+    }
+    .footer .logo-text { font-size: 1rem; }
+
+    /* —— Responsive —— */
+    @media (max-width: 900px) {
+      .grid { grid-template-columns: 1fr; }
+      .today-card { grid-template-columns: 1fr; }
+      .today-visual { min-height: 220px; }
+      .area-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 600px) {
+      .header-inner { height: 56px; gap: 0.5rem; }
+      .logo-text { font-size: 1.05rem; }
+      .wish-nav span.label { display: none; }
+      .wish-nav { padding: 0.5rem 0.7rem; }
+      .search { max-width: none; padding: 0.45rem 0.75rem; margin-left: 0; }
+      .hero { min-height: 78vh; }
+      .hero-content { padding: 2.5rem 0 3rem; }
+      .place { grid-template-columns: 110px 1fr; }
+      .place-thumb { min-height: 120px; }
+      .today-body { padding: 1.5rem 1.25rem; }
+      .area-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header class="header" id="header">
+    <div class="wrap header-inner">
+      <a href="#" class="logo" aria-label="판교런치 홈">
+        <span class="logo-mark" aria-hidden="true"></span>
+        <span class="logo-text">판교런치</span>
+      </a>
+      <label class="search" for="searchInput">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+          <circle cx="11" cy="11" r="7" /><path d="M20 20l-3.5-3.5" />
+        </svg>
+        <input id="searchInput" type="search" placeholder="식당·메뉴 검색" autocomplete="off" />
+      </label>
+      <button type="button" class="wish-nav" id="wishNav" aria-pressed="false" title="가고 싶은 식당">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+          <path d="M19 21l-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+        </svg>
+        <span class="label">가고 싶은</span>
+        <span class="badge" id="wishBadge" data-count="0">0</span>
+      </button>
+    </div>
+  </header>
+
+  <section class="hero" aria-label="메인">
+    <div class="hero-media">
+      <img
+        src="images/hero-lunch.png"
+        alt="점심 식사 플레이팅"
+        width="1600"
+        height="900"
+      />
+    </div>
+    <div class="wrap hero-content">
+      <span class="hero-brand">Pangyo Lunch Guide</span>
+      <h1>판교런치</h1>
+      <p>점심만 되면 무엇을 먹어야 하나, 고민하는 판교 직장인들을 위해 판교지역 점심메뉴 추천해드립니다.</p>
+      <div class="hero-actions">
+        <button type="button" class="btn btn-primary" id="heroRandom">오늘 뭐 먹지</button>
+        <a class="btn btn-ghost" href="#list">맛집 둘러보기</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap" aria-label="카테고리와 필터">
+    <div class="section-head">
+      <h2>메뉴 종류</h2>
+      <span class="hint">한 번에 하나씩 골라보세요</span>
+    </div>
+    <div class="chips-rail" id="categoryChips" role="list"></div>
+    <div class="filters" id="quickFilters" role="group" aria-label="빠른 필터"></div>
+  </section>
+
+  <section class="wrap today" id="today" aria-label="오늘의 추천">
+    <div class="section-head">
+      <h2>오늘의 추천</h2>
+      <span class="hint">판교 직장인 점심용</span>
+    </div>
+    <article class="today-card" id="todayCard">
+      <div class="today-visual">
+        <span class="today-badge">TODAY</span>
+        <img id="todayImg" src="" alt="" />
+      </div>
+      <div class="today-body">
+        <div class="today-meta" id="todayMeta"></div>
+        <h3 id="todayName"></h3>
+        <p class="reason" id="todayReason"></p>
+        <div class="today-actions">
+          <button type="button" class="btn-outline" id="rerollBtn">다시 뽑기</button>
+          <button type="button" class="btn-save-today" id="todaySaveBtn" aria-pressed="false">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+              <path d="M19 21l-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+            </svg>
+            <span id="todaySaveLabel">가고 싶은</span>
+          </button>
+        </div>
+      </div>
+    </article>
+  </section>
+
+  <section class="wrap" id="list" aria-label="맛집 리스트">
+    <div class="list-toolbar">
+      <p class="result-count"><strong id="resultCount">0</strong><span id="resultLabel">곳의 점심 추천</span></p>
+      <div class="list-actions">
+        <div class="view-tabs" role="tablist" aria-label="목록 보기">
+          <button type="button" class="view-tab active" id="tabAll" data-view="all" role="tab" aria-selected="true">전체</button>
+          <button type="button" class="view-tab" id="tabWish" data-view="wish" role="tab" aria-selected="false">가고 싶은</button>
+        </div>
+        <button type="button" class="clear-wish" id="clearWish">전체 삭제</button>
+        <span class="sort-note" id="sortNote">도보 거리 · 가성비 기준</span>
+      </div>
+    </div>
+    <div class="grid" id="placeGrid"></div>
+  </section>
+
+  <section class="areas" aria-label="판교 구역">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>판교 구역</h2>
+        <span class="hint">일하는 곳 근처부터</span>
+      </div>
+      <div class="area-grid" id="areaGrid"></div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="wrap footer-inner">
+      <div class="logo">
+        <span class="logo-mark" aria-hidden="true"></span>
+        <span class="logo-text">판교런치</span>
+      </div>
+      <p>판교 직장인을 위한 점심 가이드 · 판교 인기 맛집 참고 데이터</p>
+    </div>
+  </footer>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const PLACES = [
+      {
+        id: 1,
+        name: "흥도식당 판교점",
+        category: "일식",
+        area: "테크노밸리",
+        price: 11000,
+        walk: 4,
+        wait: "보통",
+        solo: true,
+        desc: "테크원 돈까스·카레·냉소바. 태블릿 주문·바 좌석으로 빠른 점심 회전.",
+        reason: "혼밥·스피드가 필요할 때 테크원 근처 안전한 선택.",
+        img: "images/food-tonkatsu.png"
+      },
+      {
+        id: 2,
+        name: "한와담 판교점",
+        category: "한식",
+        area: "알파돔",
+        price: 16000,
+        walk: 3,
+        wait: "보통",
+        solo: false,
+        desc: "점심 한우 정식과 창가 뷰. 룸·주차까지 갖춘 한우 전문점.",
+        reason: "합리적인 한우 런치가 당기거나 미팅 겸 식사할 때.",
+        img: "images/food-hanwoo.png"
+      },
+      {
+        id: 3,
+        name: "헤이준쌀국수 알파돔점",
+        category: "면",
+        area: "알파돔",
+        price: 13000,
+        walk: 3,
+        wait: "보통",
+        solo: true,
+        desc: "알파돔타워 2층 베트남 쌀국수. 혼밥·양 많음으로 후기 많은 집.",
+        reason: "가벼운 면 요리가 먹고 싶을 때 알파돔에서 가까운 선택.",
+        img: "images/food-pho.png"
+      },
+      {
+        id: 4,
+        name: "코코이찌방야 알파돔시티점",
+        category: "일식",
+        area: "알파돔",
+        price: 12000,
+        walk: 4,
+        wait: "적음",
+        solo: true,
+        desc: "라스트리트 일본식 카레. 맵기·토핑 조절 가능, 키오스크 주문.",
+        reason: "혼밥 편한 카레로 포만감 챙기고 싶을 때.",
+        img: "images/food-curry.png"
+      },
+      {
+        id: 5,
+        name: "사위식당 판교점",
+        category: "한식",
+        area: "알파돔",
+        price: 15000,
+        walk: 3,
+        wait: "많음",
+        solo: false,
+        desc: "알파돔타워 낙곱새 맛집. 낙곱새·낙삼새로 든든한 한 끼.",
+        reason: "같이 끓여 먹을 동료가 있을 때 인기 높은 선택.",
+        img: "images/food-nakgopsae.png"
+      },
+      {
+        id: 6,
+        name: "페이딤 판교점",
+        category: "중식",
+        area: "알파돔",
+        price: 20000,
+        walk: 3,
+        wait: "보통",
+        solo: false,
+        desc: "알파돔 2층 프리미엄 중식. 북경오리·딤섬·룸 회식에 강함.",
+        reason: "조금 특별한 중식 런치나 팀 식사·예약 미팅용.",
+        img: "images/food-chinese-premium.png"
+      },
+      {
+        id: 7,
+        name: "신도세기 판교역점",
+        category: "한식",
+        area: "알파돔",
+        price: 18000,
+        walk: 3,
+        wait: "보통",
+        solo: false,
+        desc: "알파돔타워 구워주는 삼겹살·숄더랙. 직장인 고기 점심·회식 단골.",
+        reason: "고기 구이가 당기는 날, 역세권에서 깔끔하게.",
+        img: "images/food-samgyeopsal.png"
+      },
+      {
+        id: 8,
+        name: "유방녕 현대백화점 판교점",
+        category: "중식",
+        area: "판교역",
+        price: 18000,
+        walk: 5,
+        wait: "적음",
+        solo: false,
+        desc: "현대백화점 5층 프리미엄 중식. 실내 동선으로 날씨 영향 적음.",
+        reason: "비 오거나 더운 날, 백화점 안에서 편안하게.",
+        img: "images/food-chinese-lunch.png"
+      },
+      {
+        id: 9,
+        name: "삼해진미 동해왕코다리 판교점",
+        category: "한식",
+        area: "백현동",
+        price: 14000,
+        walk: 6,
+        wait: "적음",
+        solo: false,
+        desc: "코다리조림 중심의 든든한 한식. 대형 홀·룸·주차 여유.",
+        reason: "단체 점심이나 주차 편한 한식이 필요할 때.",
+        img: "images/food-kodari.png"
+      },
+      {
+        id: 10,
+        name: "킹콩부대찌개 서판교점",
+        category: "한식",
+        area: "서판교",
+        price: 13000,
+        walk: 8,
+        wait: "적음",
+        solo: true,
+        desc: "텍사스부대찌개·사리면 무한리필. 서판교 직장인 점심 단골.",
+        reason: "푸짐한 부대찌개로 확실히 배부르게 먹고 싶을 때.",
+        img: "images/food-budae.png"
+      },
+      {
+        id: 11,
+        name: "쿄다이라멘",
+        category: "일식",
+        area: "서판교",
+        price: 9500,
+        walk: 8,
+        wait: "적음",
+        solo: true,
+        desc: "서판교 라멘. 냉라멘 9,500원대 가성비, 혼밥하기 좋은 자리.",
+        reason: "만 원 이하로 라멘이 먹고 싶을 때 서판교 추천.",
+        img: "images/food-ramen.png"
+      },
+      {
+        id: 12,
+        name: "LOW42",
+        category: "면",
+        area: "서판교",
+        price: 14000,
+        walk: 8,
+        wait: "적음",
+        solo: true,
+        desc: "저당면 퓨전 면 요리. 오리진 백면·중화풍 땅콩 비빔면 등.",
+        reason: "색다른 면 요리·가벼운 컨디션을 원할 때.",
+        img: "images/food-fusion-noodle.png"
+      },
+      {
+        id: 13,
+        name: "청계산수타",
+        category: "중식",
+        area: "서판교",
+        price: 12000,
+        walk: 10,
+        wait: "보통",
+        solo: true,
+        desc: "판교도서관 인근 수타짬뽕·게살볶음밥. 해산물 푸짐한 황제짬뽕.",
+        reason: "얼큰한 짬뽕이나 게살볶음밥이 당길 때.",
+        img: "images/food-jjamppong.png"
+      },
+      {
+        id: 14,
+        name: "람부뜨리",
+        category: "면",
+        area: "서판교",
+        price: 14000,
+        walk: 9,
+        wait: "보통",
+        solo: false,
+        desc: "서판교 태국 요리. 꿍팟봉커리·갈비 쌀국수 등 이색 점심.",
+        reason: "한·중·일이 질릴 때 태국식으로 기분 전환.",
+        img: "images/food-thai-curry.png"
+      },
+      {
+        id: 15,
+        name: "해우리 판교점",
+        category: "한식",
+        area: "알파돔",
+        price: 22000,
+        walk: 4,
+        wait: "보통",
+        solo: false,
+        desc: "알파돔시티 남도·회·코스. 룸 구성으로 회식·특별한 점심에 적합.",
+        reason: "격식 있는 식사나 손님 접대가 필요할 때.",
+        img: "images/food-seafood-set.png"
+      },
+      {
+        id: 16,
+        name: "우몽블랙",
+        category: "한식",
+        area: "백현동",
+        price: 20000,
+        walk: 7,
+        wait: "보통",
+        solo: false,
+        desc: "전석 룸 중심의 한식. 조용한 미팅·프라이빗 점심에 자주 언급.",
+        reason: "대화가 중요한 비즈니스 런치가 필요할 때.",
+        img: "images/food-korean-private.png"
+      }
+    ];
+
+    const CATEGORIES = ["전체", "한식", "중식", "일식", "면"];
+    const FILTERS = [
+      { id: "cheap", label: "1만 원 이하" },
+      { id: "nowait", label: "웨이팅 적음" },
+      { id: "near", label: "도보 5분" },
+      { id: "solo", label: "혼밥 OK" }
+    ];
+    const AREAS = [
+      { id: "전체", label: "전체", desc: "판교·인근 전체" },
+      { id: "판교역", label: "판교역", desc: "역세권 · 백화점" },
+      { id: "알파돔", label: "알파돔", desc: "오피스 · 맛집 밀집" },
+      { id: "테크노밸리", label: "테크노밸리", desc: "테크원 · IT 단지" },
+      { id: "백현동", label: "백현동", desc: "백현 일대" },
+      { id: "서판교", label: "서판교", desc: "판교공원 · 도서관" }
+    ];
+
+    const WISH_KEY = "pangyo-lunch-wishlist";
+
+    function loadWishlist() {
+      try {
+        const raw = JSON.parse(localStorage.getItem(WISH_KEY) || "[]");
+        return new Set(Array.isArray(raw) ? raw.map(Number) : []);
+      } catch {
+        return new Set();
+      }
+    }
+
+    function saveWishlist() {
+      localStorage.setItem(WISH_KEY, JSON.stringify([...state.wishlist]));
+    }
+
+    const state = {
+      category: "전체",
+      area: "전체",
+      filters: new Set(),
+      query: "",
+      todayId: null,
+      view: "all",
+      wishlist: loadWishlist()
+    };
+
+    const BOOKMARK_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M19 21l-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>`;
+
+    const els = {
+      header: document.getElementById("header"),
+      chips: document.getElementById("categoryChips"),
+      filters: document.getElementById("quickFilters"),
+      grid: document.getElementById("placeGrid"),
+      count: document.getElementById("resultCount"),
+      resultLabel: document.getElementById("resultLabel"),
+      sortNote: document.getElementById("sortNote"),
+      areas: document.getElementById("areaGrid"),
+      search: document.getElementById("searchInput"),
+      todayCard: document.getElementById("todayCard"),
+      todayImg: document.getElementById("todayImg"),
+      todayMeta: document.getElementById("todayMeta"),
+      todayName: document.getElementById("todayName"),
+      todayReason: document.getElementById("todayReason"),
+      todaySave: document.getElementById("todaySaveBtn"),
+      todaySaveLabel: document.getElementById("todaySaveLabel"),
+      reroll: document.getElementById("rerollBtn"),
+      heroRandom: document.getElementById("heroRandom"),
+      wishNav: document.getElementById("wishNav"),
+      wishBadge: document.getElementById("wishBadge"),
+      tabAll: document.getElementById("tabAll"),
+      tabWish: document.getElementById("tabWish"),
+      clearWish: document.getElementById("clearWish"),
+      toast: document.getElementById("toast")
+    };
+
+    let toastTimer = null;
+    function showToast(message) {
+      els.toast.textContent = message;
+      els.toast.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => els.toast.classList.remove("show"), 1800);
+    }
+
+    function formatPrice(n) {
+      return n.toLocaleString("ko-KR") + "원대";
+    }
+
+    function waitClass(wait) {
+      if (wait === "적음") return "ok";
+      if (wait === "많음") return "mid";
+      return "";
+    }
+
+    function isWished(id) {
+      return state.wishlist.has(id);
+    }
+
+    function toggleWish(id) {
+      const added = !state.wishlist.has(id);
+      if (added) state.wishlist.add(id);
+      else state.wishlist.delete(id);
+      saveWishlist();
+      updateWishUI();
+      renderList();
+      syncTodaySave();
+      showToast(added ? "가고 싶은 식당에 담았어요" : "목록에서 뺐어요");
+      return added;
+    }
+
+    function updateWishUI() {
+      const n = state.wishlist.size;
+      els.wishBadge.textContent = String(n);
+      els.wishBadge.dataset.count = String(n);
+      els.wishNav.classList.toggle("active", state.view === "wish");
+      els.wishNav.setAttribute("aria-pressed", state.view === "wish" ? "true" : "false");
+      els.tabAll.classList.toggle("active", state.view === "all");
+      els.tabWish.classList.toggle("active", state.view === "wish");
+      els.tabAll.setAttribute("aria-selected", state.view === "all" ? "true" : "false");
+      els.tabWish.setAttribute("aria-selected", state.view === "wish" ? "true" : "false");
+      els.clearWish.classList.toggle("show", state.view === "wish" && n > 0);
+      els.sortNote.textContent = state.view === "wish" ? "내가 담아둔 식당" : "도보 거리 · 가성비 기준";
+    }
+
+    function setView(view) {
+      state.view = view;
+      updateWishUI();
+      renderList();
+      if (view === "wish") {
+        document.getElementById("list").scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }
+
+    function matches(place) {
+      if (state.view === "wish" && !state.wishlist.has(place.id)) return false;
+      if (state.category !== "전체" && place.category !== state.category) return false;
+      if (state.area !== "전체" && place.area !== state.area) return false;
+      if (state.filters.has("cheap") && place.price > 10000) return false;
+      if (state.filters.has("nowait") && place.wait !== "적음") return false;
+      if (state.filters.has("near") && place.walk > 5) return false;
+      if (state.filters.has("solo") && !place.solo) return false;
+      if (state.query) {
+        const q = state.query.toLowerCase();
+        const hay = `${place.name} ${place.category} ${place.area} ${place.desc}`.toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      return true;
+    }
+
+    function filtered() {
+      return PLACES.filter(matches).sort((a, b) => a.walk - b.walk || a.price - b.price);
+    }
+
+    function renderChips() {
+      els.chips.innerHTML = CATEGORIES.map((c) =>
+        `<button type="button" class="chip${state.category === c ? " active" : ""}" data-cat="${c}" role="listitem">${c}</button>`
+      ).join("");
+    }
+
+    function renderFilters() {
+      els.filters.innerHTML = FILTERS.map((f) =>
+        `<button type="button" class="filter${state.filters.has(f.id) ? " active" : ""}" data-filter="${f.id}">${f.label}</button>`
+      ).join("");
+    }
+
+    function renderAreas() {
+      els.areas.innerHTML = AREAS.map((a) =>
+        `<button type="button" class="area${state.area === a.id ? " active" : ""}" data-area="${a.id}">
+          <strong>${a.label}</strong>
+          <span>${a.desc}</span>
+        </button>`
+      ).join("");
+    }
+
+    function renderList() {
+      const list = filtered();
+      els.count.textContent = list.length;
+      els.resultLabel.textContent = state.view === "wish" ? "곳 담아둠" : "곳의 점심 추천";
+      updateWishUI();
+
+      if (!list.length) {
+        const emptyWish = state.view === "wish";
+        els.grid.innerHTML = emptyWish
+          ? `<div class="empty"><strong>아직 담아둔 식당이 없어요</strong>리스트에서 북마크를 눌러 가고 싶은 곳을 모아보세요</div>`
+          : `<div class="empty"><strong>조건에 맞는 곳이 없어요</strong>필터를 조금 풀어보세요</div>`;
+        return;
+      }
+
+      els.grid.innerHTML = list.map((p, i) => {
+        const wished = isWished(p.id);
+        return `
+        <article class="place" style="animation-delay:${Math.min(i * 0.04, 0.4)}s">
+          <div class="place-thumb">
+            <button type="button" class="save-btn${wished ? " active" : ""}" data-wish="${p.id}" aria-label="${wished ? "가고 싶은 목록에서 제거" : "가고 싶은 목록에 추가"}" aria-pressed="${wished}">
+              ${BOOKMARK_SVG}
+            </button>
+            <img src="${p.img}" alt="${p.name}" loading="lazy" width="280" height="200" />
+          </div>
+          <div class="place-body">
+            <div class="place-tags">
+              <span class="tag">${p.category}</span>
+              <span class="tag quiet">${p.area}</span>
+            </div>
+            <h3>${p.name}</h3>
+            <p class="place-desc">${p.desc}</p>
+            <div class="place-stats">
+              <span>${formatPrice(p.price)}</span>
+              <span>도보 ${p.walk}분</span>
+              <span class="${waitClass(p.wait)}">웨이팅 ${p.wait}</span>
+              ${p.solo ? '<span class="ok">혼밥 OK</span>' : ""}
+            </div>
+          </div>
+        </article>`;
+      }).join("");
+    }
+
+    function syncTodaySave() {
+      if (state.todayId == null) return;
+      const wished = isWished(state.todayId);
+      els.todaySave.classList.toggle("active", wished);
+      els.todaySave.setAttribute("aria-pressed", wished ? "true" : "false");
+      els.todaySaveLabel.textContent = wished ? "담아둠" : "가고 싶은";
+    }
+
+    function pickToday(preferFiltered = true) {
+      const base = preferFiltered
+        ? PLACES.filter((p) => {
+            const prev = state.view;
+            state.view = "all";
+            const ok = matches(p);
+            state.view = prev;
+            return ok;
+          })
+        : PLACES;
+      const source = base.length ? base : PLACES;
+      let candidates = source.filter((p) => p.id !== state.todayId);
+      if (!candidates.length) candidates = source;
+      const pick = candidates[Math.floor(Math.random() * candidates.length)];
+      state.todayId = pick.id;
+      renderToday(pick, true);
+    }
+
+    function renderToday(place, animate) {
+      els.todayImg.src = place.img;
+      els.todayImg.alt = place.name;
+      els.todayMeta.innerHTML = `
+        <span>${place.category}</span>
+        <span>${place.area}</span>
+        <span>${formatPrice(place.price)}</span>
+        <span>도보 ${place.walk}분</span>
+      `;
+      els.todayName.textContent = place.name;
+      els.todayReason.textContent = place.reason;
+      els.todayCard.classList.add("visible");
+      syncTodaySave();
+      if (animate) {
+        els.todayCard.classList.remove("swap");
+        void els.todayCard.offsetWidth;
+        els.todayCard.classList.add("swap");
+      }
+    }
+
+    function refresh() {
+      renderChips();
+      renderFilters();
+      renderAreas();
+      renderList();
+    }
+
+    els.chips.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-cat]");
+      if (!btn) return;
+      state.category = btn.dataset.cat;
+      refresh();
+    });
+
+    els.filters.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-filter]");
+      if (!btn) return;
+      const id = btn.dataset.filter;
+      if (state.filters.has(id)) state.filters.delete(id);
+      else state.filters.add(id);
+      refresh();
+    });
+
+    els.areas.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-area]");
+      if (!btn) return;
+      state.area = btn.dataset.area;
+      refresh();
+    });
+
+    els.search.addEventListener("input", () => {
+      state.query = els.search.value.trim();
+      renderList();
+    });
+
+    els.grid.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-wish]");
+      if (!btn) return;
+      toggleWish(Number(btn.dataset.wish));
+    });
+
+    els.todaySave.addEventListener("click", () => {
+      if (state.todayId == null) return;
+      toggleWish(state.todayId);
+    });
+
+    els.wishNav.addEventListener("click", () => {
+      setView(state.view === "wish" ? "all" : "wish");
+    });
+
+    els.tabAll.addEventListener("click", () => setView("all"));
+    els.tabWish.addEventListener("click", () => setView("wish"));
+
+    els.clearWish.addEventListener("click", () => {
+      if (!state.wishlist.size) return;
+      if (!confirm("가고 싶은 식당을 모두 삭제할까요?")) return;
+      state.wishlist.clear();
+      saveWishlist();
+      updateWishUI();
+      renderList();
+      syncTodaySave();
+      showToast("목록을 비웠어요");
+    });
+
+    els.reroll.addEventListener("click", () => pickToday(true));
+    els.heroRandom.addEventListener("click", () => {
+      pickToday(true);
+      document.getElementById("today").scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+
+    window.addEventListener("scroll", () => {
+      els.header.classList.toggle("scrolled", window.scrollY > 12);
+    }, { passive: true });
+
+    refresh();
+    pickToday(false);
+  </script>
+</body>
+</html>
