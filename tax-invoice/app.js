@@ -308,7 +308,64 @@ function assignAll(unprocessed, history) {
   });
 }
 
+function requireXlsx() {
+  if (typeof XLSX === "undefined") {
+    throw new Error("엑셀(.xlsx)을 읽으려면 인터넷이 필요합니다. CSV로 저장해서 올려 주세요.");
+  }
+}
+
+function parseCsvText(text) {
+  const rows = [];
+  let row = [];
+  let cell = "";
+  let inQuotes = false;
+  const src = String(text || "").replace(/^\uFEFF/, "");
+  for (let i = 0; i < src.length; i += 1) {
+    const ch = src[i];
+    if (inQuotes) {
+      if (ch === '"') {
+        if (src[i + 1] === '"') {
+          cell += '"';
+          i += 1;
+        } else {
+          inQuotes = false;
+        }
+      } else {
+        cell += ch;
+      }
+    } else if (ch === '"') {
+      inQuotes = true;
+    } else if (ch === "," || ch === "\t") {
+      row.push(cell);
+      cell = "";
+    } else if (ch === "\n") {
+      row.push(cell);
+      if (row.some((c) => String(c).trim())) rows.push(row);
+      row = [];
+      cell = "";
+    } else if (ch !== "\r") {
+      cell += ch;
+    }
+  }
+  row.push(cell);
+  if (row.some((c) => String(c).trim())) rows.push(row);
+  if (!rows.length) return [];
+  const headers = rows[0].map(canonHeader);
+  return rows.slice(1).map((cols) => {
+    const obj = {};
+    headers.forEach((h, idx) => {
+      obj[h] = cols[idx] ?? "";
+    });
+    return obj;
+  });
+}
+
+function isCsvFile(file) {
+  return /\.csv$/i.test(file.name || "") || /csv/i.test(file.type || "");
+}
+
 function sheetToObjects(sheet) {
+  requireXlsx();
   const rows = XLSX.utils.sheet_to_json(sheet, { defval: "", raw: true });
   return rows.map((row) => {
     const next = {};
@@ -585,13 +642,19 @@ function renderAll() {
 }
 
 async function readExcelFile(file) {
+  requireXlsx();
   const buf = await file.arrayBuffer();
   return XLSX.read(buf, { type: "array", cellDates: true });
 }
 
 async function onUnprocessedFile(file) {
-  const wb = await readExcelFile(file);
-  const parsed = parseWorkbook(wb);
+  let parsed;
+  if (isCsvFile(file)) {
+    const rows = parseCsvText(await file.text());
+    parsed = { unprocessed: rows, history: [] };
+  } else {
+    parsed = parseWorkbook(await readExcelFile(file));
+  }
   if (!parsed.unprocessed.length) {
     throw new Error("미처리현황 시트를 읽지 못했습니다. 승인번호·공급자/공급받는자 이메일 컬럼을 확인해 주세요.");
   }
@@ -605,9 +668,13 @@ async function onUnprocessedFile(file) {
 }
 
 async function onHistoryFile(file) {
-  const wb = await readExcelFile(file);
-  const parsed = parseWorkbook(wb);
-  const rows = parsed.history.length ? parsed.history : parsed.unprocessed;
+  let rows;
+  if (isCsvFile(file)) {
+    rows = parseCsvText(await file.text());
+  } else {
+    const parsed = parseWorkbook(await readExcelFile(file));
+    rows = parsed.history.length ? parsed.history : parsed.unprocessed;
+  }
   if (!rows.length) throw new Error("과거 처리 데이터를 읽지 못했습니다. 처리담당자 컬럼을 확인해 주세요.");
   state.history = rows;
   state.files.history = file.name;
@@ -615,6 +682,7 @@ async function onHistoryFile(file) {
 }
 
 function exportAssignedXlsx() {
+  requireXlsx();
   const rows = filteredRows().map((row) => ({
     예상담당자: row.owner,
     판정순위: row.rankLabel,

@@ -710,6 +710,9 @@ def main() -> None:
     print(f"wrote {history_path}")
     print(f"wrote {js_path}")
     print(f"unprocessed={len(UNPROCESSED)} history={len(HISTORY)}")
+    from build_standalone import main as build_html
+
+    build_html()
 
 
 if __name__ == "__main__":
