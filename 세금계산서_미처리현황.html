@@ -41,7 +41,7 @@
       font-size: 12px;
     }
     .topbar-inner, .header-inner, .wrap {
-      width: min(1180px, calc(100% - 32px));
+      width: min(1560px, calc(100% - 24px));
       margin: 0 auto;
     }
     .topbar-inner {
@@ -307,45 +307,48 @@
     .btn.ghost { background: #fff; color: var(--navy); border: 1px solid var(--line); }
     .btn:active { transform: translateY(1px); }
 
-    .table-wrap { overflow: visible; padding: 0 12px 14px; }
+    .table-wrap { overflow: visible; padding: 0 10px 14px; }
     table.data {
       width: 100%;
       border-collapse: collapse;
-      font-size: 12px;
+      font-size: 11.5px;
     }
     table.data th {
       background: var(--navy);
       color: #fff;
       font-weight: 700;
       text-align: left;
-      padding: 8px 7px;
+      padding: 6px 5px;
     }
+    table.data thead tr:nth-child(2) th { top: 28px; }
     table.data th.grp-erp { text-align: center; background: #2c3e50; }
     table.data th.grp-nts { text-align: center; background: #1f5c4d; }
     table.data th.grp-diff { text-align: center; background: #7a1f32; }
+    table.data th.sub-erp { background: #3a4d61; text-align: right; }
+    table.data th.sub-nts { background: #2a6d5c; text-align: right; }
+    table.data th.sub-diff { background: #8d2a3e; text-align: right; }
     table.data td {
       border-bottom: 1px solid #eef1f4;
-      padding: 7px 6px;
+      padding: 6px 5px;
       vertical-align: top;
     }
     table.data td small { display: block; color: var(--muted); margin-top: 2px; }
     table.data tr:hover td { background: #f7f9fb; }
     .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
-    .amt-box { min-width: 118px; }
-    .amt-row {
-      display: flex;
-      justify-content: space-between;
-      gap: 8px;
-      font-variant-numeric: tabular-nums;
-      line-height: 1.45;
-    }
-    .amt-row em { font-style: normal; color: #8a93a0; font-size: 11px; }
-    .amt-row b { font-weight: 700; }
     .amt-erp { background: #f6f8fa; }
     .amt-nts { background: #f3f8f6; }
     .amt-diff { background: #fff7f8; }
-    .diff-nonzero .amt-row b { color: var(--danger); }
+    .diff-nonzero { color: var(--danger); font-weight: 700; }
     tr.has-diff td { background: #fff8f8; }
+    .judge-mail {
+      display: block;
+      margin-top: 3px;
+      font-size: 10px;
+      color: #b4bac3;
+      font-weight: 400;
+      line-height: 1.3;
+      word-break: break-all;
+    }
     .empty-cell, .empty-inline { text-align: center; color: var(--muted); padding: 28px 8px; }
 
     .pill {
@@ -500,15 +503,29 @@
         <table class="data">
           <thead>
             <tr>
-              <th>#</th>
-              <th>구분</th>
-              <th>거래처</th>
-              <th>작성일</th>
-              <th>담당</th>
-              <th>판정</th>
-              <th class="grp-erp">ERP</th>
-              <th class="grp-nts">국세청</th>
-              <th class="grp-diff">차이</th>
+              <th rowspan="2">#</th>
+              <th rowspan="2">구분</th>
+              <th rowspan="2">거래처</th>
+              <th rowspan="2">작성일</th>
+              <th rowspan="2">담당</th>
+              <th rowspan="2">판정</th>
+              <th colspan="4" class="grp-erp">ERP</th>
+              <th colspan="4" class="grp-nts">국세청</th>
+              <th colspan="4" class="grp-diff">차이</th>
+            </tr>
+            <tr>
+              <th class="sub-erp">매수</th>
+              <th class="sub-erp">공급가액</th>
+              <th class="sub-erp">세액</th>
+              <th class="sub-erp">합계</th>
+              <th class="sub-nts">매수</th>
+              <th class="sub-nts">공급가액</th>
+              <th class="sub-nts">세액</th>
+              <th class="sub-nts">합계</th>
+              <th class="sub-diff">매수</th>
+              <th class="sub-diff">공급가액</th>
+              <th class="sub-diff">세액</th>
+              <th class="sub-diff">합계</th>
             </tr>
           </thead>
           <tbody id="tableBody"></tbody>
@@ -3901,31 +3918,31 @@ function hasAmountDiff(row) {
   return [row.diffQty, row.diffSupply, row.diffVat, row.diffTotal].some((v) => Math.abs(toNumber(v)) > 0.001);
 }
 
-function amountBox(kind, qty, supply, vat, total, signed) {
+function numCells(kind, qty, supply, vat, total, signed) {
   const q = signed ? formatSignedQty(qty) : formatQty(qty);
   const s = signed ? formatSignedCompact(supply) : formatCompact(supply);
   const v = signed ? formatSignedCompact(vat) : formatCompact(vat);
   const t = signed ? formatSignedCompact(total) : formatCompact(total);
   const extra = signed && [qty, supply, vat, total].some((n) => Math.abs(toNumber(n)) > 0.001) ? " diff-nonzero" : "";
-  return `<td class="amt-box amt-${kind}${extra}">
-    <div class="amt-row"><em>매수</em><b>${q}</b></div>
-    <div class="amt-row"><em>공급</em><b>${s}</b></div>
-    <div class="amt-row"><em>세액</em><b>${v}</b></div>
-    <div class="amt-row"><em>합계</em><b>${t}</b></div>
-  </td>`;
+  return `
+    <td class="num amt-${kind}${extra}">${q}</td>
+    <td class="num amt-${kind}${extra}">${s}</td>
+    <td class="num amt-${kind}${extra}">${v}</td>
+    <td class="num amt-${kind}${extra}">${t}</td>`;
 }
 
 function renderTable(rows) {
   const body = document.getElementById("tableBody");
   document.getElementById("resultMeta").textContent = `표시 ${formatCount(rows.length)} / 전체 ${formatCount(state.assigned.length)}`;
   if (!rows.length) {
-    body.innerHTML = `<tr><td colspan="9" class="empty-cell">조건에 맞는 건이 없습니다.</td></tr>`;
+    body.innerHTML = `<tr><td colspan="18" class="empty-cell">조건에 맞는 건이 없습니다.</td></tr>`;
     return;
   }
   body.innerHTML = rows
     .map((row) => {
       const tone = ownerTone(row.owner);
       const differ = hasAmountDiff(row);
+      const mail = row.emailUsed || "";
       return `
         <tr class="${differ ? "has-diff" : ""}">
           <td>${row.id}</td>
@@ -3938,10 +3955,13 @@ function renderTable(rows) {
           <td>
             <span class="pill tone-${tone}">${escapeHtml(row.owner)}</span>
           </td>
-          <td><span class="pill rank-${row.rank}" title="${escapeHtml(row.reason)}">${escapeHtml(shortRankLabel(row.rank))}</span></td>
-          ${amountBox("erp", row.erpQty, row.erpSupply, row.erpVat, row.erpTotal, false)}
-          ${amountBox("nts", row.ntsQty, row.ntsSupply, row.ntsVat, row.ntsTotal, false)}
-          ${amountBox("diff", row.diffQty, row.diffSupply, row.diffVat, row.diffTotal, true)}
+          <td>
+            <span class="pill rank-${row.rank}" title="${escapeHtml(row.reason)}">${escapeHtml(shortRankLabel(row.rank))}</span>
+            ${mail ? `<span class="judge-mail">${escapeHtml(mail)}</span>` : ""}
+          </td>
+          ${numCells("erp", row.erpQty, row.erpSupply, row.erpVat, row.erpTotal, false)}
+          ${numCells("nts", row.ntsQty, row.ntsSupply, row.ntsVat, row.ntsTotal, false)}
+          ${numCells("diff", row.diffQty, row.diffSupply, row.diffVat, row.diffTotal, true)}
         </tr>`;
     })
     .join("");
