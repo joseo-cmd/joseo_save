@@ -8,112 +8,205 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
   <style>
     :root {
-      --ink: #152033;
-      --muted: #5d6b80;
-      --line: #d9e0ea;
-      --paper: #eef2f6;
+      --yellow: #fae100;
+      --yellow-soft: #fff6b8;
+      --cream: #fffdf6;
+      --ink: #191919;
+      --muted: #8a8a8a;
+      --line: #f0eee6;
       --white: #fff;
-      --navy: #16324f;
-      --navy-2: #0f2438;
-      --teal: #0f6b5c;
-      --gold: #9a6b12;
-      --wine: #8a2c3c;
-      --slate: #3d4f66;
-      --ok: #1b6b45;
-      --danger: #9b2c2c;
-      --shadow: 0 10px 28px rgba(15, 36, 56, 0.08);
+      --brown: #c9a27a;
+      --peach: #ffb3c1;
+      --mint: #8fd6c4;
+      --sky: #b8dff0;
+      --ok: #2a9d6a;
+      --danger: #ef5b6a;
+      --shadow: 0 10px 28px rgba(25, 25, 25, 0.06);
       --font: "Pretendard Variable", Pretendard, "Malgun Gothic", sans-serif;
+      --radius: 22px;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: var(--font);
       background:
-        linear-gradient(180deg, #dfe7ef 0%, var(--paper) 220px);
+        radial-gradient(circle at 12% -10%, #fff3a8 0, transparent 28%),
+        radial-gradient(circle at 92% 8%, #ffe0ea 0, transparent 22%),
+        var(--cream);
       color: var(--ink);
       line-height: 1.5;
     }
     button, input, select, textarea { font-family: inherit; }
     a { color: inherit; }
 
-    .topbar {
-      background: var(--navy-2);
-      color: #e8eef5;
-      font-size: 12px;
-      letter-spacing: 0.02em;
-    }
     .topbar-inner, .header-inner, .wrap {
-      width: min(1480px, calc(100% - 32px));
+      width: min(1120px, calc(100% - 32px));
       margin: 0 auto;
     }
-    .topbar-inner {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 8px 0;
-    }
     .header {
-      background: var(--navy);
-      color: #fff;
-      border-bottom: 4px solid #c4a35a;
+      background: var(--yellow);
+      border-bottom: 1px solid #f0d400;
     }
     .header-inner {
       display: flex;
-      align-items: flex-end;
+      align-items: center;
       justify-content: space-between;
       gap: 20px;
-      padding: 22px 0 18px;
+      padding: 18px 0 16px;
     }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .friends {
+      display: flex;
+      align-items: flex-end;
+      gap: 6px;
+    }
+    .buddy {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      position: relative;
+      box-shadow: 0 4px 0 rgba(0,0,0,0.06);
+    }
+    .buddy.y { background: #ffe34a; }
+    .buddy.p { background: #ffb7c5; width: 38px; height: 38px; }
+    .buddy.b { background: #d7b48c; width: 36px; height: 36px; }
+    .buddy::before, .buddy::after {
+      content: "";
+      position: absolute;
+      background: #191919;
+      border-radius: 50%;
+      width: 5px;
+      height: 6px;
+      top: 15px;
+    }
+    .buddy::before { left: 12px; }
+    .buddy::after { right: 12px; }
+    .buddy .cheek {
+      position: absolute;
+      width: 8px;
+      height: 5px;
+      border-radius: 50%;
+      background: #ff8fa0;
+      bottom: 12px;
+      opacity: 0.7;
+    }
+    .buddy .cheek.l { left: 6px; }
+    .buddy .cheek.r { right: 6px; }
     .eyebrow {
-      font-size: 12px;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-      opacity: 0.72;
-      margin-bottom: 6px;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      color: #6b5b00;
+      margin-bottom: 2px;
     }
-    h1 { font-size: 26px; font-weight: 800; letter-spacing: -0.03em; }
-    .header-meta { text-align: right; font-size: 13px; opacity: 0.88; }
-    .header-meta strong { display: block; font-size: 18px; margin-bottom: 2px; }
+    h1 { font-size: 24px; font-weight: 800; letter-spacing: -0.04em; }
+    .header-meta { text-align: right; font-size: 13px; color: #4a4200; }
+    .header-meta strong {
+      display: inline-flex;
+      align-items: center;
+      background: #191919;
+      color: var(--yellow);
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 13px;
+      margin-bottom: 4px;
+    }
 
-    .layout { padding: 22px 0 64px; }
+    .layout { padding: 22px 0 72px; }
     .grid-2 {
       display: grid;
       grid-template-columns: 1.15fr 0.85fr;
-      gap: 16px;
-      margin-bottom: 16px;
+      gap: 14px;
+      margin-bottom: 14px;
     }
     .card {
       background: var(--white);
       border: 1px solid var(--line);
+      border-radius: var(--radius);
       box-shadow: var(--shadow);
     }
     .card h2 {
-      font-size: 15px;
-      padding: 14px 16px 0;
-      letter-spacing: -0.02em;
+      font-size: 16px;
+      padding: 16px 18px 0;
+      letter-spacing: -0.03em;
     }
-    .card .hint { color: var(--muted); font-size: 12px; padding: 4px 16px 12px; }
+    .card .hint { color: var(--muted); font-size: 12px; padding: 4px 18px 12px; }
 
+    .upload-card { position: relative; overflow: hidden; }
     .upload-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 12px;
+      gap: 10px;
       padding: 0 16px 16px;
     }
+    .upload-row.is-locked { filter: blur(2px); pointer-events: none; user-select: none; }
     .drop {
-      border: 1px dashed #b7c3d3;
-      background: #f7f9fb;
+      border: 1.5px dashed #eadf8a;
+      background: #fffced;
       padding: 14px;
-      min-height: 108px;
+      min-height: 96px;
+      border-radius: 16px;
     }
     .drop strong { display: block; font-size: 13px; margin-bottom: 4px; }
     .drop p { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
     .drop input { font-size: 12px; width: 100%; }
-    .file-name { margin-top: 8px; font-size: 12px; color: var(--navy); font-weight: 600; }
+    .file-name { margin-top: 8px; font-size: 12px; color: #6b5b00; font-weight: 700; }
 
-    .rules {
-      padding: 0 16px 16px;
-      font-size: 13px;
+    .lock-panel {
+      position: absolute;
+      inset: 0;
+      background: rgba(255, 253, 246, 0.88);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 3;
     }
+    .lock-panel[hidden] { display: none; }
+    .lock-box {
+      width: min(360px, 100%);
+      background: #fff;
+      border: 1px solid #f3e27a;
+      border-radius: 20px;
+      padding: 18px 18px 16px;
+      box-shadow: var(--shadow);
+      text-align: center;
+    }
+    .lock-face {
+      width: 54px;
+      height: 54px;
+      margin: 0 auto 8px;
+      border-radius: 50%;
+      background: var(--yellow);
+      position: relative;
+      box-shadow: 0 4px 0 #f0d400;
+    }
+    .lock-face::before, .lock-face::after {
+      content: "";
+      position: absolute;
+      width: 6px;
+      height: 7px;
+      background: #191919;
+      border-radius: 50%;
+      top: 20px;
+    }
+    .lock-face::before { left: 16px; }
+    .lock-face::after { right: 16px; }
+    .lock-box h3 { font-size: 15px; margin-bottom: 4px; }
+    .lock-box p { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+    .lock-row { display: flex; gap: 8px; }
+    .lock-row input {
+      flex: 1;
+      border: 1px solid #eee4a8;
+      border-radius: 999px;
+      padding: 10px 14px;
+      font-size: 13px;
+      background: #fffdf2;
+    }
+
+    .rules { padding: 0 18px 16px; font-size: 13px; }
     .rules ol { padding-left: 18px; }
     .rules li { margin: 6px 0; }
     .mail-map {
@@ -124,28 +217,31 @@
     }
     .mail-map th, .mail-map td {
       border: 1px solid var(--line);
-      padding: 6px 8px;
+      padding: 7px 8px;
       text-align: left;
     }
-    .mail-map th { background: #f3f6f9; }
+    .mail-map th { background: #fff6b8; }
 
     .kpis {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 12px;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
     }
     .kpi {
       background: var(--white);
       border: 1px solid var(--line);
+      border-radius: var(--radius);
       padding: 14px 16px;
       box-shadow: var(--shadow);
     }
-    .kpi span { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; }
-    .kpi strong { font-size: 20px; letter-spacing: -0.03em; }
-    .kpi em { display: block; margin-top: 6px; font-style: normal; font-size: 12px; color: var(--slate); }
-    .kpi .amt-line { display: block; margin-top: 3px; font-size: 12px; color: var(--slate); font-variant-numeric: tabular-nums; }
+    .kpi span { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+    .kpi strong { font-size: 18px; letter-spacing: -0.03em; }
+    .kpi em { display: block; margin-top: 6px; font-style: normal; font-size: 12px; color: #6b6b6b; }
+    .kpi .amt-line { display: block; margin-top: 2px; font-size: 12px; color: #6b6b6b; font-variant-numeric: tabular-nums; }
+    .kpi.diff-kpi { background: #fff5f6; }
     .kpi.diff-kpi strong { color: var(--danger); }
+    .kpi:first-child { background: #fff9c8; }
 
     .owner-grid {
       display: grid;
@@ -159,18 +255,19 @@
       background: #fff;
       padding: 12px;
       cursor: pointer;
+      border-radius: 18px;
     }
-    .owner-card:hover { border-color: var(--navy); }
+    .owner-card:hover { border-color: #f0d400; background: #fffced; }
     .owner-card-top { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
     .owner-card-top strong { font-size: 13px; }
     .owner-card p { font-size: 12px; color: var(--muted); }
     .owner-money { color: var(--ink) !important; font-weight: 700; margin-top: 4px; }
     .owner-rank { margin-top: 4px; }
-    .tone-south { border-top: 3px solid var(--navy); }
-    .tone-edu { border-top: 3px solid var(--teal); }
-    .tone-public { border-top: 3px solid var(--gold); }
-    .tone-hist { border-top: 3px solid var(--slate); }
-    .tone-unset { border-top: 3px solid var(--wine); }
+    .tone-south { box-shadow: inset 0 4px 0 var(--sky); }
+    .tone-edu { box-shadow: inset 0 4px 0 var(--mint); }
+    .tone-public { box-shadow: inset 0 4px 0 var(--yellow); }
+    .tone-hist { box-shadow: inset 0 4px 0 #ddd; }
+    .tone-unset { box-shadow: inset 0 4px 0 var(--peach); }
 
     .toolbar {
       display: flex;
@@ -181,81 +278,90 @@
     }
     .toolbar label { font-size: 12px; color: var(--muted); }
     select, .toolbar input[type="search"], .toolbar input[type="month"] {
-      border: 1px solid var(--line);
+      border: 1px solid #eee6b0;
       background: #fff;
-      padding: 7px 9px;
+      padding: 7px 10px;
       font-size: 13px;
+      border-radius: 999px;
     }
     .spacer { flex: 1; }
     .btn {
-      border: 1px solid var(--navy);
-      background: var(--navy);
-      color: #fff;
-      padding: 8px 12px;
+      border: 0;
+      background: #191919;
+      color: var(--yellow);
+      padding: 8px 14px;
       font-size: 13px;
-      font-weight: 700;
+      font-weight: 800;
       cursor: pointer;
+      border-radius: 999px;
     }
-    .btn.ghost { background: #fff; color: var(--navy); }
+    .btn.ghost { background: #fff; color: #191919; border: 1px solid #eee4a8; }
     .btn:active { transform: translateY(1px); }
 
-    .table-wrap { overflow: auto; padding: 0 16px 16px; }
+    .table-wrap { overflow: visible; padding: 0 12px 14px; }
     table.data {
       width: 100%;
-      border-collapse: collapse;
-      font-size: 12.5px;
-      min-width: 1480px;
+      border-collapse: separate;
+      border-spacing: 0;
+      font-size: 12px;
     }
     table.data th {
-      background: #1b3a5f;
-      color: #fff;
+      background: #191919;
+      color: var(--yellow);
       font-weight: 700;
       text-align: left;
-      padding: 7px 8px;
-      position: sticky;
-      top: 0;
-      z-index: 2;
+      padding: 8px 7px;
     }
-    table.data thead tr:nth-child(2) th { top: 31px; }
-    table.data th.grp-erp { background: #1b3a5f; text-align: center; }
-    table.data th.grp-nts { background: #0f4a3c; text-align: center; }
-    table.data th.grp-diff { background: #5a2a32; text-align: center; }
-    table.data th.sub-erp { background: #24486f; text-align: right; }
-    table.data th.sub-nts { background: #17604e; text-align: right; }
-    table.data th.sub-diff { background: #6d3640; text-align: right; }
+    table.data th:first-child { border-radius: 12px 0 0 12px; }
+    table.data th:last-child { border-radius: 0 12px 12px 0; }
+    table.data th.grp-erp { text-align: center; background: #3b2f12; }
+    table.data th.grp-nts { text-align: center; background: #16362e; }
+    table.data th.grp-diff { text-align: center; background: #3a1c22; }
     table.data td {
-      border-bottom: 1px solid #e6ebf1;
-      padding: 8px;
+      border-bottom: 1px solid #f4f1e6;
+      padding: 7px 6px;
       vertical-align: top;
     }
     table.data td small { display: block; color: var(--muted); margin-top: 2px; }
-    table.data tr:hover td { background: #f6f9fc; }
+    table.data tr:hover td { background: #fffced; }
     .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
-    .diff-cell { color: var(--muted); }
-    .diff-nonzero { color: var(--danger); font-weight: 700; background: #fdf2f2; }
+    .amt-box { min-width: 118px; }
+    .amt-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      font-variant-numeric: tabular-nums;
+      line-height: 1.45;
+    }
+    .amt-row em { font-style: normal; color: #9a9a9a; font-size: 11px; }
+    .amt-row b { font-weight: 700; }
+    .amt-erp { background: #fffaf0; }
+    .amt-nts { background: #f3fbf8; }
+    .amt-diff { background: #fff7f8; }
+    .diff-nonzero .amt-row b { color: var(--danger); }
     tr.has-diff td { background: #fff8f8; }
-    .reason, .memo { color: var(--muted); max-width: 220px; }
     .empty-cell, .empty-inline { text-align: center; color: var(--muted); padding: 28px 8px; }
 
     .pill {
       display: inline-block;
-      padding: 2px 7px;
+      padding: 2px 8px;
       font-size: 11px;
-      font-weight: 700;
-      background: #eef2f6;
+      font-weight: 800;
+      background: #f6f6f6;
       color: var(--ink);
       white-space: nowrap;
+      border-radius: 999px;
     }
-    .kind-매출 { background: #e8eef8; color: #1a3a6b; }
-    .kind-매입 { background: #e8f5f1; color: #0f6b5c; }
-    .rank-1 { background: #e7f4ec; color: var(--ok); }
-    .rank-2 { background: #f7efd9; color: #7a5610; }
-    .rank-0 { background: #f8e6e6; color: var(--danger); }
-    .pill.tone-south { background: #e6eef6; color: var(--navy); }
-    .pill.tone-edu { background: #e5f3ef; color: var(--teal); }
-    .pill.tone-public { background: #f6edd8; color: #7a5610; }
-    .pill.tone-hist { background: #eef1f4; color: var(--slate); }
-    .pill.tone-unset { background: #f8e6e6; color: var(--wine); }
+    .kind-매출 { background: #e8f4fb; color: #24586d; }
+    .kind-매입 { background: #e7f8f2; color: #1b6b54; }
+    .rank-1 { background: #e7f7ee; color: var(--ok); }
+    .rank-2 { background: #fff3c4; color: #7a5610; }
+    .rank-0 { background: #ffe4e8; color: var(--danger); }
+    .pill.tone-south { background: #e7f4fb; color: #24586d; }
+    .pill.tone-edu { background: #e5f7f1; color: #1b6b54; }
+    .pill.tone-public { background: #fff3c4; color: #6b5b00; }
+    .pill.tone-hist { background: #f3f3f3; color: #555; }
+    .pill.tone-unset { background: #ffe4e8; color: #b13b4a; }
 
     .result-meta { margin-left: auto; font-size: 12px; color: var(--muted); }
 
@@ -264,10 +370,12 @@
       left: 50%;
       bottom: 24px;
       transform: translateX(-50%) translateY(20px);
-      background: var(--navy-2);
-      color: #fff;
+      background: #191919;
+      color: var(--yellow);
       padding: 10px 16px;
       font-size: 13px;
+      font-weight: 700;
+      border-radius: 999px;
       opacity: 0;
       pointer-events: none;
       transition: 0.25s ease;
@@ -277,7 +385,8 @@
     .footer {
       color: var(--muted);
       font-size: 12px;
-      padding-top: 8px;
+      padding-top: 10px;
+      text-align: center;
     }
 
     @media (max-width: 980px) {
@@ -286,48 +395,60 @@
       .header-meta { text-align: left; }
     }
     @media print {
-      .topbar, .upload-row, .toolbar, .btn, .toast { display: none !important; }
+      .header, .upload-row, .toolbar, .btn, .toast, .lock-panel { display: none !important; }
       body { background: #fff; }
       .card, .kpi { box-shadow: none; }
     }
   </style>
 </head>
 <body>
-  <div class="topbar">
-    <div class="topbar-inner">
-      <span>회계팀 월마감 작업대 · 세금계산서 미처리 담당 추정</span>
-      <span>1순위 이메일 · 2순위 과거 처리 데이터</span>
-    </div>
-  </div>
   <header class="header">
     <div class="header-inner">
-      <div>
-        <p class="eyebrow">Month-end close</p>
-        <h1>세금계산서 미처리현황</h1>
+      <div class="brand">
+        <div class="friends" aria-hidden="true">
+          <span class="buddy y"><i class="cheek l"></i><i class="cheek r"></i></span>
+          <span class="buddy p"><i class="cheek l"></i><i class="cheek r"></i></span>
+          <span class="buddy b"><i class="cheek l"></i><i class="cheek r"></i></span>
+        </div>
+        <div>
+          <p class="eyebrow">월마감 친구들</p>
+          <h1>세금계산서 미처리현황</h1>
+        </div>
       </div>
       <div class="header-meta">
         <strong id="closeMonthLabel">2026.07 마감</strong>
-        <span>ERP · 국세청 금액 비교 · 예상담당자</span>
+        <div>ERP · 국세청 비교 · 예상담당자</div>
       </div>
     </div>
   </header>
 
   <main class="layout wrap">
     <section class="grid-2">
-      <article class="card">
+      <article class="card upload-card">
         <h2>원본 파일</h2>
-        <p class="hint">에이텍 ERP-U / 국세청 비교 양식(2줄 헤더, 공급받는자이메일1)을 그대로 올리면 됩니다. ERP·국세청·차이(매수/공급가액/세액/합계)를 같이 보여 줍니다.</p>
-        <div class="upload-row">
+        <p class="hint">비밀번호를 연 뒤에만 올릴 수 있어요. ERP-U / 국세청 비교 양식 그대로 두면 됩니다.</p>
+        <div class="lock-panel" id="uploadLock">
+          <form class="lock-box" id="unlockForm">
+            <div class="lock-face" aria-hidden="true"></div>
+            <h3>나만 올리는 칸이에요</h3>
+            <p>비밀번호를 치면 원본 파일을 올릴 수 있어요.</p>
+            <div class="lock-row">
+              <input id="uploadPassword" type="password" autocomplete="current-password" placeholder="비밀번호" />
+              <button type="submit" class="btn">열기</button>
+            </div>
+          </form>
+        </div>
+        <div class="upload-row is-locked" id="uploadFields">
           <label class="drop">
             <strong>1. 세금계산서 미처리현황</strong>
-            <p>유형·거래처명·사업자번호·발생일자·ERP/국세청 매수·공급가액·세액·합계·공급자이메일·공급받는자이메일1. 매입은 공급받는자이메일1로 1순위를 봅니다.</p>
-            <input id="fileOpen" type="file" accept=".xlsx,.xls,.csv" />
+            <p>유형·거래처명·사업자번호·발생일자·ERP/국세청 금액·이메일. 매입은 공급받는자이메일1로 1순위를 봐요.</p>
+            <input id="fileOpen" type="file" accept=".xlsx,.xls,.csv" disabled />
             <div class="file-name" id="fileUnprocessed">샘플 데이터 사용 중</div>
           </label>
           <label class="drop">
             <strong>2. 과거 처리 데이터</strong>
-            <p>거래처사업자번호·거래처명·처리담당자. 1순위가 없을 때 최다 처리 담당자를 2순위로 씁니다.</p>
-            <input id="fileHist" type="file" accept=".xlsx,.xls,.csv" />
+            <p>거래처사업자번호·거래처명·처리담당자. 1순위가 없을 때 제일 많이 처리한 사람을 2순위로 써요.</p>
+            <input id="fileHist" type="file" accept=".xlsx,.xls,.csv" disabled />
             <div class="file-name" id="fileHistory">샘플 데이터 사용 중</div>
           </label>
         </div>
@@ -424,30 +545,15 @@
         <table class="data">
           <thead>
             <tr>
-              <th rowspan="2">#</th>
-              <th rowspan="2">구분</th>
-              <th rowspan="2">거래처</th>
-              <th rowspan="2">작성일</th>
-              <th rowspan="2">예상담당자</th>
-              <th rowspan="2">판정</th>
-              <th rowspan="2">근거</th>
-              <th colspan="4" class="grp-erp">ERP</th>
-              <th colspan="4" class="grp-nts">국세청</th>
-              <th colspan="4" class="grp-diff">차이 (ERP − 국세청)</th>
-            </tr>
-            <tr>
-              <th class="sub-erp">매수</th>
-              <th class="sub-erp">공급가액</th>
-              <th class="sub-erp">세액</th>
-              <th class="sub-erp">합계</th>
-              <th class="sub-nts">매수</th>
-              <th class="sub-nts">공급가액</th>
-              <th class="sub-nts">세액</th>
-              <th class="sub-nts">합계</th>
-              <th class="sub-diff">매수</th>
-              <th class="sub-diff">공급가액</th>
-              <th class="sub-diff">세액</th>
-              <th class="sub-diff">합계</th>
+              <th>#</th>
+              <th>구분</th>
+              <th>거래처</th>
+              <th>작성일</th>
+              <th>담당</th>
+              <th>판정</th>
+              <th class="grp-erp">ERP</th>
+              <th class="grp-nts">국세청</th>
+              <th class="grp-diff">차이</th>
             </tr>
           </thead>
           <tbody id="tableBody"></tbody>
@@ -455,7 +561,7 @@
       </div>
     </section>
 
-    <p class="footer">이 HTML 하나만 브라우저로 열면 됩니다. 실제 마감 시 미처리현황·과거처리 엑셀(또는 CSV)을 올려 주세요.</p>
+    <p class="footer">이 HTML만 열면 돼요. 원본 파일은 비밀번호를 연 뒤에만 올릴 수 있어요.</p>
   </main>
 
   <div class="toast" id="toast" role="status"></div>
@@ -2917,11 +3023,14 @@ const UNPROCESSED_HINTS = [
 ];
 const HISTORY_HINTS = ["처리담당자", "처리일자", "거래처명", "거래처사업자번호"];
 
+const UPLOAD_PASS_SHA256 = "01d42fd7180a7e9748aa3e9786bf93969581f68fbbd906c00d96aaa434481429";
+
 const state = {
   closeMonth: "2026-08",
   unprocessed: [],
   history: [],
   assigned: [],
+  uploadUnlocked: false,
   filters: {
     kind: "전체",
     owner: "전체",
@@ -3025,6 +3134,28 @@ function formatSignedQty(n) {
 
 function formatCount(n) {
   return `${n.toLocaleString("ko-KR")}건`;
+}
+
+function formatCompact(n) {
+  return Math.round(toNumber(n)).toLocaleString("ko-KR");
+}
+
+function formatSignedCompact(n) {
+  const v = Math.round(toNumber(n));
+  if (v === 0) return "0";
+  return `${v > 0 ? "+" : ""}${v.toLocaleString("ko-KR")}`;
+}
+
+function formatShortDate(value) {
+  const s = String(value || "");
+  const m = s.match(/(\d{4})-(\d{2})-(\d{2})/);
+  return m ? `${m[2]}.${m[3]}` : s || "-";
+}
+
+function shortRankLabel(rank) {
+  if (rank === 1) return "1순위";
+  if (rank === 2) return "2순위";
+  return "미지정";
 }
 
 function blankToNullNumber(value) {
@@ -3674,18 +3805,31 @@ function hasAmountDiff(row) {
   return [row.diffQty, row.diffSupply, row.diffVat, row.diffTotal].some((v) => Math.abs(toNumber(v)) > 0.001);
 }
 
+function amountBox(kind, qty, supply, vat, total, signed) {
+  const q = signed ? formatSignedQty(qty) : formatQty(qty);
+  const s = signed ? formatSignedCompact(supply) : formatCompact(supply);
+  const v = signed ? formatSignedCompact(vat) : formatCompact(vat);
+  const t = signed ? formatSignedCompact(total) : formatCompact(total);
+  const extra = signed && [qty, supply, vat, total].some((n) => Math.abs(toNumber(n)) > 0.001) ? " diff-nonzero" : "";
+  return `<td class="amt-box amt-${kind}${extra}">
+    <div class="amt-row"><em>매수</em><b>${q}</b></div>
+    <div class="amt-row"><em>공급</em><b>${s}</b></div>
+    <div class="amt-row"><em>세액</em><b>${v}</b></div>
+    <div class="amt-row"><em>합계</em><b>${t}</b></div>
+  </td>`;
+}
+
 function renderTable(rows) {
   const body = document.getElementById("tableBody");
   document.getElementById("resultMeta").textContent = `표시 ${formatCount(rows.length)} / 전체 ${formatCount(state.assigned.length)}`;
   if (!rows.length) {
-    body.innerHTML = `<tr><td colspan="19" class="empty-cell">조건에 맞는 건이 없습니다.</td></tr>`;
+    body.innerHTML = `<tr><td colspan="9" class="empty-cell">조건에 맞는 건이 없어요.</td></tr>`;
     return;
   }
   body.innerHTML = rows
     .map((row) => {
       const tone = ownerTone(row.owner);
       const differ = hasAmountDiff(row);
-      const diffClass = differ ? "num diff-nonzero" : "num diff-cell";
       return `
         <tr class="${differ ? "has-diff" : ""}">
           <td>${row.id}</td>
@@ -3694,24 +3838,14 @@ function renderTable(rows) {
             <strong>${escapeHtml(row.counterpartName || "-")}</strong>
             <small>${escapeHtml(row.counterpartBiz || "")}</small>
           </td>
-          <td>${escapeHtml(row.writeDate || "-")}</td>
+          <td>${escapeHtml(formatShortDate(row.writeDate))}</td>
           <td>
             <span class="pill tone-${tone}">${escapeHtml(row.owner)}</span>
           </td>
-          <td><span class="pill rank-${row.rank}">${escapeHtml(row.rankLabel)}</span></td>
-          <td class="reason">${escapeHtml(row.reason)}</td>
-          <td class="num">${formatQty(row.erpQty)}</td>
-          <td class="num">${formatMoney(row.erpSupply)}</td>
-          <td class="num">${formatMoney(row.erpVat)}</td>
-          <td class="num">${formatMoney(row.erpTotal)}</td>
-          <td class="num">${formatQty(row.ntsQty)}</td>
-          <td class="num">${formatMoney(row.ntsSupply)}</td>
-          <td class="num">${formatMoney(row.ntsVat)}</td>
-          <td class="num">${formatMoney(row.ntsTotal)}</td>
-          <td class="${diffClass}">${formatSignedQty(row.diffQty)}</td>
-          <td class="${diffClass}">${formatSignedMoney(row.diffSupply)}</td>
-          <td class="${diffClass}">${formatSignedMoney(row.diffVat)}</td>
-          <td class="${diffClass}">${formatSignedMoney(row.diffTotal)}</td>
+          <td><span class="pill rank-${row.rank}" title="${escapeHtml(row.reason)}">${escapeHtml(shortRankLabel(row.rank))}</span></td>
+          ${amountBox("erp", row.erpQty, row.erpSupply, row.erpVat, row.erpTotal, false)}
+          ${amountBox("nts", row.ntsQty, row.ntsSupply, row.ntsVat, row.ntsTotal, false)}
+          ${amountBox("diff", row.diffQty, row.diffSupply, row.diffVat, row.diffTotal, true)}
         </tr>`;
     })
     .join("");
@@ -3831,6 +3965,89 @@ function showToast(message) {
   showToast.timer = setTimeout(() => el.classList.remove("show"), 2200);
 }
 
+function sha256hexSync(text) {
+  const msg = Array.from(new TextEncoder().encode(text));
+  const K = [
+    0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,
+    0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,
+    0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,
+    0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,
+    0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,
+    0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,
+    0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,
+    0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2,
+  ];
+  let h0 = 0x6a09e667, h1 = 0xbb67ae85, h2 = 0x3c6ef372, h3 = 0xa54ff53a;
+  let h4 = 0x510e527f, h5 = 0x9b05688c, h6 = 0x1f83d9ab, h7 = 0x5be0cd19;
+  const bitLen = msg.length * 8;
+  msg.push(0x80);
+  while ((msg.length % 64) !== 56) msg.push(0);
+  const hi = Math.floor(bitLen / 0x100000000);
+  for (let i = 24; i >= 0; i -= 8) msg.push((hi >>> i) & 0xff);
+  for (let i = 24; i >= 0; i -= 8) msg.push((bitLen >>> i) & 0xff);
+  const rr = (x, n) => (x >>> n) | (x << (32 - n));
+  for (let i = 0; i < msg.length; i += 64) {
+    const w = [];
+    for (let t = 0; t < 16; t += 1) {
+      const o = i + t * 4;
+      w[t] = (msg[o] << 24) | (msg[o + 1] << 16) | (msg[o + 2] << 8) | msg[o + 3];
+    }
+    for (let t = 16; t < 64; t += 1) {
+      const s0 = rr(w[t - 15], 7) ^ rr(w[t - 15], 18) ^ (w[t - 15] >>> 3);
+      const s1 = rr(w[t - 2], 17) ^ rr(w[t - 2], 19) ^ (w[t - 2] >>> 10);
+      w[t] = (w[t - 16] + s0 + w[t - 7] + s1) | 0;
+    }
+    let a = h0, b = h1, c = h2, d = h3, e = h4, f = h5, g = h6, h = h7;
+    for (let t = 0; t < 64; t += 1) {
+      const S1 = rr(e, 6) ^ rr(e, 11) ^ rr(e, 25);
+      const ch = (e & f) ^ (~e & g);
+      const t1 = (h + S1 + ch + K[t] + w[t]) | 0;
+      const S0 = rr(a, 2) ^ rr(a, 13) ^ rr(a, 22);
+      const maj = (a & b) ^ (a & c) ^ (b & c);
+      const t2 = (S0 + maj) | 0;
+      h = g; g = f; f = e; e = (d + t1) | 0; d = c; c = b; b = a; a = (t1 + t2) | 0;
+    }
+    h0 = (h0 + a) | 0; h1 = (h1 + b) | 0; h2 = (h2 + c) | 0; h3 = (h3 + d) | 0;
+    h4 = (h4 + e) | 0; h5 = (h5 + f) | 0; h6 = (h6 + g) | 0; h7 = (h7 + h) | 0;
+  }
+  return [h0, h1, h2, h3, h4, h5, h6, h7]
+    .map((n) => (n >>> 0).toString(16).padStart(8, "0"))
+    .join("");
+}
+
+async function sha256hex(text) {
+  if (globalThis.crypto && crypto.subtle) {
+    const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
+    return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, "0")).join("");
+  }
+  return sha256hexSync(text);
+}
+
+function applyUploadLock() {
+  const unlocked = state.uploadUnlocked;
+  const lock = document.getElementById("uploadLock");
+  const fields = document.getElementById("uploadFields");
+  if (lock) lock.hidden = unlocked;
+  if (fields) fields.classList.toggle("is-locked", !unlocked);
+  const open = document.getElementById("fileOpen");
+  const hist = document.getElementById("fileHist");
+  if (open) open.disabled = !unlocked;
+  if (hist) hist.disabled = !unlocked;
+}
+
+async function tryUnlock(password) {
+  const hex = await sha256hex(String(password || ""));
+  if (hex !== UPLOAD_PASS_SHA256) {
+    showToast("비밀번호가 달라요.");
+    return false;
+  }
+  state.uploadUnlocked = true;
+  try { sessionStorage.setItem("taxUploadUnlocked", "1"); } catch {}
+  applyUploadLock();
+  showToast("원본 파일을 올릴 수 있어요.");
+  return true;
+}
+
 function bindUi() {
   document.getElementById("filterKind").addEventListener("change", (e) => {
     state.filters.kind = e.target.value;
@@ -3872,22 +4089,32 @@ function bindUi() {
   document.getElementById("fileOpen").addEventListener("change", async (e) => {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
+    if (!state.uploadUnlocked) {
+      showToast("비밀번호를 먼저 쳐 주세요.");
+      e.target.value = "";
+      return;
+    }
     try {
       await onUnprocessedFile(file);
-      showToast("미처리현황을 반영했습니다.");
+      showToast("미처리현황을 반영했어요.");
     } catch (err) {
-      showToast(err.message || "파일을 읽지 못했습니다.");
+      showToast(err.message || "파일을 읽지 못했어요.");
     }
     e.target.value = "";
   });
   document.getElementById("fileHist").addEventListener("change", async (e) => {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
+    if (!state.uploadUnlocked) {
+      showToast("비밀번호를 먼저 쳐 주세요.");
+      e.target.value = "";
+      return;
+    }
     try {
       await onHistoryFile(file);
-      showToast("과거 처리 데이터를 반영했습니다.");
+      showToast("과거 처리 데이터를 반영했어요.");
     } catch (err) {
-      showToast(err.message || "파일을 읽지 못했습니다.");
+      showToast(err.message || "파일을 읽지 못했어요.");
     }
     e.target.value = "";
   });
@@ -3897,9 +4124,17 @@ function bindUi() {
       renderAll();
     }
   });
+  document.getElementById("unlockForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const input = document.getElementById("uploadPassword");
+    await tryUnlock(input.value);
+    input.value = "";
+  });
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  try { state.uploadUnlocked = sessionStorage.getItem("taxUploadUnlocked") === "1"; } catch {}
+  applyUploadLock();
   bindUi();
   loadSample();
   const monthInput = document.getElementById("closeMonthInput");
