@@ -314,11 +314,11 @@
     <section class="grid-2">
       <article class="card">
         <h2>원본 파일</h2>
-        <p class="hint">실제 엑셀을 올리면 샘플을 대체합니다. 컬럼명이 달라도 공급자/공급받는자 이메일, 처리담당자만 있으면 읽습니다.</p>
+        <p class="hint">에이텍 ERP-U / 국세청 비교 양식(2줄 헤더, 공급받는자이메일1)을 그대로 올리면 됩니다. 금액은 국세청 칸을 씁니다.</p>
         <div class="upload-row">
           <label class="drop">
             <strong>1. 세금계산서 미처리현황</strong>
-            <p>매입·매출 원장. 매입은 공급받는자이메일, 매출은 공급자이메일로 1순위를 봅니다.</p>
+            <p>유형·거래처명·사업자번호·발생일자·국세청 공급가액/세액·공급자이메일·공급받는자이메일1. 매입은 공급받는자이메일1로 1순위를 봅니다.</p>
             <input id="fileOpen" type="file" accept=".xlsx,.xls,.csv" />
             <div class="file-name" id="fileUnprocessed">샘플 데이터 사용 중</div>
           </label>
@@ -334,7 +334,7 @@
         <h2>판정 규칙</h2>
         <div class="rules">
           <ol>
-            <li><b>1순위 이메일</b> — 매입: 공급받는자이메일 / 매출: 공급하는자(공급자)이메일</li>
+            <li><b>1순위 이메일</b> — 매입: 공급받는자이메일1 / 매출: 공급자이메일</li>
             <li><b>2순위 과거처리</b> — 1순위가 없거나 매핑 밖이면 사업자번호 → 거래처명 순으로 찾고, 여러 명이면 처리 건수가 많은 사람</li>
           </ol>
           <table class="mail-map">
@@ -1749,6 +1749,8 @@ const EMAIL_ALIASES = {
   "공급받는자 이메일1": "공급받는자이메일",
   "매입매출구분": "구분",
   "세금계산서구분": "구분",
+  "유형": "구분",
+  "발생일자": "작성일자",
   "거래처": "거래처명",
   "상호": "거래처명",
   "사업자번호": "거래처사업자번호",
@@ -1762,8 +1764,11 @@ const UNPROCESSED_HINTS = [
   "승인번호",
   "공급자이메일",
   "공급받는자이메일",
+  "공급받는자이메일1",
   "공급자상호",
   "공급받는자상호",
+  "유형",
+  "거래처명",
 ];
 const HISTORY_HINTS = ["처리담당자", "처리일자", "거래처명", "거래처사업자번호"];
 
@@ -1857,7 +1862,7 @@ function formatCount(n) {
 }
 
 function detectKind(row) {
-  const raw = String(row["구분"] || row["매입매출"] || "").trim();
+  const raw = String(row["구분"] || row["유형"] || row["매입매출"] || "").trim();
   if (raw.includes("매입")) return "매입";
   if (raw.includes("매출")) return "매출";
   return "";
@@ -1884,12 +1889,12 @@ function counterpartOf(row, kind) {
 
 function lookupEmail(row, kind) {
   if (kind === "매입") {
-    return row["공급받는자이메일"] || row["공급받는자이메일1"] || "";
+    return row["공급받는자이메일"] || row["공급받는자이메일1"] || row["공급받는자 이메일1"] || "";
   }
   if (kind === "매출") {
     return row["공급자이메일"] || row["공급하는자이메일"] || "";
   }
-  return row["공급받는자이메일"] || row["공급자이메일"] || "";
+  return row["공급받는자이메일"] || row["공급받는자이메일1"] || row["공급자이메일"] || "";
 }
 
 function matchEmailOwner(emailField) {
@@ -2046,7 +2051,11 @@ function requireXlsx() {
   }
 }
 
-function parseCsvText(text) {
+function cellText(value) {
+  return String(value ?? "").replace(/^\uFEFF/, "").trim();
+}
+
+function parseCsvMatrix(text) {
   const rows = [];
   let row = [];
   let cell = "";
@@ -2081,42 +2090,139 @@ function parseCsvText(text) {
   }
   row.push(cell);
   if (row.some((c) => String(c).trim())) rows.push(row);
-  if (!rows.length) return [];
-  const headers = rows[0].map(canonHeader);
-  return rows.slice(1).map((cols) => {
+  return rows;
+}
+
+function headerIndex(header, names) {
+  const compact = header.map((c) => normalizeKey(c));
+  for (const name of names) {
+    const i = compact.indexOf(normalizeKey(name));
+    if (i >= 0) return i;
+  }
+  return -1;
+}
+
+function lastIndexBefore(header, name, beforeIdx) {
+  const compact = header.map((c) => normalizeKey(c));
+  const want = normalizeKey(name);
+  let found = -1;
+  const end = beforeIdx < 0 ? compact.length : beforeIdx;
+  for (let i = 0; i < end; i += 1) {
+    if (compact[i] === want) found = i;
+  }
+  return found;
+}
+
+function isAtecNtsCompareMatrix(matrix) {
+  if (!matrix || matrix.length < 3) return false;
+  const top = matrix.slice(0, 3).map((r) => (r || []).map(cellText).join("|")).join("|");
+  return /국세청/.test(top) && /공급받는자이메일/.test(top) && /유형|거래처명/.test(top);
+}
+
+function parseAtecNtsCompareMatrix(matrix) {
+  let headerIdx = 0;
+  for (let i = 0; i < Math.min(4, matrix.length); i += 1) {
+    const joined = (matrix[i] || []).map(cellText).join("|");
+    if (/공급받는자이메일/.test(joined) && /공급자이메일/.test(joined)) {
+      headerIdx = i;
+      break;
+    }
+  }
+  const header = matrix[headerIdx] || [];
+  const sellerIdx = headerIndex(header, ["공급자이메일", "공급하는자이메일"]);
+  const buyerIdx = headerIndex(header, ["공급받는자이메일1", "공급받는자이메일", "공급받는자 이메일1"]);
+  const kindIdx = headerIndex(header, ["유형", "구분"]);
+  const nameIdx = headerIndex(header, ["거래처명", "상호"]);
+  const bizIdx = headerIndex(header, ["사업자번호", "거래처사업자번호", "사업자등록번호"]);
+  const dateIdx = headerIndex(header, ["발생일자", "작성일자", "발행일자"]);
+  const unitIdx = headerIndex(header, ["사업자단위"]);
+  const memoIdx = lastIndexBefore(header, "적요", sellerIdx);
+  const supplyIdx = lastIndexBefore(header, "공급가액", sellerIdx);
+  const vatIdx = lastIndexBefore(header, "세액", sellerIdx);
+  const totalIdx = lastIndexBefore(header, "합계", sellerIdx);
+  const rows = [];
+  for (let i = headerIdx + 1; i < matrix.length; i += 1) {
+    const r = matrix[i] || [];
+    const kind = cellText(kindIdx >= 0 ? r[kindIdx] : r[1]);
+    const name = cellText(nameIdx >= 0 ? r[nameIdx] : r[2]);
+    const biz = cellText(bizIdx >= 0 ? r[bizIdx] : r[3]);
+    if (!kind && !name && !biz) continue;
+    const date = cellText(dateIdx >= 0 ? r[dateIdx] : r[4]);
+    const memo = cellText(memoIdx >= 0 ? r[memoIdx] : r[11]);
+    const supply = toNumber(supplyIdx >= 0 ? r[supplyIdx] : r[12]);
+    const vat = toNumber(vatIdx >= 0 ? r[vatIdx] : r[13]);
+    const total = toNumber(totalIdx >= 0 ? r[totalIdx] : r[14]) || supply + vat;
+    const sellerEmail = cellText(sellerIdx >= 0 ? r[sellerIdx] : r[15]);
+    const buyerEmail = cellText(buyerIdx >= 0 ? r[buyerIdx] : r[16]);
+    const unit = cellText(unitIdx >= 0 ? r[unitIdx] : r[0]);
+    const isBuy = kind.includes("매입");
+    rows.push({
+      구분: kind,
+      유형: kind,
+      거래처명: name,
+      거래처사업자번호: biz,
+      사업자번호: biz,
+      작성일자: date,
+      발생일자: date,
+      품목: memo,
+      공급가액: supply,
+      세액: vat,
+      합계금액: total,
+      공급자이메일: sellerEmail,
+      공급받는자이메일: buyerEmail,
+      공급받는자이메일1: buyerEmail,
+      사업자단위: unit,
+      공급자상호: isBuy ? name : unit,
+      공급받는자상호: isBuy ? (unit || "(주)에이텍컴퓨터") : name,
+      비고: unit ? "" : "ERP 미반영/수정분",
+      상태: "미처리",
+    });
+  }
+  return rows;
+}
+
+function matrixToObjects(matrix) {
+  if (!matrix.length) return [];
+  if (isAtecNtsCompareMatrix(matrix)) return parseAtecNtsCompareMatrix(matrix);
+  const headers = matrix[0].map(canonHeader);
+  return matrix.slice(1).map((cols) => {
     const obj = {};
     headers.forEach((h, idx) => {
-      obj[h] = cols[idx] ?? "";
+      if (h) obj[h] = cols[idx] ?? "";
     });
     return obj;
   });
+}
+
+function parseCsvText(text) {
+  return matrixToObjects(parseCsvMatrix(text));
 }
 
 function isCsvFile(file) {
   return /\.csv$/i.test(file.name || "") || /csv/i.test(file.type || "");
 }
 
-function sheetToObjects(sheet) {
+function sheetToMatrix(sheet) {
   requireXlsx();
-  const rows = XLSX.utils.sheet_to_json(sheet, { defval: "", raw: true });
-  return rows.map((row) => {
-    const next = {};
-    Object.entries(row).forEach(([key, value]) => {
-      next[canonHeader(key)] = value;
-    });
-    return next;
-  });
+  return XLSX.utils.sheet_to_json(sheet, { header: 1, defval: "", raw: true });
+}
+
+function sheetToObjects(sheet) {
+  return matrixToObjects(sheetToMatrix(sheet));
 }
 
 function guessSheetRole(sheetName, rows) {
   const name = String(sheetName || "");
   if (/과거|처리|이력|history/i.test(name)) return "history";
-  if (/미처리|현황|세금/i.test(name)) return "unprocessed";
+  if (/미처리|현황|세금|국세청/i.test(name)) return "unprocessed";
   if (!rows.length) return "unknown";
   const keys = Object.keys(rows[0]);
   const histScore = HISTORY_HINTS.filter((h) => keys.includes(h)).length;
   const openScore = UNPROCESSED_HINTS.filter((h) => keys.includes(h)).length;
   if (keys.includes("처리담당자") && histScore >= 2) return "history";
+  if (keys.includes("공급받는자이메일") || keys.includes("공급받는자이메일1") || keys.includes("유형")) {
+    return "unprocessed";
+  }
   if (openScore >= 2) return "unprocessed";
   return histScore > openScore ? "history" : "unprocessed";
 }
@@ -2138,8 +2244,8 @@ function loadSample() {
   state.closeMonth = sample.closeMonth || "2026-08";
   state.unprocessed = sample.unprocessed.slice();
   state.history = sample.history.slice();
-  state.files.unprocessed = "세금계산서_미처리현황_샘플.xlsx (내장)";
-  state.files.history = "과거_처리데이터_샘플.xlsx (내장)";
+  state.files.unprocessed = "에이텍 국세청 비교양식 (내장 7월 매입)";
+  state.files.history = "과거 처리 데이터 없음";
   refreshAssigned();
 }
 
@@ -2388,7 +2494,7 @@ async function onUnprocessedFile(file) {
     parsed = parseWorkbook(await readExcelFile(file));
   }
   if (!parsed.unprocessed.length) {
-    throw new Error("미처리현황 시트를 읽지 못했습니다. 승인번호·공급자/공급받는자 이메일 컬럼을 확인해 주세요.");
+    throw new Error("미처리현황을 읽지 못했습니다. 유형·거래처명·국세청 공급가액·공급받는자이메일1 컬럼을 확인해 주세요.");
   }
   state.unprocessed = parsed.unprocessed;
   state.files.unprocessed = file.name;
