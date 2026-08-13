@@ -98,12 +98,13 @@
       font-size: 12px;
     }
     .email-add {
-      display: grid;
+      display: none !important;
       grid-template-columns: 1.2fr 1fr auto;
       gap: 6px;
       margin-top: 10px;
     }
-    .email-add[hidden], .email-unlock[hidden] { display: none; }
+    .email-add.is-open { display: grid !important; }
+    .email-unlock.is-closed { display: none !important; }
     .email-add input {
       border: 1px solid var(--line);
       border-radius: 6px;
@@ -561,7 +562,7 @@
             <input id="emailUnlockPassword" type="password" autocomplete="current-password" placeholder="비밀번호" />
             <button type="submit" class="btn">입력창 열기</button>
           </form>
-          <form id="emailAddForm" class="email-add" hidden>
+          <form id="emailAddForm" class="email-add">
             <input id="newEmail" type="email" placeholder="이메일" required />
             <input id="newOwner" type="text" placeholder="예상담당자" required />
             <button type="submit" class="btn">추가</button>
@@ -4148,8 +4149,8 @@ function applyEmailLock() {
   const unlocked = state.emailUnlocked;
   const gate = document.getElementById("emailUnlockForm");
   const form = document.getElementById("emailAddForm");
-  if (gate) gate.hidden = unlocked;
-  if (form) form.hidden = !unlocked;
+  if (gate) gate.classList.toggle("is-closed", unlocked);
+  if (form) form.classList.toggle("is-open", unlocked);
   renderMailMap();
 }
 
@@ -4273,7 +4274,7 @@ function bindUi() {
 
 document.addEventListener("DOMContentLoaded", () => {
   try { state.uploadUnlocked = sessionStorage.getItem("taxUploadUnlocked") === "1"; } catch {}
-  try { state.emailUnlocked = sessionStorage.getItem("taxEmailUnlocked") === "1"; } catch {}
+  state.emailUnlocked = false;
   loadEmailOwners();
   applyUploadLock();
   applyEmailLock();
