@@ -325,6 +325,7 @@
     }
     table.data col.col-id { width: 34px; }
     table.data col.col-kind { width: 44px; }
+    table.data col.col-name { width: 120px; }
     table.data col.col-date { width: 48px; }
     table.data col.col-owner { width: 78px; }
     table.data col.col-judge { width: 82px; }
@@ -337,6 +338,11 @@
     }
     table.data td.col-owner .pill,
     table.data td.col-judge .pill { white-space: normal; }
+    table.data td.col-name {
+      word-break: keep-all;
+      overflow-wrap: anywhere;
+    }
+    table.data td.col-name strong { display: block; line-height: 1.3; }
     table.data th {
       background: var(--navy);
       color: #fff;
@@ -542,7 +548,7 @@
             <tr>
               <th rowspan="2">#</th>
               <th rowspan="2">구분</th>
-              <th rowspan="2">거래처</th>
+              <th rowspan="2" class="col-name">거래처</th>
               <th rowspan="2">작성일</th>
               <th rowspan="2" class="col-owner">담당</th>
               <th rowspan="2" class="col-judge">판정</th>
@@ -3983,7 +3989,7 @@ function renderTable(rows) {
         <tr class="${differ ? "has-diff" : ""}">
           <td>${row.id}</td>
           <td><span class="pill kind-${row.kind}">${escapeHtml(row.kind)}</span></td>
-          <td>
+          <td class="col-name" title="${escapeHtml(row.counterpartName || "")}">
             <strong>${escapeHtml(row.counterpartName || "-")}</strong>
             <small>${escapeHtml(row.counterpartBiz || "")}</small>
           </td>
