@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>세금계산서 미처리현황 · v0913</title>
+  <title>세금계산서 미처리현황 · v0915</title>
   <meta name="description" content="미처리 세금계산서의 예상담당자를 판정하고 ERP·국세청 금액을 비교합니다." />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
   <style>
@@ -318,45 +318,36 @@
 
     .table-wrap { overflow: visible; padding: 0 10px 14px; }
     table.data {
-      width: auto;
-      max-width: 100%;
+      width: 100%;
       table-layout: fixed;
       border-collapse: collapse;
       font-size: 11.5px;
     }
     table.data col.col-id { width: 32px; }
     table.data col.col-kind { width: 42px; }
-    table.data col.col-name { width: 72px; }
+    table.data col.col-name { width: 168px; }
     table.data col.col-date { width: 46px; }
-    table.data col.col-owner { width: 72px; }
-    table.data col.col-judge { width: 78px; }
-    table.data col.col-qty { width: 34px; }
-    table.data col.col-money { width: 108px; }
+    table.data col.col-owner { width: 132px; }
+    table.data col.col-judge { width: 86px; }
+    table.data col.col-qty { width: 32px; }
+    table.data col.col-money { width: 78px; }
     table.data th.col-owner, table.data td.col-owner,
     table.data th.col-judge, table.data td.col-judge {
       padding-left: 4px;
       padding-right: 4px;
     }
-    table.data td.col-owner .pill,
-    table.data td.col-judge .pill { white-space: normal; }
+    table.data td.col-owner .pill { white-space: normal; word-break: keep-all; }
+    table.data td.col-judge .pill { white-space: nowrap; }
     table.data th.col-name,
     table.data td.col-name {
-      width: 72px !important;
-      max-width: 72px !important;
-      min-width: 0;
-      padding-left: 4px;
-      padding-right: 4px;
-    }
-    table.data td.col-name {
-      overflow: hidden;
+      padding-left: 6px;
+      padding-right: 6px;
     }
     table.data td.col-name strong {
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-      line-height: 1.25;
-      word-break: break-all;
+      display: block;
+      line-height: 1.3;
+      word-break: keep-all;
+      overflow-wrap: break-word;
     }
     table.data td.col-name small {
       overflow: hidden;
@@ -459,7 +450,7 @@
   </style>
 </head>
 <body>
-  <div class="verbar">v0913 · 이 노란 띠가 보이면 최신 파일입니다. 거래처 칸은 좁게 고정되어 있습니다.</div>
+  <div class="verbar">v0915 · 이 노란 띠가 보이면 최신 파일입니다. 거래처·담당을 조금 넓히고 합계 쪽 빈 칸을 줄였습니다.</div>
   <div class="topbar">
     <div class="topbar-inner">
       <span>ATEC · 회계 월마감</span>
@@ -474,7 +465,7 @@
           <span class="logo-ko">에이텍컴퓨터</span>
         </div>
         <p class="eyebrow">Month-end close</p>
-        <h1>세금계산서 미처리현황 <span style="font-size:13px;font-weight:600;color:#9aa6b4">v0913</span></h1>
+        <h1>세금계산서 미처리현황 <span style="font-size:13px;font-weight:600;color:#9aa6b4">v0915</span></h1>
       </div>
       <div class="header-meta">
         <strong id="closeMonthLabel">2026.07 마감</strong>
