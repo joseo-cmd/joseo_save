@@ -310,9 +310,24 @@
     .table-wrap { overflow: visible; padding: 0 10px 14px; }
     table.data {
       width: 100%;
+      table-layout: fixed;
       border-collapse: collapse;
       font-size: 11.5px;
     }
+    table.data col.col-id { width: 34px; }
+    table.data col.col-kind { width: 44px; }
+    table.data col.col-date { width: 48px; }
+    table.data col.col-owner { width: 78px; }
+    table.data col.col-judge { width: 82px; }
+    table.data col.col-qty { width: 36px; }
+    table.data col.col-money { width: 96px; }
+    table.data th.col-owner, table.data td.col-owner,
+    table.data th.col-judge, table.data td.col-judge {
+      padding-left: 4px;
+      padding-right: 4px;
+    }
+    table.data td.col-owner .pill,
+    table.data td.col-judge .pill { white-space: normal; }
     table.data th {
       background: var(--navy);
       color: #fff;
@@ -502,31 +517,42 @@
       </div>
       <div class="table-wrap">
         <table class="data">
+          <colgroup>
+            <col class="col-id" />
+            <col class="col-kind" />
+            <col class="col-name" />
+            <col class="col-date" />
+            <col class="col-owner" />
+            <col class="col-judge" />
+            <col class="col-qty" /><col class="col-money" /><col class="col-money" /><col class="col-money" />
+            <col class="col-qty" /><col class="col-money" /><col class="col-money" /><col class="col-money" />
+            <col class="col-qty" /><col class="col-money" /><col class="col-money" /><col class="col-money" />
+          </colgroup>
           <thead>
             <tr>
               <th rowspan="2">#</th>
               <th rowspan="2">구분</th>
               <th rowspan="2">거래처</th>
               <th rowspan="2">작성일</th>
-              <th rowspan="2">담당</th>
-              <th rowspan="2">판정</th>
+              <th rowspan="2" class="col-owner">담당</th>
+              <th rowspan="2" class="col-judge">판정</th>
               <th colspan="4" class="grp-erp">ERP</th>
               <th colspan="4" class="grp-nts">국세청</th>
               <th colspan="4" class="grp-diff">차이</th>
             </tr>
             <tr>
-              <th class="sub-erp">매수</th>
-              <th class="sub-erp">공급가액</th>
-              <th class="sub-erp">세액</th>
-              <th class="sub-erp">합계</th>
-              <th class="sub-nts">매수</th>
-              <th class="sub-nts">공급가액</th>
-              <th class="sub-nts">세액</th>
-              <th class="sub-nts">합계</th>
-              <th class="sub-diff">매수</th>
-              <th class="sub-diff">공급가액</th>
-              <th class="sub-diff">세액</th>
-              <th class="sub-diff">합계</th>
+              <th class="sub-erp col-qty">매수</th>
+              <th class="sub-erp col-money">공급가액</th>
+              <th class="sub-erp col-money">세액</th>
+              <th class="sub-erp col-money">합계</th>
+              <th class="sub-nts col-qty">매수</th>
+              <th class="sub-nts col-money">공급가액</th>
+              <th class="sub-nts col-money">세액</th>
+              <th class="sub-nts col-money">합계</th>
+              <th class="sub-diff col-qty">매수</th>
+              <th class="sub-diff col-money">공급가액</th>
+              <th class="sub-diff col-money">세액</th>
+              <th class="sub-diff col-money">합계</th>
             </tr>
           </thead>
           <tbody id="tableBody"></tbody>
@@ -3926,10 +3952,10 @@ function numCells(kind, qty, supply, vat, total, signed) {
   const t = signed ? formatSignedCompact(total) : formatCompact(total);
   const extra = signed && [qty, supply, vat, total].some((n) => Math.abs(toNumber(n)) > 0.001) ? " diff-nonzero" : "";
   return `
-    <td class="num amt-${kind}${extra}">${q}</td>
-    <td class="num amt-${kind}${extra}">${s}</td>
-    <td class="num amt-${kind}${extra}">${v}</td>
-    <td class="num amt-${kind}${extra}">${t}</td>`;
+    <td class="num col-qty amt-${kind}${extra}">${q}</td>
+    <td class="num col-money amt-${kind}${extra}">${s}</td>
+    <td class="num col-money amt-${kind}${extra}">${v}</td>
+    <td class="num col-money amt-${kind}${extra}">${t}</td>`;
 }
 
 function renderTable(rows) {
@@ -3953,10 +3979,10 @@ function renderTable(rows) {
             <small>${escapeHtml(row.counterpartBiz || "")}</small>
           </td>
           <td>${escapeHtml(formatShortDate(row.writeDate))}</td>
-          <td>
+          <td class="col-owner">
             <span class="pill tone-${tone}">${escapeHtml(row.owner)}</span>
           </td>
-          <td>
+          <td class="col-judge">
             <span class="pill rank-${row.rank}" title="${escapeHtml(row.reason)}">${escapeHtml(shortRankLabel(row.rank))}</span>
             ${mail ? `<span class="judge-mail">${escapeHtml(mail)}</span>` : ""}
           </td>
