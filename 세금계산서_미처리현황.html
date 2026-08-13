@@ -15,7 +15,7 @@
       --white: #fff;
       --navy: #1c2430;
       --navy-2: #11161d;
-      --red: #d70051;
+      --red: #e2006a;
       --red-soft: #fde8ef;
       --ok: #1b7a4a;
       --danger: #c81e3a;
@@ -62,17 +62,50 @@
       gap: 20px;
       padding: 22px 0 18px;
     }
-    .brand-mark {
-      width: 36px;
-      height: 36px;
-      border: 2px solid var(--red);
-      color: #fff;
-      display: grid;
-      place-items: center;
-      font-size: 11px;
+    .logo {
+      display: inline-flex;
+      flex-direction: column;
+      justify-content: center;
+      background: #fff;
+      padding: 7px 12px 6px;
+      margin-bottom: 10px;
+      line-height: 1.05;
+      min-width: 118px;
+    }
+    .logo-en {
+      color: #e2006a;
+      font-size: 22px;
       font-weight: 800;
       letter-spacing: 0.04em;
-      margin-bottom: 8px;
+    }
+    .logo-ko {
+      color: #4a4a4a;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin-top: 2px;
+    }
+    .email-add {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr 0.8fr auto;
+      gap: 6px;
+      margin-top: 10px;
+    }
+    .email-add input {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-size: 12px;
+    }
+    .mail-map .btn-del {
+      background: #fff;
+      color: var(--muted);
+      border: 1px solid var(--line);
+      padding: 3px 8px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      border-radius: 4px;
     }
     .eyebrow {
       font-size: 11px;
@@ -347,7 +380,7 @@
     }
 
     @media (max-width: 980px) {
-      .grid-2, .kpis, .owner-grid, .upload-row { grid-template-columns: 1fr; }
+      .grid-2, .kpis, .owner-grid, .upload-row, .email-add { grid-template-columns: 1fr; }
       .header-inner { flex-direction: column; align-items: flex-start; }
       .header-meta { text-align: left; }
     }
@@ -368,7 +401,10 @@
   <header class="header">
     <div class="header-inner">
       <div>
-        <div class="brand-mark">AT</div>
+        <div class="logo" aria-label="에이텍컴퓨터">
+          <span class="logo-en">ATEC</span>
+          <span class="logo-ko">에이텍컴퓨터</span>
+        </div>
         <p class="eyebrow">Month-end close</p>
         <h1>세금계산서 미처리현황</h1>
       </div>
@@ -504,15 +540,17 @@
           </ol>
           <table class="mail-map">
             <thead>
-              <tr><th>이메일</th><th>예상담당자</th></tr>
+              <tr><th>이메일</th><th>예상담당자</th><th></th></tr>
             </thead>
-            <tbody>
-              <tr><td>fatec@ateccomputer.kr</td><td>남부,중부사업부</td></tr>
-              <tr><td>eatec@ateccomputer.kr</td><td>이은정(교육,전자칠판)</td></tr>
-              <tr><td>tatec@ateccomputer.kr</td><td>강소라(공공,수도권)</td></tr>
-            </tbody>
+            <tbody id="mailMapBody"></tbody>
           </table>
-          <p class="hint" style="padding: 10px 0 0;">과거 처리 적재 <b id="historyCount">0건</b></p>
+          <form id="emailAddForm" class="email-add">
+            <input id="newEmail" type="email" placeholder="이메일" required />
+            <input id="newOwner" type="text" placeholder="예상담당자" required />
+            <input id="emailPassword" type="password" autocomplete="current-password" placeholder="비밀번호" required />
+            <button type="submit" class="btn">추가</button>
+          </form>
+          <p class="hint" style="padding: 10px 0 0;">이메일 추가는 비밀번호가 필요합니다. 과거 처리 적재 <b id="historyCount">0건</b></p>
         </div>
       </article>
     </section>
@@ -2938,7 +2976,7 @@ window.TAX_SAMPLE = {
 
 /* 세금계산서 미처리현황 — 예상담당자 판정 · ERP/국세청 금액 비교 */
 
-const EMAIL_OWNERS = {
+const DEFAULT_EMAIL_OWNERS = {
   "fatec@ateccomputer.kr": "남부,중부사업부",
   "fatec@atecomputer.kr": "남부,중부사업부",
   "eatec@ateccomputer.kr": "이은정(교육,전자칠판)",
@@ -2946,6 +2984,7 @@ const EMAIL_OWNERS = {
   "tatec@ateccomputer.kr": "강소라(공공,수도권)",
   "tatec@atecomputer.kr": "강소라(공공,수도권)",
 };
+const EMAIL_OWNERS = { ...DEFAULT_EMAIL_OWNERS };
 
 const EMAIL_ALIASES = {
   "공급하는자이메일": "공급자이메일",
@@ -2979,7 +3018,8 @@ const UNPROCESSED_HINTS = [
 ];
 const HISTORY_HINTS = ["처리담당자", "처리일자", "거래처명", "거래처사업자번호"];
 
-const UPLOAD_PASS_SHA256 = "01d42fd7180a7e9748aa3e9786bf93969581f68fbbd906c00d96aaa434481429";
+const APP_PASS_SHA256 = "4ec9599fc203d176a301536c2e091a19bc852759b255bd6818810a42c5fed14a";
+const CUSTOM_EMAIL_KEY = "taxEmailOwners";
 
 const state = {
   closeMonth: "2026-08",
@@ -3178,6 +3218,90 @@ function matchEmailOwner(emailField) {
     }
   }
   return null;
+}
+
+function loadEmailOwners() {
+  Object.keys(EMAIL_OWNERS).forEach((k) => delete EMAIL_OWNERS[k]);
+  Object.assign(EMAIL_OWNERS, DEFAULT_EMAIL_OWNERS);
+  try {
+    const extra = JSON.parse(localStorage.getItem(CUSTOM_EMAIL_KEY) || "{}");
+    if (extra && typeof extra === "object") Object.assign(EMAIL_OWNERS, extra);
+  } catch {}
+}
+
+function saveCustomEmailOwners() {
+  const extra = {};
+  Object.keys(EMAIL_OWNERS).forEach((email) => {
+    if (DEFAULT_EMAIL_OWNERS[email] !== EMAIL_OWNERS[email]) extra[email] = EMAIL_OWNERS[email];
+  });
+  try { localStorage.setItem(CUSTOM_EMAIL_KEY, JSON.stringify(extra)); } catch {}
+}
+
+function emailAliases(email) {
+  const value = normalizeEmail(email);
+  const list = [value];
+  if (value.endsWith("@ateccomputer.kr")) list.push(value.replace("@ateccomputer.kr", "@atecomputer.kr"));
+  if (value.endsWith("@atecomputer.kr")) list.push(value.replace("@atecomputer.kr", "@ateccomputer.kr"));
+  return [...new Set(list)];
+}
+
+function isDefaultEmail(email) {
+  return Object.prototype.hasOwnProperty.call(DEFAULT_EMAIL_OWNERS, email);
+}
+
+function renderMailMap() {
+  const body = document.getElementById("mailMapBody");
+  if (!body) return;
+  const rows = Object.keys(EMAIL_OWNERS)
+    .filter((email) => !email.endsWith("@atecomputer.kr") || !EMAIL_OWNERS[email.replace("@atecomputer.kr", "@ateccomputer.kr")])
+    .sort((a, b) => a.localeCompare(b));
+  body.innerHTML = rows
+    .map((email) => {
+      const custom = !isDefaultEmail(email) || DEFAULT_EMAIL_OWNERS[email] !== EMAIL_OWNERS[email];
+      return `<tr>
+        <td>${escapeHtml(email)}</td>
+        <td>${escapeHtml(EMAIL_OWNERS[email])}</td>
+        <td>${custom ? `<button type="button" class="btn-del" data-del-email="${escapeHtml(email)}">삭제</button>` : ""}</td>
+      </tr>`;
+    })
+    .join("");
+}
+
+async function addEmailOwner(email, owner, password) {
+  const ok = (await sha256hex(String(password || ""))) === APP_PASS_SHA256;
+  if (!ok) {
+    showToast("비밀번호가 일치하지 않습니다.");
+    return false;
+  }
+  const name = String(owner || "").trim();
+  const value = normalizeEmail(email);
+  if (!value || !name) {
+    showToast("이메일과 예상담당자를 입력해 주세요.");
+    return false;
+  }
+  emailAliases(value).forEach((alias) => {
+    EMAIL_OWNERS[alias] = name;
+  });
+  saveCustomEmailOwners();
+  refreshAssigned();
+  showToast("1순위 이메일을 추가했습니다.");
+  return true;
+}
+
+async function removeEmailOwner(email, password) {
+  const ok = (await sha256hex(String(password || ""))) === APP_PASS_SHA256;
+  if (!ok) {
+    showToast("비밀번호가 일치하지 않습니다.");
+    return false;
+  }
+  emailAliases(email).forEach((alias) => {
+    if (DEFAULT_EMAIL_OWNERS[alias]) EMAIL_OWNERS[alias] = DEFAULT_EMAIL_OWNERS[alias];
+    else delete EMAIL_OWNERS[alias];
+  });
+  saveCustomEmailOwners();
+  refreshAssigned();
+  showToast("추가한 이메일을 삭제했습니다.");
+  return true;
 }
 
 function buildHistoryIndex(historyRows) {
@@ -3821,6 +3945,7 @@ function renderAll() {
   renderOwnerFilter(allSum.owners);
   renderTable(visible);
   renderFileBadges();
+  renderMailMap();
   document.getElementById("closeMonthLabel").textContent = `${state.closeMonth.replace("-", ".")} 마감`;
 }
 
@@ -3993,7 +4118,7 @@ function applyUploadLock() {
 
 async function tryUnlock(password) {
   const hex = await sha256hex(String(password || ""));
-  if (hex !== UPLOAD_PASS_SHA256) {
+  if (hex !== APP_PASS_SHA256) {
     showToast("비밀번호가 일치하지 않습니다.");
     return false;
   }
@@ -4086,10 +4211,32 @@ function bindUi() {
     await tryUnlock(input.value);
     input.value = "";
   });
+  document.getElementById("emailAddForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const email = document.getElementById("newEmail");
+    const owner = document.getElementById("newOwner");
+    const pass = document.getElementById("emailPassword");
+    const ok = await addEmailOwner(email.value, owner.value, pass.value);
+    if (ok) {
+      email.value = "";
+      owner.value = "";
+    }
+    pass.value = "";
+  });
+  document.getElementById("mailMapBody").addEventListener("click", async (e) => {
+    const btn = e.target.closest("[data-del-email]");
+    if (!btn) return;
+    const passInput = document.getElementById("emailPassword");
+    const pass = passInput.value || window.prompt("삭제하려면 비밀번호를 입력하세요.");
+    if (pass == null || pass === "") return;
+    await removeEmailOwner(btn.dataset.delEmail, pass);
+    passInput.value = "";
+  });
 }
 
 document.addEventListener("DOMContentLoaded", () => {
   try { state.uploadUnlocked = sessionStorage.getItem("taxUploadUnlocked") === "1"; } catch {}
+  loadEmailOwners();
   applyUploadLock();
   bindUi();
   loadSample();
