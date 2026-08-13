@@ -1,0 +1,1847 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>세금계산서 미처리현황 · 회계 월마감</title>
+  <meta name="description" content="미처리 세금계산서의 예상담당자를 이메일(1순위)과 과거 처리(2순위)로 판정하고 현업에 공유합니다." />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+  <style>
+    :root {
+      --ink: #152033;
+      --muted: #5d6b80;
+      --line: #d9e0ea;
+      --paper: #eef2f6;
+      --white: #fff;
+      --navy: #16324f;
+      --navy-2: #0f2438;
+      --teal: #0f6b5c;
+      --gold: #9a6b12;
+      --wine: #8a2c3c;
+      --slate: #3d4f66;
+      --ok: #1b6b45;
+      --danger: #9b2c2c;
+      --shadow: 0 10px 28px rgba(15, 36, 56, 0.08);
+      --font: "Pretendard Variable", Pretendard, "Malgun Gothic", sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font);
+      background:
+        linear-gradient(180deg, #dfe7ef 0%, var(--paper) 220px);
+      color: var(--ink);
+      line-height: 1.5;
+    }
+    button, input, select, textarea { font-family: inherit; }
+    a { color: inherit; }
+
+    .topbar {
+      background: var(--navy-2);
+      color: #e8eef5;
+      font-size: 12px;
+      letter-spacing: 0.02em;
+    }
+    .topbar-inner, .header-inner, .wrap {
+      width: min(1240px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+    .topbar-inner {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 8px 0;
+    }
+    .header {
+      background: var(--navy);
+      color: #fff;
+      border-bottom: 4px solid #c4a35a;
+    }
+    .header-inner {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 22px 0 18px;
+    }
+    .eyebrow {
+      font-size: 12px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      opacity: 0.72;
+      margin-bottom: 6px;
+    }
+    h1 { font-size: 26px; font-weight: 800; letter-spacing: -0.03em; }
+    .header-meta { text-align: right; font-size: 13px; opacity: 0.88; }
+    .header-meta strong { display: block; font-size: 18px; margin-bottom: 2px; }
+
+    .layout { padding: 22px 0 64px; }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    .card {
+      background: var(--white);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+    }
+    .card h2 {
+      font-size: 15px;
+      padding: 14px 16px 0;
+      letter-spacing: -0.02em;
+    }
+    .card .hint { color: var(--muted); font-size: 12px; padding: 4px 16px 12px; }
+
+    .upload-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      padding: 0 16px 16px;
+    }
+    .drop {
+      border: 1px dashed #b7c3d3;
+      background: #f7f9fb;
+      padding: 14px;
+      min-height: 108px;
+    }
+    .drop strong { display: block; font-size: 13px; margin-bottom: 4px; }
+    .drop p { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+    .drop input { font-size: 12px; width: 100%; }
+    .file-name { margin-top: 8px; font-size: 12px; color: var(--navy); font-weight: 600; }
+
+    .rules {
+      padding: 0 16px 16px;
+      font-size: 13px;
+    }
+    .rules ol { padding-left: 18px; }
+    .rules li { margin: 6px 0; }
+    .mail-map {
+      margin-top: 10px;
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+    .mail-map th, .mail-map td {
+      border: 1px solid var(--line);
+      padding: 6px 8px;
+      text-align: left;
+    }
+    .mail-map th { background: #f3f6f9; }
+
+    .kpis {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .kpi {
+      background: var(--white);
+      border: 1px solid var(--line);
+      padding: 14px 16px;
+      box-shadow: var(--shadow);
+    }
+    .kpi span { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+    .kpi strong { font-size: 20px; letter-spacing: -0.03em; }
+    .kpi em { display: block; margin-top: 6px; font-style: normal; font-size: 12px; color: var(--slate); }
+
+    .owner-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      padding: 0 16px 16px;
+    }
+    .owner-card {
+      text-align: left;
+      border: 1px solid var(--line);
+      background: #fff;
+      padding: 12px;
+      cursor: pointer;
+    }
+    .owner-card:hover { border-color: var(--navy); }
+    .owner-card-top { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
+    .owner-card-top strong { font-size: 13px; }
+    .owner-card p { font-size: 12px; color: var(--muted); }
+    .owner-money { color: var(--ink) !important; font-weight: 700; margin-top: 4px; }
+    .owner-rank { margin-top: 4px; }
+    .tone-south { border-top: 3px solid var(--navy); }
+    .tone-edu { border-top: 3px solid var(--teal); }
+    .tone-public { border-top: 3px solid var(--gold); }
+    .tone-hist { border-top: 3px solid var(--slate); }
+    .tone-unset { border-top: 3px solid var(--wine); }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      padding: 0 16px 12px;
+    }
+    .toolbar label { font-size: 12px; color: var(--muted); }
+    select, .toolbar input[type="search"], .toolbar input[type="month"] {
+      border: 1px solid var(--line);
+      background: #fff;
+      padding: 7px 9px;
+      font-size: 13px;
+    }
+    .spacer { flex: 1; }
+    .btn {
+      border: 1px solid var(--navy);
+      background: var(--navy);
+      color: #fff;
+      padding: 8px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .btn.ghost { background: #fff; color: var(--navy); }
+    .btn:active { transform: translateY(1px); }
+
+    .table-wrap { overflow: auto; padding: 0 16px 16px; }
+    table.data {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12.5px;
+      min-width: 1080px;
+    }
+    table.data th {
+      background: #1b3a5f;
+      color: #fff;
+      font-weight: 700;
+      text-align: left;
+      padding: 8px;
+      position: sticky;
+      top: 0;
+    }
+    table.data td {
+      border-bottom: 1px solid #e6ebf1;
+      padding: 8px;
+      vertical-align: top;
+    }
+    table.data td small { display: block; color: var(--muted); margin-top: 2px; }
+    table.data tr:hover td { background: #f6f9fc; }
+    .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .reason, .memo { color: var(--muted); max-width: 260px; }
+    .empty-cell, .empty-inline { text-align: center; color: var(--muted); padding: 28px 8px; }
+
+    .pill {
+      display: inline-block;
+      padding: 2px 7px;
+      font-size: 11px;
+      font-weight: 700;
+      background: #eef2f6;
+      color: var(--ink);
+      white-space: nowrap;
+    }
+    .kind-매출 { background: #e8eef8; color: #1a3a6b; }
+    .kind-매입 { background: #e8f5f1; color: #0f6b5c; }
+    .rank-1 { background: #e7f4ec; color: var(--ok); }
+    .rank-2 { background: #f7efd9; color: #7a5610; }
+    .rank-0 { background: #f8e6e6; color: var(--danger); }
+    .pill.tone-south { background: #e6eef6; color: var(--navy); }
+    .pill.tone-edu { background: #e5f3ef; color: var(--teal); }
+    .pill.tone-public { background: #f6edd8; color: #7a5610; }
+    .pill.tone-hist { background: #eef1f4; color: var(--slate); }
+    .pill.tone-unset { background: #f8e6e6; color: var(--wine); }
+
+    .share-box { padding: 0 16px 16px; }
+    #shareText {
+      width: 100%;
+      min-height: 280px;
+      border: 1px solid var(--line);
+      padding: 12px;
+      font-size: 12.5px;
+      line-height: 1.55;
+      resize: vertical;
+      background: #fbfcfe;
+    }
+    .result-meta { margin-left: auto; font-size: 12px; color: var(--muted); }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 24px;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--navy-2);
+      color: #fff;
+      padding: 10px 16px;
+      font-size: 13px;
+      opacity: 0;
+      pointer-events: none;
+      transition: 0.25s ease;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    .footer {
+      color: var(--muted);
+      font-size: 12px;
+      padding-top: 8px;
+    }
+
+    @media (max-width: 980px) {
+      .grid-2, .kpis, .owner-grid, .upload-row { grid-template-columns: 1fr; }
+      .header-inner { flex-direction: column; align-items: flex-start; }
+      .header-meta { text-align: left; }
+    }
+    @media print {
+      .topbar, .upload-row, .toolbar, .btn, .toast { display: none !important; }
+      body { background: #fff; }
+      .card, .kpi { box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="topbar-inner">
+      <span>회계팀 월마감 작업대 · 세금계산서 미처리 담당 추정</span>
+      <span>1순위 이메일 · 2순위 과거 처리 데이터</span>
+    </div>
+  </div>
+  <header class="header">
+    <div class="header-inner">
+      <div>
+        <p class="eyebrow">Month-end close</p>
+        <h1>세금계산서 미처리현황</h1>
+      </div>
+      <div class="header-meta">
+        <strong id="closeMonthLabel">2026.08 마감</strong>
+        <span>현업 공유용 예상담당자 추출</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="layout wrap">
+    <section class="grid-2">
+      <article class="card">
+        <h2>원본 파일</h2>
+        <p class="hint">실제 엑셀을 올리면 샘플을 대체합니다. 컬럼명이 달라도 공급자/공급받는자 이메일, 처리담당자만 있으면 읽습니다.</p>
+        <div class="upload-row">
+          <label class="drop">
+            <strong>1. 세금계산서 미처리현황</strong>
+            <p>매입·매출 원장. 매입은 공급받는자이메일, 매출은 공급자이메일로 1순위를 봅니다.</p>
+            <input id="fileOpen" type="file" accept=".xlsx,.xls,.csv" />
+            <div class="file-name" id="fileUnprocessed">샘플 데이터 사용 중</div>
+          </label>
+          <label class="drop">
+            <strong>2. 과거 처리 데이터</strong>
+            <p>거래처사업자번호·거래처명·처리담당자. 1순위가 없을 때 최다 처리 담당자를 2순위로 씁니다.</p>
+            <input id="fileHist" type="file" accept=".xlsx,.xls,.csv" />
+            <div class="file-name" id="fileHistory">샘플 데이터 사용 중</div>
+          </label>
+        </div>
+      </article>
+      <article class="card">
+        <h2>판정 규칙</h2>
+        <div class="rules">
+          <ol>
+            <li><b>1순위 이메일</b> — 매입: 공급받는자이메일 / 매출: 공급하는자(공급자)이메일</li>
+            <li><b>2순위 과거처리</b> — 1순위가 없거나 매핑 밖이면 사업자번호 → 거래처명 순으로 찾고, 여러 명이면 처리 건수가 많은 사람</li>
+          </ol>
+          <table class="mail-map">
+            <thead>
+              <tr><th>이메일</th><th>예상담당자</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>fatec@atecomputer.kr</td><td>남부,중부사업부</td></tr>
+              <tr><td>eatec@atecomputer.kr</td><td>이은정(교육,전자칠판)</td></tr>
+              <tr><td>tatec@ateccomputer.kr</td><td>강소라(공공,수도권)</td></tr>
+            </tbody>
+          </table>
+          <p class="hint" style="padding: 10px 0 0;">과거 처리 적재 <b id="historyCount">0건</b></p>
+        </div>
+      </article>
+    </section>
+
+    <section class="kpis" aria-label="집계">
+      <div class="kpi">
+        <span>미처리 전체</span>
+        <strong id="kpiCount">0건</strong>
+        <em id="kpiRank">1순위 0 · 2순위 0</em>
+      </div>
+      <div class="kpi">
+        <span>공급가액</span>
+        <strong id="kpiSupply">0원</strong>
+        <em>세액 <span id="kpiVat">0원</span></em>
+      </div>
+      <div class="kpi">
+        <span>매출 / 매입</span>
+        <strong style="font-size:15px" id="kpiSales">0건</strong>
+        <em id="kpiPurchase">0건</em>
+      </div>
+      <div class="kpi">
+        <span>미지정</span>
+        <strong id="kpiUnset">0건</strong>
+        <em>이메일·이력 모두 없음</em>
+      </div>
+    </section>
+
+    <section class="card" style="margin-bottom:16px">
+      <h2>예상담당자별</h2>
+      <p class="hint">카드를 누르면 해당 담당자 건만 필터합니다.</p>
+      <div class="owner-grid" id="ownerCards"></div>
+    </section>
+
+    <section class="card" style="margin-bottom:16px">
+      <h2>건별 현황</h2>
+      <div class="toolbar">
+        <label>마감월
+          <input id="closeMonthInput" type="month" value="2026-08" />
+        </label>
+        <label>구분
+          <select id="filterKind">
+            <option>전체</option>
+            <option>매출</option>
+            <option>매입</option>
+          </select>
+        </label>
+        <label>담당자
+          <select id="filterOwner"><option>전체</option></select>
+        </label>
+        <label>판정
+          <select id="filterRank">
+            <option value="전체">전체</option>
+            <option value="1">1순위 이메일</option>
+            <option value="2">2순위 과거처리</option>
+            <option value="0">미지정</option>
+          </select>
+        </label>
+        <input id="filterQuery" type="search" placeholder="거래처·품목·승인번호 검색" style="min-width:220px" />
+        <span class="spacer"></span>
+        <span class="result-meta" id="resultMeta"></span>
+        <button type="button" class="btn ghost" id="btnReset">샘플 다시 불러오기</button>
+        <button type="button" class="btn ghost" id="btnExport">엑셀 내려받기</button>
+      </div>
+      <div class="table-wrap">
+        <table class="data">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>구분</th>
+              <th>거래처</th>
+              <th>품목</th>
+              <th>공급가액</th>
+              <th>세액</th>
+              <th>작성일</th>
+              <th>예상담당자</th>
+              <th>판정</th>
+              <th>근거</th>
+              <th>이메일/메모</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>현업 공유 문구</h2>
+      <p class="hint">메일·메신저에 그대로 붙여 넣으면 됩니다. 담당자별 건수와 건별 리스트가 들어 있습니다.</p>
+      <div class="toolbar" style="padding-top:0">
+        <button type="button" class="btn" id="btnCopy">공유 문구 복사</button>
+      </div>
+      <div class="share-box">
+        <textarea id="shareText" spellcheck="false"></textarea>
+      </div>
+    </section>
+
+    <p class="footer">이 HTML 하나만 브라우저로 열면 됩니다. 실제 마감 시 미처리현황·과거처리 엑셀(또는 CSV)을 올려 주세요.</p>
+  </main>
+
+  <div class="toast" id="toast" role="status"></div>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+  <script>
+/* 샘플 데이터 — generate_sample.py 로 재생성 */
+window.TAX_SAMPLE = {
+  "generatedAt": "2026-08-13",
+  "closeMonth": "2026-08",
+  "company": {
+    "biz": "214-81-12345",
+    "name": "(주)에이티이컴퓨터",
+    "ceo": "김태형"
+  },
+  "emailOwners": {
+    "fatec@atecomputer.kr": "남부,중부사업부",
+    "eatec@atecomputer.kr": "이은정(교육,전자칠판)",
+    "tatec@ateccomputer.kr": "강소라(공공,수도권)"
+  },
+  "unprocessed": [
+    {
+      "구분": "매출",
+      "승인번호": "20260811매0000000100000014",
+      "작성일자": "2026-08-04",
+      "발행일자": "2026-08-04",
+      "공급자등록번호": "214-81-12345",
+      "공급자상호": "(주)에이티이컴퓨터",
+      "공급자대표자명": "김태형",
+      "공급자이메일": "fatec@atecomputer.kr",
+      "공급받는자등록번호": "409-83-11220",
+      "공급받는자상호": "전남정보통신(주)",
+      "공급받는자대표자명": "오세훈",
+      "공급받는자이메일": "acct@jninfo.co.kr",
+      "품목": "네트워크 스위치 납품",
+      "공급가액": 4800000,
+      "비고": "광주·전남 납품",
+      "상태": "미처리",
+      "세액": 480000,
+      "합계금액": 5280000
+    },
+    {
+      "구분": "매출",
+      "승인번호": "20260811매0000000200000014",
+      "작성일자": "2026-08-05",
+      "발행일자": "2026-08-05",
+      "공급자등록번호": "214-81-12345",
+      "공급자상호": "(주)에이티이컴퓨터",
+      "공급자대표자명": "김태형",
+      "공급자이메일": "fatec@atecomputer.kr",
+      "공급받는자등록번호": "312-81-66721",
+      "공급받는자상호": "대전스마트스쿨",
+      "공급받는자대표자명": "한지민",
+      "공급받는자이메일": "tax@djsmart.kr",
+      "품목": "교실 기자재 설치",
+      "공급가액": 2150000,
+      "비고": "중부권 교육청 연계",
+      "상태": "미처리",
+      "세액": 215000,
+      "합계금액": 2365000
+    },
+    {
+      "구분": "매출",
+      "승인번호": "20260811매0000000300000014",
+      "작성일자": "2026-08-06",
+      "발행일자": "2026-08-06",
+      "공급자등록번호": "214-81-12345",
+      "공급자상호": "(주)에이티이컴퓨터",
+      "공급자대표자명": "김태형",
+      "공급자이메일": "eatec@atecomputer.kr",
+      "공급받는자등록번호": "104-82-33410",
+      "공급받는자상호": "서울특별시교육청",
+      "공급받는자대표자명": "교육감",
+      "공급받는자이메일": "ebill@sen.go.kr",
+      "품목": "전자칠판 20대",
+      "공급가액": 36000000,
+      "비고": "본청 계약",
+      "상태": "미처리",
+      "세액": 3600000,
+      "합계금액": 39600000
+    },
+    {
+      "구분": "매출",
+      "승인번호": "20260811매0000000400000014",
+      "작성일자": "2026-08-07",
+      "발행일자": "2026-08-07",
+      "공급자등록번호": "214-81-12345",
+      "공급자상호": "(주)에이티이컴퓨터",
+      "공급자대표자명": "김태형",
+      "공급자이메일": "eatec@atecomputer.kr",
+      "공급받는자등록번호": "220-82-01812",
+      "공급받는자상호": "강남구청 평생학습관",
+      "공급받는자대표자명": "관장",
+      "공급받는자이메일": "learn@gangnam.go.kr",
+      "품목": "교육용 노트북 임대",
+      "공급가액": 5400000,
+      "비고": "",
+      "상태": "미처리",
+      "세액": 540000,
+      "합계금액": 5940000
+    },
+    {
+      "구분": "매출",
+      "승인번호": "20260811매0000000500000014",
+      "작성일자": "2026-08-07",
+      "발행일자": "2026-08-08",
+      "공급자등록번호": "214-81-12345",
+      "공급자상호": "(주)에이티이컴퓨터",
+      "공급자대표자명": "김태형",
+      "공급자이메일": "tatec@ateccomputer.kr",
+      "공급받는자등록번호": "135-83-00991",
+      "공급받는자상호": "경기도청",
+      "공급받는자대표자명": "도지사",
+      "공급받는자이메일": "invoice@gg.go.kr",
+      "품목": "공공 전산장비 유지보수",
+      "공급가액": 12700000,
+      "비고": "수도권 공공",
+      "상태": "미처리",
+      "세액": 1270000,
+      "합계금액": 13970000
+    },
+    {
+      "구분": "매출",
+      "승인번호": "20260811매0000000600000014",
+      "작성일자": "2026-08-08",
+      "발행일자": "2026-08-08",
+      "공급자등록번호": "214-81-12345",
+      "공급자상호": "(주)에이티이컴퓨터",
+      "공급자대표자명": "김태형",
+      "공급자이메일": "tatec@ateccomputer.kr",
+      "공급받는자등록번호": "102-82-00001",
+      "공급받는자상호": "인천광역시교육청",
+      "공급받는자대표자명": "교육감",
+      "공급받는자이메일": "tax@ice.go.kr",
+      "품목": "전자칠판 설치(공공)",
+      "공급가액": 9250000,
+      "비고": "",
+      "상태": "미처리",
+      "세액": 925000,
+      "합계금액": 10175000
+    },
+    {
+      "구분": "매출",
+      "승인번호": "20260811매0000000700000014",
+      "작성일자": "2026-08-08",
+      "발행일자": "2026-08-09",
+      "공급자등록번호": "214-81-12345",
+      "공급자상호": "(주)에이티이컴퓨터",
+      "공급자대표자명": "김태형",
+      "공급자이메일": "",
+      "공급받는자등록번호": "120-81-44550",
+      "공급받는자상호": "한빛시스템",
+      "공급받는자대표자명": "박준호",
+      "공급받는자이메일": "finance@hanbit-sys.kr",
+      "품목": "서버 증설",
+      "공급가액": 7800000,
+      "비고": "메일 미기재",
+      "상태": "미처리",
+      "세액": 780000,
+      "합계금액": 8580000
+    },
+    {
+      "구분": "매출",
+      "승인번호": "20260811매0000000800000014",
+      "작성일자": "2026-08-09",
+      "발행일자": "2026-08-09",
+      "공급자등록번호": "214-81-12345",
+      "공급자상호": "(주)에이티이컴퓨터",
+      "공급자대표자명": "김태형",
+      "공급자이메일": "sales@atecomputer.kr",
+      "공급받는자등록번호": "211-87-77880",
+      "공급받는자상호": "(주)블루웨이브",
+      "공급받는자대표자명": "최유진",
+      "공급받는자이메일": "ap@bluewave.co.kr",
+      "품목": "스토리지 납품",
+      "공급가액": 3300000,
+      "비고": "부서메일 아님",
+      "상태": "미처리",
+      "세액": 330000,
+      "합계금액": 3630000
+    },
+    {
+      "구분": "매출",
+      "승인번호": "20260811매0000000900000014",
+      "작성일자": "2026-08-11",
+      "발행일자": "2026-08-11",
+      "공급자등록번호": "214-81-12345",
+      "공급자상호": "(주)에이티이컴퓨터",
+      "공급자대표자명": "김태형",
+      "공급자이메일": "",
+      "공급받는자등록번호": "615-81-99012",
+      "공급받는자상호": "새봄커머스",
+      "공급받는자대표자명": "이민재",
+      "공급받는자이메일": "new@saebom.kr",
+      "품목": "모니터 납품",
+      "공급가액": 1120000,
+      "비고": "신규 거래처",
+      "상태": "미처리",
+      "세액": 112000,
+      "합계금액": 1232000
+    },
+    {
+      "구분": "매입",
+      "승인번호": "20260812매0000000100000014",
+      "작성일자": "2026-08-03",
+      "발행일자": "2026-08-03",
+      "공급자등록번호": "301-81-22334",
+      "공급자상호": "호남전선자재",
+      "공급자대표자명": "정우성",
+      "공급자이메일": "bill@honam-cable.kr",
+      "공급받는자등록번호": "214-81-12345",
+      "공급받는자상호": "(주)에이티이컴퓨터",
+      "공급받는자대표자명": "김태형",
+      "공급받는자이메일": "fatec@atecomputer.kr",
+      "품목": "케이블·부자재",
+      "공급가액": 860000,
+      "비고": "남부 현장 사용",
+      "상태": "미처리",
+      "세액": 86000,
+      "합계금액": 946000
+    },
+    {
+      "구분": "매입",
+      "승인번호": "20260812매0000000200000014",
+      "작성일자": "2026-08-04",
+      "발행일자": "2026-08-04",
+      "공급자등록번호": "314-86-55110",
+      "공급자상호": "충청로지스",
+      "공급자대표자명": "윤서연",
+      "공급자이메일": "tax@cc-logis.kr",
+      "공급받는자등록번호": "214-81-12345",
+      "공급받는자상호": "(주)에이티이컴퓨터",
+      "공급받는자대표자명": "김태형",
+      "공급받는자이메일": "fatec@atecomputer.kr",
+      "품목": "중부권 운송비",
+      "공급가액": 420000,
+      "비고": "",
+      "상태": "미처리",
+      "세액": 42000,
+      "합계금액": 462000
+    },
+    {
+      "구분": "매입",
+      "승인번호": "20260812매0000000300000014",
+      "작성일자": "2026-08-05",
+      "발행일자": "2026-08-05",
+      "공급자등록번호": "110-81-33456",
+      "공급자상호": "에듀보드코리아",
+      "공급자대표자명": "장현우",
+      "공급자이메일": "sales@eduboard.kr",
+      "공급받는자등록번호": "214-81-12345",
+      "공급받는자상호": "(주)에이티이컴퓨터",
+      "공급받는자대표자명": "김태형",
+      "공급받는자이메일": "eatec@atecomputer.kr",
+      "품목": "전자칠판 패널",
+      "공급가액": 18600000,
+      "비고": "교육사업 원재료",
+      "상태": "미처리",
+      "세액": 1860000,
+      "합계금액": 20460000
+    },
+    {
+      "구분": "매입",
+      "승인번호": "20260812매0000000400000014",
+      "작성일자": "2026-08-06",
+      "발행일자": "2026-08-06",
+      "공급자등록번호": "211-88-66770",
+      "공급자상호": "러닝팩토리",
+      "공급자대표자명": "서하늘",
+      "공급자이메일": "invoice@learnfactory.kr",
+      "공급받는자등록번호": "214-81-12345",
+      "공급받는자상호": "(주)에이티이컴퓨터",
+      "공급받는자대표자명": "김태형",
+      "공급받는자이메일": "eatec@atecomputer.kr",
+      "품목": "교육 콘텐츠 라이선스",
+      "공급가액": 2900000,
+      "비고": "",
+      "상태": "미처리",
+      "세액": 290000,
+      "합계금액": 3190000
+    },
+    {
+      "구분": "매입",
+      "승인번호": "20260812매0000000500000014",
+      "작성일자": "2026-08-07",
+      "발행일자": "2026-08-07",
+      "공급자등록번호": "138-81-22990",
+      "공급자상호": "수도권전산서비스",
+      "공급자대표자명": "노지훈",
+      "공급자이메일": "ar@sudo-it.kr",
+      "공급받는자등록번호": "214-81-12345",
+      "공급받는자상호": "(주)에이티이컴퓨터",
+      "공급받는자대표자명": "김태형",
+      "공급받는자이메일": "tatec@ateccomputer.kr",
+      "품목": "공공망 회선 사용료",
+      "공급가액": 1540000,
+      "비고": "",
+      "상태": "미처리",
+      "세액": 154000,
+      "합계금액": 1694000
+    },
+    {
+      "구분": "매입",
+      "승인번호": "20260812매0000000600000014",
+      "작성일자": "2026-08-08",
+      "발행일자": "2026-08-08",
+      "공급자등록번호": "214-86-10101",
+      "공급자상호": "동아부품",
+      "공급자대표자명": "배성민",
+      "공급자이메일": "donga@donga-parts.kr",
+      "공급받는자등록번호": "214-81-12345",
+      "공급받는자상호": "(주)에이티이컴퓨터",
+      "공급받는자대표자명": "김태형",
+      "공급받는자이메일": "",
+      "품목": "예비 부품",
+      "공급가액": 675000,
+      "비고": "수신메일 없음",
+      "상태": "미처리",
+      "세액": 67500,
+      "합계금액": 742500
+    },
+    {
+      "구분": "매입",
+      "승인번호": "20260812매0000000700000014",
+      "작성일자": "2026-08-10",
+      "발행일자": "2026-08-10",
+      "공급자등록번호": "220-81-30303",
+      "공급자상호": "주식회사 그린로지스",
+      "공급자대표자명": "문가영",
+      "공급자이메일": "tax@greenlogis.kr",
+      "공급받는자등록번호": "214-81-12345",
+      "공급받는자상호": "(주)에이티이컴퓨터",
+      "공급받는자대표자명": "김태형",
+      "공급받는자이메일": "",
+      "품목": "수도권 배송비",
+      "공급가액": 310000,
+      "비고": "상호 매칭",
+      "상태": "미처리",
+      "세액": 31000,
+      "합계금액": 341000
+    },
+    {
+      "구분": "매입",
+      "승인번호": "20260812매0000000800000014",
+      "작성일자": "2026-08-11",
+      "발행일자": "2026-08-11",
+      "공급자등록번호": "120-81-44550",
+      "공급자상호": "한빛시스템",
+      "공급자대표자명": "박준호",
+      "공급자이메일": "finance@hanbit-sys.kr",
+      "공급받는자등록번호": "214-81-12345",
+      "공급받는자상호": "(주)에이티이컴퓨터",
+      "공급받는자대표자명": "김태형",
+      "공급받는자이메일": "tatec@ateccomputer.kr",
+      "품목": "유지보수 외주",
+      "공급가액": 1980000,
+      "비고": "과거담당은 박준호이나 메일 우선",
+      "상태": "미처리",
+      "세액": 198000,
+      "합계금액": 2178000
+    },
+    {
+      "구분": "매입",
+      "승인번호": "20260812매0000000900000014",
+      "작성일자": "2026-08-12",
+      "발행일자": "2026-08-12",
+      "공급자등록번호": "599-88-01010",
+      "공급자상호": "북극성솔루션",
+      "공급자대표자명": "강다은",
+      "공급자이메일": "hello@polaris-sol.kr",
+      "공급받는자등록번호": "214-81-12345",
+      "공급받는자상호": "(주)에이티이컴퓨터",
+      "공급받는자대표자명": "김태형",
+      "공급받는자이메일": "",
+      "품목": "소프트웨어 구독",
+      "공급가액": 2200000,
+      "비고": "신규 · 이력 없음",
+      "상태": "미처리",
+      "세액": 220000,
+      "합계금액": 2420000
+    }
+  ],
+  "history": [
+    {
+      "처리일자": "2026-07-28",
+      "작성일자": "2026-07-15",
+      "구분": "매출",
+      "승인번호": "20260715S0000000100000014",
+      "거래처사업자번호": "120-81-44550",
+      "거래처명": "한빛시스템",
+      "품목": "서버 유지보수",
+      "공급가액": 6200000,
+      "처리담당자": "박준호",
+      "처리부서": "SI사업부",
+      "비고": "",
+      "세액": 620000,
+      "합계금액": 6820000
+    },
+    {
+      "처리일자": "2026-06-20",
+      "작성일자": "2026-06-10",
+      "구분": "매출",
+      "승인번호": "20260610S0000000200000014",
+      "거래처사업자번호": "120-81-44550",
+      "거래처명": "한빛시스템",
+      "품목": "스토리지 증설",
+      "공급가액": 4100000,
+      "처리담당자": "박준호",
+      "처리부서": "SI사업부",
+      "비고": "",
+      "세액": 410000,
+      "합계금액": 4510000
+    },
+    {
+      "처리일자": "2026-05-19",
+      "작성일자": "2026-05-08",
+      "구분": "매입",
+      "승인번호": "20260508B0000000300000014",
+      "거래처사업자번호": "120-81-44550",
+      "거래처명": "한빛시스템",
+      "품목": "외주 개발",
+      "공급가액": 2400000,
+      "처리담당자": "이은정(교육,전자칠판)",
+      "처리부서": "교육사업",
+      "비고": "1회성",
+      "세액": 240000,
+      "합계금액": 2640000
+    },
+    {
+      "처리일자": "2026-07-22",
+      "작성일자": "2026-07-09",
+      "구분": "매출",
+      "승인번호": "20260709S0000000400000014",
+      "거래처사업자번호": "211-87-77880",
+      "거래처명": "(주)블루웨이브",
+      "품목": "NAS 납품",
+      "공급가액": 2800000,
+      "처리담당자": "최민아",
+      "처리부서": "영업지원",
+      "비고": "",
+      "세액": 280000,
+      "합계금액": 3080000
+    },
+    {
+      "처리일자": "2026-04-18",
+      "작성일자": "2026-04-07",
+      "구분": "매출",
+      "승인번호": "20260407S0000000500000014",
+      "거래처사업자번호": "211-87-77880",
+      "거래처명": "블루웨이브",
+      "품목": "백업장비",
+      "공급가액": 1950000,
+      "처리담당자": "최민아",
+      "처리부서": "영업지원",
+      "비고": "",
+      "세액": 195000,
+      "합계금액": 2145000
+    },
+    {
+      "처리일자": "2026-07-15",
+      "작성일자": "2026-07-03",
+      "구분": "매입",
+      "승인번호": "20260703B0000000600000014",
+      "거래처사업자번호": "214-86-10101",
+      "거래처명": "동아부품",
+      "품목": "소모품",
+      "공급가액": 540000,
+      "처리담당자": "남부,중부사업부",
+      "처리부서": "남부·중부",
+      "비고": "",
+      "세액": 54000,
+      "합계금액": 594000
+    },
+    {
+      "처리일자": "2026-06-12",
+      "작성일자": "2026-06-02",
+      "구분": "매입",
+      "승인번호": "20260602B0000000700000014",
+      "거래처사업자번호": "214-86-10101",
+      "거래처명": "동아부품",
+      "품목": "커넥터",
+      "공급가액": 210000,
+      "처리담당자": "남부,중부사업부",
+      "처리부서": "남부·중부",
+      "비고": "",
+      "세액": 21000,
+      "합계금액": 231000
+    },
+    {
+      "처리일자": "2026-07-30",
+      "작성일자": "2026-07-18",
+      "구분": "매입",
+      "승인번호": "20260718B0000000800000014",
+      "거래처사업자번호": "220-81-30303",
+      "거래처명": "(주)그린로지스",
+      "품목": "배송비",
+      "공급가액": 280000,
+      "처리담당자": "강소라(공공,수도권)",
+      "처리부서": "공공·수도권",
+      "비고": "",
+      "세액": 28000,
+      "합계금액": 308000
+    },
+    {
+      "처리일자": "2026-03-21",
+      "작성일자": "2026-03-10",
+      "구분": "매입",
+      "승인번호": "20260310B0000000900000014",
+      "거래처사업자번호": "220-81-30303",
+      "거래처명": "그린로지스",
+      "품목": "운송",
+      "공급가액": 190000,
+      "처리담당자": "강소라(공공,수도권)",
+      "처리부서": "공공·수도권",
+      "비고": "",
+      "세액": 19000,
+      "합계금액": 209000
+    },
+    {
+      "처리일자": "2026-07-25",
+      "작성일자": "2026-07-11",
+      "구분": "매출",
+      "승인번호": "20260711S0000001000000014",
+      "거래처사업자번호": "104-82-33410",
+      "거래처명": "서울특별시교육청",
+      "품목": "전자칠판",
+      "공급가액": 28000000,
+      "처리담당자": "이은정(교육,전자칠판)",
+      "처리부서": "교육사업",
+      "비고": "",
+      "세액": 2800000,
+      "합계금액": 30800000
+    },
+    {
+      "처리일자": "2026-06-27",
+      "작성일자": "2026-06-14",
+      "구분": "매입",
+      "승인번호": "20260614B0000001100000014",
+      "거래처사업자번호": "110-81-33456",
+      "거래처명": "에듀보드코리아",
+      "품목": "패널",
+      "공급가액": 15200000,
+      "처리담당자": "이은정(교육,전자칠판)",
+      "처리부서": "교육사업",
+      "비고": "",
+      "세액": 1520000,
+      "합계금액": 16720000
+    },
+    {
+      "처리일자": "2026-07-08",
+      "작성일자": "2026-06-30",
+      "구분": "매출",
+      "승인번호": "20260630S0000001200000014",
+      "거래처사업자번호": "135-83-00991",
+      "거래처명": "경기도청",
+      "품목": "유지보수",
+      "공급가액": 11000000,
+      "처리담당자": "강소라(공공,수도권)",
+      "처리부서": "공공·수도권",
+      "비고": "",
+      "세액": 1100000,
+      "합계금액": 12100000
+    },
+    {
+      "처리일자": "2026-05-14",
+      "작성일자": "2026-05-02",
+      "구분": "매출",
+      "승인번호": "20260502S0000001300000014",
+      "거래처사업자번호": "409-83-11220",
+      "거래처명": "전남정보통신(주)",
+      "품목": "스위치",
+      "공급가액": 3900000,
+      "처리담당자": "남부,중부사업부",
+      "처리부서": "남부·중부",
+      "비고": "",
+      "세액": 390000,
+      "합계금액": 4290000
+    }
+  ]
+};
+
+/* 세금계산서 미처리현황 — 예상담당자 판정 및 현업 공유 */
+
+const EMAIL_OWNERS = {
+  "fatec@atecomputer.kr": "남부,중부사업부",
+  "eatec@atecomputer.kr": "이은정(교육,전자칠판)",
+  "tatec@ateccomputer.kr": "강소라(공공,수도권)",
+  // 도메인 오탈자 보정
+  "tatec@atecomputer.kr": "강소라(공공,수도권)",
+};
+
+const EMAIL_ALIASES = {
+  "공급하는자이메일": "공급자이메일",
+  "공급하는자 이메일": "공급자이메일",
+  "공급자 이메일": "공급자이메일",
+  "공급받는자 이메일": "공급받는자이메일",
+  "공급받는자이메일1": "공급받는자이메일",
+  "공급받는자 이메일1": "공급받는자이메일",
+  "매입매출구분": "구분",
+  "세금계산서구분": "구분",
+  "거래처": "거래처명",
+  "상호": "거래처명",
+  "사업자번호": "거래처사업자번호",
+  "사업자등록번호": "거래처사업자번호",
+  "담당자": "처리담당자",
+  "처리자": "처리담당자",
+  "처리담당": "처리담당자",
+};
+
+const UNPROCESSED_HINTS = [
+  "승인번호",
+  "공급자이메일",
+  "공급받는자이메일",
+  "공급자상호",
+  "공급받는자상호",
+];
+const HISTORY_HINTS = ["처리담당자", "처리일자", "거래처명", "거래처사업자번호"];
+
+const state = {
+  closeMonth: "2026-08",
+  unprocessed: [],
+  history: [],
+  assigned: [],
+  filters: {
+    kind: "전체",
+    owner: "전체",
+    rank: "전체",
+    query: "",
+  },
+  files: {
+    unprocessed: null,
+    history: null,
+  },
+};
+
+function normalizeKey(key) {
+  return String(key || "")
+    .replace(/^\uFEFF/, "")
+    .replace(/\s+/g, "")
+    .trim();
+}
+
+function canonHeader(key) {
+  const raw = String(key || "").replace(/^\uFEFF/, "").trim();
+  const compact = normalizeKey(raw);
+  if (EMAIL_ALIASES[raw]) return EMAIL_ALIASES[raw];
+  if (EMAIL_ALIASES[compact]) return EMAIL_ALIASES[compact];
+  return raw;
+}
+
+function normalizeEmail(value) {
+  return String(value || "")
+    .replace(/\u3000/g, " ")
+    .trim()
+    .toLowerCase();
+}
+
+function splitEmails(value) {
+  return String(value || "")
+    .split(/[;,\n|/]+/)
+    .map(normalizeEmail)
+    .filter(Boolean);
+}
+
+function digitsOnly(value) {
+  return String(value || "").replace(/\D/g, "");
+}
+
+function normalizeName(value) {
+  return String(value || "")
+    .replace(/\(주\)|주식회사|\(유\)|유한회사|\s+/g, "")
+    .trim()
+    .toLowerCase();
+}
+
+function toNumber(value) {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  const n = Number(String(value || "").replace(/,/g, "").trim());
+  return Number.isFinite(n) ? n : 0;
+}
+
+function excelDate(value) {
+  if (value == null || value === "") return "";
+  if (value instanceof Date && !Number.isNaN(value.getTime())) {
+    return value.toISOString().slice(0, 10);
+  }
+  if (typeof value === "number") {
+    const utc = Math.round((value - 25569) * 86400 * 1000);
+    const d = new Date(utc);
+    if (!Number.isNaN(d.getTime())) return d.toISOString().slice(0, 10);
+  }
+  const s = String(value).trim();
+  const m = s.match(/^(\d{4})[.\-/]?(\d{1,2})[.\-/]?(\d{1,2})/);
+  if (m) {
+    return `${m[1]}-${m[2].padStart(2, "0")}-${m[3].padStart(2, "0")}`;
+  }
+  return s;
+}
+
+function formatMoney(n) {
+  return `${Math.round(toNumber(n)).toLocaleString("ko-KR")}원`;
+}
+
+function formatCount(n) {
+  return `${n.toLocaleString("ko-KR")}건`;
+}
+
+function detectKind(row) {
+  const raw = String(row["구분"] || row["매입매출"] || "").trim();
+  if (raw.includes("매입")) return "매입";
+  if (raw.includes("매출")) return "매출";
+  return "";
+}
+
+function counterpartOf(row, kind) {
+  if (kind === "매출") {
+    return {
+      biz: row["공급받는자등록번호"] || row["거래처사업자번호"] || "",
+      name: row["공급받는자상호"] || row["거래처명"] || "",
+    };
+  }
+  if (kind === "매입") {
+    return {
+      biz: row["공급자등록번호"] || row["거래처사업자번호"] || "",
+      name: row["공급자상호"] || row["거래처명"] || "",
+    };
+  }
+  return {
+    biz: row["거래처사업자번호"] || row["공급자등록번호"] || row["공급받는자등록번호"] || "",
+    name: row["거래처명"] || row["공급자상호"] || row["공급받는자상호"] || "",
+  };
+}
+
+function lookupEmail(row, kind) {
+  if (kind === "매입") {
+    return row["공급받는자이메일"] || row["공급받는자이메일1"] || "";
+  }
+  if (kind === "매출") {
+    return row["공급자이메일"] || row["공급하는자이메일"] || "";
+  }
+  return row["공급받는자이메일"] || row["공급자이메일"] || "";
+}
+
+function matchEmailOwner(emailField) {
+  for (const email of splitEmails(emailField)) {
+    if (EMAIL_OWNERS[email]) {
+      return { owner: EMAIL_OWNERS[email], email };
+    }
+  }
+  return null;
+}
+
+function buildHistoryIndex(historyRows) {
+  const byBiz = new Map();
+  const byName = new Map();
+
+  const push = (map, key, rec) => {
+    if (!key) return;
+    if (!map.has(key)) map.set(key, []);
+    map.get(key).push(rec);
+  };
+
+  historyRows.forEach((row, idx) => {
+    const owner = String(row["처리담당자"] || "").trim();
+    if (!owner) return;
+    const rec = {
+      owner,
+      date: excelDate(row["처리일자"] || row["작성일자"]),
+      kind: detectKind(row),
+      biz: digitsOnly(row["거래처사업자번호"] || row["사업자번호"] || row["공급자등록번호"]),
+      name: String(row["거래처명"] || row["상호"] || row["공급자상호"] || "").trim(),
+      idx,
+    };
+    push(byBiz, rec.biz, rec);
+    push(byName, normalizeName(rec.name), rec);
+  });
+
+  return { byBiz, byName };
+}
+
+function pickHistoryOwner(records) {
+  if (!records || !records.length) return null;
+  const tally = new Map();
+  records.forEach((rec) => {
+    const cur = tally.get(rec.owner) || { owner: rec.owner, count: 0, latest: "" };
+    cur.count += 1;
+    if (rec.date && rec.date >= cur.latest) cur.latest = rec.date;
+    tally.set(rec.owner, cur);
+  });
+  const ranked = [...tally.values()].sort((a, b) => {
+    if (b.count !== a.count) return b.count - a.count;
+    if (a.latest !== b.latest) return a.latest < b.latest ? 1 : -1;
+    return a.owner.localeCompare(b.owner, "ko");
+  });
+  const top = ranked[0];
+  return {
+    owner: top.owner,
+    count: top.count,
+    latest: top.latest,
+    total: records.length,
+  };
+}
+
+function assignOwner(row, historyIndex) {
+  const kind = detectKind(row) || "미구분";
+  const emailField = lookupEmail(row, kind === "미구분" ? "" : kind);
+  const counterpart = counterpartOf(row, kind === "미구분" ? "" : kind);
+  const emailHit = matchEmailOwner(emailField);
+
+  let historyHit = null;
+  let historyHow = "";
+  const bizKey = digitsOnly(counterpart.biz);
+  const nameKey = normalizeName(counterpart.name);
+  if (bizKey && historyIndex.byBiz.has(bizKey)) {
+    historyHit = pickHistoryOwner(historyIndex.byBiz.get(bizKey));
+    historyHow = "사업자번호";
+  } else if (nameKey && historyIndex.byName.has(nameKey)) {
+    historyHit = pickHistoryOwner(historyIndex.byName.get(nameKey));
+    historyHow = "거래처명";
+  }
+
+  if (emailHit) {
+    return {
+      owner: emailHit.owner,
+      rank: 1,
+      rankLabel: "1순위 · 이메일",
+      reason: `${kind === "매입" ? "공급받는자" : "공급하는자"} 이메일 ${emailHit.email}`,
+      emailUsed: emailHit.email,
+      historyOwner: historyHit ? historyHit.owner : "",
+      historyNote: historyHit
+        ? `과거 ${historyHit.count}건(${historyHow}) · 최근 ${historyHit.latest || "-"}`
+        : "",
+    };
+  }
+
+  if (historyHit) {
+    return {
+      owner: historyHit.owner,
+      rank: 2,
+      rankLabel: "2순위 · 과거처리",
+      reason: `${counterpart.name || "거래처"} ${historyHow} 매칭 · ${historyHit.count}건 · 최근 ${historyHit.latest || "-"}`,
+      emailUsed: splitEmails(emailField)[0] || "",
+      historyOwner: historyHit.owner,
+      historyNote: `${historyHow} · ${historyHit.count}/${historyHit.total}건`,
+    };
+  }
+
+  const leftoverEmail = splitEmails(emailField)[0] || "";
+  return {
+    owner: "미지정",
+    rank: 0,
+    rankLabel: "미지정",
+    reason: leftoverEmail
+      ? `이메일(${leftoverEmail}) 매핑 없음 · 과거 이력 없음`
+      : "이메일 없음 · 과거 이력 없음",
+    emailUsed: leftoverEmail,
+    historyOwner: "",
+    historyNote: "",
+  };
+}
+
+function assignAll(unprocessed, history) {
+  const index = buildHistoryIndex(history);
+  return unprocessed.map((row, i) => {
+    const kind = detectKind(row) || "미구분";
+    const counterpart = counterpartOf(row, kind === "미구분" ? "" : kind);
+    const judged = assignOwner(row, index);
+    const supply = toNumber(row["공급가액"]);
+    const vat = toNumber(row["세액"]);
+    const total = toNumber(row["합계금액"]) || supply + vat;
+    return {
+      id: i + 1,
+      kind,
+      approval: String(row["승인번호"] || ""),
+      writeDate: excelDate(row["작성일자"]),
+      issueDate: excelDate(row["발행일자"]),
+      counterpartName: counterpart.name,
+      counterpartBiz: counterpart.biz,
+      item: String(row["품목"] || ""),
+      supply,
+      vat,
+      total,
+      memo: String(row["비고"] || ""),
+      status: String(row["상태"] || "미처리"),
+      emailField: lookupEmail(row, kind === "미구분" ? "" : kind),
+      ...judged,
+      raw: row,
+    };
+  });
+}
+
+function requireXlsx() {
+  if (typeof XLSX === "undefined") {
+    throw new Error("엑셀(.xlsx)을 읽으려면 인터넷이 필요합니다. CSV로 저장해서 올려 주세요.");
+  }
+}
+
+function parseCsvText(text) {
+  const rows = [];
+  let row = [];
+  let cell = "";
+  let inQuotes = false;
+  const src = String(text || "").replace(/^\uFEFF/, "");
+  for (let i = 0; i < src.length; i += 1) {
+    const ch = src[i];
+    if (inQuotes) {
+      if (ch === '"') {
+        if (src[i + 1] === '"') {
+          cell += '"';
+          i += 1;
+        } else {
+          inQuotes = false;
+        }
+      } else {
+        cell += ch;
+      }
+    } else if (ch === '"') {
+      inQuotes = true;
+    } else if (ch === "," || ch === "\t") {
+      row.push(cell);
+      cell = "";
+    } else if (ch === "\n") {
+      row.push(cell);
+      if (row.some((c) => String(c).trim())) rows.push(row);
+      row = [];
+      cell = "";
+    } else if (ch !== "\r") {
+      cell += ch;
+    }
+  }
+  row.push(cell);
+  if (row.some((c) => String(c).trim())) rows.push(row);
+  if (!rows.length) return [];
+  const headers = rows[0].map(canonHeader);
+  return rows.slice(1).map((cols) => {
+    const obj = {};
+    headers.forEach((h, idx) => {
+      obj[h] = cols[idx] ?? "";
+    });
+    return obj;
+  });
+}
+
+function isCsvFile(file) {
+  return /\.csv$/i.test(file.name || "") || /csv/i.test(file.type || "");
+}
+
+function sheetToObjects(sheet) {
+  requireXlsx();
+  const rows = XLSX.utils.sheet_to_json(sheet, { defval: "", raw: true });
+  return rows.map((row) => {
+    const next = {};
+    Object.entries(row).forEach(([key, value]) => {
+      next[canonHeader(key)] = value;
+    });
+    return next;
+  });
+}
+
+function guessSheetRole(sheetName, rows) {
+  const name = String(sheetName || "");
+  if (/과거|처리|이력|history/i.test(name)) return "history";
+  if (/미처리|현황|세금/i.test(name)) return "unprocessed";
+  if (!rows.length) return "unknown";
+  const keys = Object.keys(rows[0]);
+  const histScore = HISTORY_HINTS.filter((h) => keys.includes(h)).length;
+  const openScore = UNPROCESSED_HINTS.filter((h) => keys.includes(h)).length;
+  if (keys.includes("처리담당자") && histScore >= 2) return "history";
+  if (openScore >= 2) return "unprocessed";
+  return histScore > openScore ? "history" : "unprocessed";
+}
+
+function parseWorkbook(workbook) {
+  const result = { unprocessed: [], history: [] };
+  workbook.SheetNames.forEach((name) => {
+    const rows = sheetToObjects(workbook.Sheets[name]);
+    const role = guessSheetRole(name, rows);
+    if (role === "history") result.history.push(...rows);
+    else if (role === "unprocessed") result.unprocessed.push(...rows);
+  });
+  return result;
+}
+
+function loadSample() {
+  const sample = window.TAX_SAMPLE;
+  if (!sample) throw new Error("샘플 데이터가 없습니다.");
+  state.closeMonth = sample.closeMonth || "2026-08";
+  state.unprocessed = sample.unprocessed.slice();
+  state.history = sample.history.slice();
+  state.files.unprocessed = "세금계산서_미처리현황_샘플.xlsx (내장)";
+  state.files.history = "과거_처리데이터_샘플.xlsx (내장)";
+  refreshAssigned();
+}
+
+function refreshAssigned() {
+  state.assigned = assignAll(state.unprocessed, state.history);
+  renderAll();
+}
+
+function filteredRows() {
+  const { kind, owner, rank, query } = state.filters;
+  const q = query.trim().toLowerCase();
+  return state.assigned.filter((row) => {
+    if (kind !== "전체" && row.kind !== kind) return false;
+    if (owner !== "전체" && row.owner !== owner) return false;
+    if (rank === "1" && row.rank !== 1) return false;
+    if (rank === "2" && row.rank !== 2) return false;
+    if (rank === "0" && row.rank !== 0) return false;
+    if (q) {
+      const hay = [
+        row.owner,
+        row.counterpartName,
+        row.counterpartBiz,
+        row.item,
+        row.approval,
+        row.emailUsed,
+        row.reason,
+      ]
+        .join(" ")
+        .toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+}
+
+function summarize(rows) {
+  const byOwner = new Map();
+  const byKind = { 매출: { count: 0, supply: 0, vat: 0 }, 매입: { count: 0, supply: 0, vat: 0 } };
+  const byRank = { 1: 0, 2: 0, 0: 0 };
+  rows.forEach((row) => {
+    const bucket = byOwner.get(row.owner) || {
+      owner: row.owner,
+      count: 0,
+      supply: 0,
+      vat: 0,
+      total: 0,
+      sales: 0,
+      purchase: 0,
+      rank1: 0,
+      rank2: 0,
+      unset: 0,
+    };
+    bucket.count += 1;
+    bucket.supply += row.supply;
+    bucket.vat += row.vat;
+    bucket.total += row.total;
+    if (row.kind === "매출") bucket.sales += 1;
+    if (row.kind === "매입") bucket.purchase += 1;
+    if (row.rank === 1) bucket.rank1 += 1;
+    else if (row.rank === 2) bucket.rank2 += 1;
+    else bucket.unset += 1;
+    byOwner.set(row.owner, bucket);
+
+    if (byKind[row.kind]) {
+      byKind[row.kind].count += 1;
+      byKind[row.kind].supply += row.supply;
+      byKind[row.kind].vat += row.vat;
+    }
+    byRank[row.rank] = (byRank[row.rank] || 0) + 1;
+  });
+
+  const owners = [...byOwner.values()].sort((a, b) => {
+    if (a.owner === "미지정") return 1;
+    if (b.owner === "미지정") return -1;
+    return b.count - a.count || a.owner.localeCompare(b.owner, "ko");
+  });
+
+  return {
+    count: rows.length,
+    supply: rows.reduce((s, r) => s + r.supply, 0),
+    vat: rows.reduce((s, r) => s + r.vat, 0),
+    total: rows.reduce((s, r) => s + r.total, 0),
+    owners,
+    byKind,
+    byRank,
+  };
+}
+
+function ownerTone(owner) {
+  if (owner === "미지정") return "unset";
+  if (owner.startsWith("남부")) return "south";
+  if (owner.startsWith("이은정")) return "edu";
+  if (owner.startsWith("강소라")) return "public";
+  return "hist";
+}
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function renderKpis(sum) {
+  document.getElementById("kpiCount").textContent = formatCount(sum.count);
+  document.getElementById("kpiSupply").textContent = formatMoney(sum.supply);
+  document.getElementById("kpiVat").textContent = formatMoney(sum.vat);
+  document.getElementById("kpiUnset").textContent = formatCount(sum.byRank[0] || 0);
+  document.getElementById("kpiSales").textContent = `${formatCount(sum.byKind.매출.count)} · ${formatMoney(sum.byKind.매출.supply)}`;
+  document.getElementById("kpiPurchase").textContent = `${formatCount(sum.byKind.매입.count)} · ${formatMoney(sum.byKind.매입.supply)}`;
+  document.getElementById("kpiRank").textContent = `1순위 ${sum.byRank[1] || 0} · 2순위 ${sum.byRank[2] || 0}`;
+}
+
+function renderOwnerCards(owners) {
+  const box = document.getElementById("ownerCards");
+  if (!owners.length) {
+    box.innerHTML = `<p class="empty-inline">표시할 담당자가 없습니다.</p>`;
+    return;
+  }
+  box.innerHTML = owners
+    .map((o) => {
+      const tone = ownerTone(o.owner);
+      return `
+        <button type="button" class="owner-card tone-${tone}" data-owner="${escapeHtml(o.owner)}">
+          <div class="owner-card-top">
+            <strong>${escapeHtml(o.owner)}</strong>
+            <span>${formatCount(o.count)}</span>
+          </div>
+          <p>매출 ${o.sales} · 매입 ${o.purchase}</p>
+          <p class="owner-money">${formatMoney(o.supply)}</p>
+          <p class="owner-rank">1순위 ${o.rank1} · 2순위 ${o.rank2}${o.unset ? ` · 미지정 ${o.unset}` : ""}</p>
+        </button>`;
+    })
+    .join("");
+}
+
+function renderOwnerFilter(owners) {
+  const sel = document.getElementById("filterOwner");
+  const current = state.filters.owner;
+  const names = ["전체", ...owners.map((o) => o.owner)];
+  sel.innerHTML = names
+    .map((name) => `<option value="${escapeHtml(name)}"${name === current ? " selected" : ""}>${escapeHtml(name)}</option>`)
+    .join("");
+}
+
+function renderTable(rows) {
+  const body = document.getElementById("tableBody");
+  document.getElementById("resultMeta").textContent = `표시 ${formatCount(rows.length)} / 전체 ${formatCount(state.assigned.length)}`;
+  if (!rows.length) {
+    body.innerHTML = `<tr><td colspan="11" class="empty-cell">조건에 맞는 건이 없습니다.</td></tr>`;
+    return;
+  }
+  body.innerHTML = rows
+    .map((row) => {
+      const tone = ownerTone(row.owner);
+      return `
+        <tr>
+          <td>${row.id}</td>
+          <td><span class="pill kind-${row.kind}">${escapeHtml(row.kind)}</span></td>
+          <td>
+            <strong>${escapeHtml(row.counterpartName || "-")}</strong>
+            <small>${escapeHtml(row.counterpartBiz || "")}</small>
+          </td>
+          <td>${escapeHtml(row.item || "-")}</td>
+          <td class="num">${formatMoney(row.supply)}</td>
+          <td class="num">${formatMoney(row.vat)}</td>
+          <td>${escapeHtml(row.writeDate || "-")}</td>
+          <td>
+            <span class="pill tone-${tone}">${escapeHtml(row.owner)}</span>
+          </td>
+          <td><span class="pill rank-${row.rank}">${escapeHtml(row.rankLabel)}</span></td>
+          <td class="reason">${escapeHtml(row.reason)}</td>
+          <td class="memo">${escapeHtml(row.emailUsed || row.memo || "")}</td>
+        </tr>`;
+    })
+    .join("");
+}
+
+function buildShareText(allRows) {
+  const sum = summarize(allRows);
+  const today = new Date();
+  const ymd = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+  const monthLabel = `${state.closeMonth.replace("-", "년 ")}월`;
+  const lines = [];
+  lines.push(`[회계 월마감] 세금계산서 미처리현황 공유 (${ymd})`);
+  lines.push("");
+  lines.push(`■ 마감월: ${monthLabel}`);
+  lines.push(`■ 전체 미처리: ${formatCount(sum.count)} / 공급가액 ${formatMoney(sum.supply)} / 세액 ${formatMoney(sum.vat)}`);
+  lines.push(`  - 매출 ${formatCount(sum.byKind.매출.count)} (${formatMoney(sum.byKind.매출.supply)})`);
+  lines.push(`  - 매입 ${formatCount(sum.byKind.매입.count)} (${formatMoney(sum.byKind.매입.supply)})`);
+  lines.push(`■ 담당자 판정: 1순위 이메일 ${sum.byRank[1] || 0}건 · 2순위 과거처리 ${sum.byRank[2] || 0}건 · 미지정 ${sum.byRank[0] || 0}건`);
+  lines.push("");
+  lines.push("■ 예상담당자별");
+  sum.owners.forEach((o) => {
+    lines.push(`  - ${o.owner}: ${formatCount(o.count)} (매출 ${o.sales} / 매입 ${o.purchase}) · 공급가액 ${formatMoney(o.supply)}`);
+  });
+  lines.push("");
+  lines.push("■ 건별 (예상담당자 | 구분 | 거래처 | 품목 | 공급가액 | 판정)");
+  allRows.forEach((row) => {
+    lines.push(
+      `  ${row.id}. ${row.owner} | ${row.kind} | ${row.counterpartName} | ${row.item} | ${formatMoney(row.supply)} | ${row.rankLabel}`
+    );
+  });
+  lines.push("");
+  lines.push("※ 1순위: 매입=공급받는자이메일, 매출=공급하는자이메일");
+  lines.push("※ 1순위 없거나 매핑 없으면 과거 처리 담당자(사업자번호→거래처명, 다건이면 최다 처리)로 2순위 지정");
+  lines.push("※ 확인 후 처리 또는 담당 정정 회신 부탁드립니다.");
+  return lines.join("\n");
+}
+
+function renderShare() {
+  document.getElementById("shareText").value = buildShareText(state.assigned);
+}
+
+function renderFileBadges() {
+  document.getElementById("fileUnprocessed").textContent = state.files.unprocessed || "샘플 데이터 사용 중";
+  document.getElementById("fileHistory").textContent = state.files.history || "샘플 데이터 사용 중";
+  document.getElementById("historyCount").textContent = formatCount(state.history.length);
+}
+
+function renderAll() {
+  const visible = filteredRows();
+  const allSum = summarize(state.assigned);
+  renderKpis(allSum);
+  renderOwnerCards(allSum.owners);
+  renderOwnerFilter(allSum.owners);
+  renderTable(visible);
+  renderShare();
+  renderFileBadges();
+  document.getElementById("closeMonthLabel").textContent = `${state.closeMonth.replace("-", ".")} 마감`;
+}
+
+async function readExcelFile(file) {
+  requireXlsx();
+  const buf = await file.arrayBuffer();
+  return XLSX.read(buf, { type: "array", cellDates: true });
+}
+
+async function onUnprocessedFile(file) {
+  let parsed;
+  if (isCsvFile(file)) {
+    const rows = parseCsvText(await file.text());
+    parsed = { unprocessed: rows, history: [] };
+  } else {
+    parsed = parseWorkbook(await readExcelFile(file));
+  }
+  if (!parsed.unprocessed.length) {
+    throw new Error("미처리현황 시트를 읽지 못했습니다. 승인번호·공급자/공급받는자 이메일 컬럼을 확인해 주세요.");
+  }
+  state.unprocessed = parsed.unprocessed;
+  state.files.unprocessed = file.name;
+  if (parsed.history.length && !state.files.history) {
+    state.history = parsed.history;
+    state.files.history = `${file.name} (이력 시트)`;
+  }
+  refreshAssigned();
+}
+
+async function onHistoryFile(file) {
+  let rows;
+  if (isCsvFile(file)) {
+    rows = parseCsvText(await file.text());
+  } else {
+    const parsed = parseWorkbook(await readExcelFile(file));
+    rows = parsed.history.length ? parsed.history : parsed.unprocessed;
+  }
+  if (!rows.length) throw new Error("과거 처리 데이터를 읽지 못했습니다. 처리담당자 컬럼을 확인해 주세요.");
+  state.history = rows;
+  state.files.history = file.name;
+  refreshAssigned();
+}
+
+function exportAssignedXlsx() {
+  requireXlsx();
+  const rows = filteredRows().map((row) => ({
+    예상담당자: row.owner,
+    판정순위: row.rankLabel,
+    판정근거: row.reason,
+    구분: row.kind,
+    승인번호: row.approval,
+    작성일자: row.writeDate,
+    거래처명: row.counterpartName,
+    거래처사업자번호: row.counterpartBiz,
+    품목: row.item,
+    공급가액: row.supply,
+    세액: row.vat,
+    합계금액: row.total,
+    판정이메일: row.emailUsed,
+    과거처리담당: row.historyOwner,
+    비고: row.memo,
+  }));
+  const ws = XLSX.utils.json_to_sheet(rows);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "예상담당자");
+  const ownerWs = XLSX.utils.json_to_sheet(
+    summarize(state.assigned).owners.map((o) => ({
+      예상담당자: o.owner,
+      건수: o.count,
+      매출: o.sales,
+      매입: o.purchase,
+      공급가액: o.supply,
+      세액: o.vat,
+      합계: o.total,
+      "1순위": o.rank1,
+      "2순위": o.rank2,
+      미지정: o.unset,
+    }))
+  );
+  XLSX.utils.book_append_sheet(wb, ownerWs, "담당자별집계");
+  XLSX.writeFile(wb, `세금계산서_미처리_예상담당자_${state.closeMonth}.xlsx`);
+}
+
+function showToast(message) {
+  const el = document.getElementById("toast");
+  el.textContent = message;
+  el.classList.add("show");
+  clearTimeout(showToast.timer);
+  showToast.timer = setTimeout(() => el.classList.remove("show"), 2200);
+}
+
+function bindUi() {
+  document.getElementById("filterKind").addEventListener("change", (e) => {
+    state.filters.kind = e.target.value;
+    renderAll();
+  });
+  document.getElementById("filterOwner").addEventListener("change", (e) => {
+    state.filters.owner = e.target.value;
+    renderAll();
+  });
+  document.getElementById("filterRank").addEventListener("change", (e) => {
+    state.filters.rank = e.target.value;
+    renderAll();
+  });
+  document.getElementById("filterQuery").addEventListener("input", (e) => {
+    state.filters.query = e.target.value;
+    renderTable(filteredRows());
+    document.getElementById("resultMeta").textContent = `표시 ${formatCount(filteredRows().length)} / 전체 ${formatCount(state.assigned.length)}`;
+  });
+  document.getElementById("ownerCards").addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-owner]");
+    if (!btn) return;
+    const owner = btn.dataset.owner;
+    state.filters.owner = state.filters.owner === owner ? "전체" : owner;
+    document.getElementById("filterOwner").value = state.filters.owner;
+    renderAll();
+  });
+  document.getElementById("btnCopy").addEventListener("click", async () => {
+    const text = document.getElementById("shareText").value;
+    try {
+      await navigator.clipboard.writeText(text);
+      showToast("현업 공유 문구를 복사했습니다.");
+    } catch {
+      document.getElementById("shareText").select();
+      document.execCommand("copy");
+      showToast("현업 공유 문구를 복사했습니다.");
+    }
+  });
+  document.getElementById("btnExport").addEventListener("click", () => {
+    exportAssignedXlsx();
+    showToast("예상담당자 엑셀을 내려받았습니다.");
+  });
+  document.getElementById("btnReset").addEventListener("click", () => {
+    state.filters = { kind: "전체", owner: "전체", rank: "전체", query: "" };
+    document.getElementById("filterKind").value = "전체";
+    document.getElementById("filterRank").value = "전체";
+    document.getElementById("filterQuery").value = "";
+    loadSample();
+    showToast("샘플 데이터로 다시 불러왔습니다.");
+  });
+  document.getElementById("fileOpen").addEventListener("change", async (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    try {
+      await onUnprocessedFile(file);
+      showToast("미처리현황을 반영했습니다.");
+    } catch (err) {
+      showToast(err.message || "파일을 읽지 못했습니다.");
+    }
+    e.target.value = "";
+  });
+  document.getElementById("fileHist").addEventListener("change", async (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    try {
+      await onHistoryFile(file);
+      showToast("과거 처리 데이터를 반영했습니다.");
+    } catch (err) {
+      showToast(err.message || "파일을 읽지 못했습니다.");
+    }
+    e.target.value = "";
+  });
+  document.getElementById("closeMonthInput").addEventListener("change", (e) => {
+    if (e.target.value) {
+      state.closeMonth = e.target.value;
+      renderAll();
+    }
+  });
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  bindUi();
+  loadSample();
+  const monthInput = document.getElementById("closeMonthInput");
+  if (monthInput) monthInput.value = state.closeMonth;
+});
+
+  </script>
+</body>
+</html>
