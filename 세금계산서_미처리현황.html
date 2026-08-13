@@ -8,118 +8,93 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
   <style>
     :root {
-      --yellow: #fae100;
-      --yellow-soft: #fff6b8;
-      --cream: #fffdf6;
-      --ink: #191919;
-      --muted: #8a8a8a;
-      --line: #f0eee6;
+      --ink: #1a1d21;
+      --muted: #6b7280;
+      --line: #e6e8ec;
+      --paper: #f4f6f8;
       --white: #fff;
-      --brown: #c9a27a;
-      --peach: #ffb3c1;
-      --mint: #8fd6c4;
-      --sky: #b8dff0;
-      --ok: #2a9d6a;
-      --danger: #ef5b6a;
-      --shadow: 0 10px 28px rgba(25, 25, 25, 0.06);
+      --navy: #1c2430;
+      --navy-2: #11161d;
+      --red: #d70051;
+      --red-soft: #fde8ef;
+      --ok: #1b7a4a;
+      --danger: #c81e3a;
+      --erp: #2c3e50;
+      --nts: #1f5c4d;
+      --shadow: 0 8px 24px rgba(17, 22, 29, 0.06);
       --font: "Pretendard Variable", Pretendard, "Malgun Gothic", sans-serif;
-      --radius: 22px;
+      --radius: 8px;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: var(--font);
-      background:
-        radial-gradient(circle at 12% -10%, #fff3a8 0, transparent 28%),
-        radial-gradient(circle at 92% 8%, #ffe0ea 0, transparent 22%),
-        var(--cream);
+      background: var(--paper);
       color: var(--ink);
       line-height: 1.5;
     }
     button, input, select, textarea { font-family: inherit; }
     a { color: inherit; }
 
+    .topbar {
+      background: var(--navy-2);
+      color: #c9d2dc;
+      font-size: 12px;
+    }
     .topbar-inner, .header-inner, .wrap {
-      width: min(1120px, calc(100% - 32px));
+      width: min(1180px, calc(100% - 32px));
       margin: 0 auto;
     }
+    .topbar-inner {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 8px 0;
+    }
     .header {
-      background: var(--yellow);
-      border-bottom: 1px solid #f0d400;
+      background: var(--navy);
+      color: #fff;
+      border-bottom: 3px solid var(--red);
     }
     .header-inner {
       display: flex;
-      align-items: center;
+      align-items: flex-end;
       justify-content: space-between;
       gap: 20px;
-      padding: 18px 0 16px;
+      padding: 22px 0 18px;
     }
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
+    .brand-mark {
+      width: 36px;
+      height: 36px;
+      border: 2px solid var(--red);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      margin-bottom: 8px;
     }
-    .friends {
-      display: flex;
-      align-items: flex-end;
-      gap: 6px;
-    }
-    .buddy {
-      width: 42px;
-      height: 42px;
-      border-radius: 50%;
-      position: relative;
-      box-shadow: 0 4px 0 rgba(0,0,0,0.06);
-    }
-    .buddy.y { background: #ffe34a; }
-    .buddy.p { background: #ffb7c5; width: 38px; height: 38px; }
-    .buddy.b { background: #d7b48c; width: 36px; height: 36px; }
-    .buddy::before, .buddy::after {
-      content: "";
-      position: absolute;
-      background: #191919;
-      border-radius: 50%;
-      width: 5px;
-      height: 6px;
-      top: 15px;
-    }
-    .buddy::before { left: 12px; }
-    .buddy::after { right: 12px; }
-    .buddy .cheek {
-      position: absolute;
-      width: 8px;
-      height: 5px;
-      border-radius: 50%;
-      background: #ff8fa0;
-      bottom: 12px;
-      opacity: 0.7;
-    }
-    .buddy .cheek.l { left: 6px; }
-    .buddy .cheek.r { right: 6px; }
     .eyebrow {
       font-size: 11px;
-      letter-spacing: 0.08em;
-      color: #6b5b00;
-      margin-bottom: 2px;
-    }
-    h1 { font-size: 24px; font-weight: 800; letter-spacing: -0.04em; }
-    .header-meta { text-align: right; font-size: 13px; color: #4a4200; }
-    .header-meta strong {
-      display: inline-flex;
-      align-items: center;
-      background: #191919;
-      color: var(--yellow);
-      border-radius: 999px;
-      padding: 4px 10px;
-      font-size: 13px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #9aa6b4;
       margin-bottom: 4px;
     }
+    h1 { font-size: 24px; font-weight: 750; letter-spacing: -0.03em; }
+    .header-meta { text-align: right; font-size: 13px; color: #c9d2dc; }
+    .header-meta strong {
+      display: block;
+      color: #fff;
+      font-size: 16px;
+      margin-bottom: 2px;
+    }
 
-    .layout { padding: 22px 0 72px; }
+    .layout { padding: 22px 0 64px; }
     .grid-2 {
       display: grid;
       grid-template-columns: 1.15fr 0.85fr;
       gap: 14px;
-      margin-bottom: 14px;
     }
     .card {
       background: var(--white);
@@ -130,9 +105,17 @@
     .card h2 {
       font-size: 16px;
       padding: 16px 18px 0;
-      letter-spacing: -0.03em;
+      letter-spacing: -0.02em;
     }
-    .card .hint { color: var(--muted); font-size: 12px; padding: 4px 18px 12px; }
+    .card h2::after {
+      content: "";
+      display: block;
+      width: 28px;
+      height: 2px;
+      background: var(--red);
+      margin-top: 8px;
+    }
+    .card .hint { color: var(--muted); font-size: 12px; padding: 8px 18px 12px; }
 
     .upload-card { position: relative; overflow: hidden; }
     .upload-row {
@@ -141,23 +124,23 @@
       gap: 10px;
       padding: 0 16px 16px;
     }
-    .upload-row.is-locked { filter: blur(2px); pointer-events: none; user-select: none; }
+    .upload-row.is-locked { filter: blur(1.5px); pointer-events: none; user-select: none; }
     .drop {
-      border: 1.5px dashed #eadf8a;
-      background: #fffced;
+      border: 1px dashed #c5ccd6;
+      background: #f8fafc;
       padding: 14px;
       min-height: 96px;
-      border-radius: 16px;
+      border-radius: 6px;
     }
     .drop strong { display: block; font-size: 13px; margin-bottom: 4px; }
     .drop p { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
     .drop input { font-size: 12px; width: 100%; }
-    .file-name { margin-top: 8px; font-size: 12px; color: #6b5b00; font-weight: 700; }
+    .file-name { margin-top: 8px; font-size: 12px; color: var(--navy); font-weight: 700; }
 
     .lock-panel {
       position: absolute;
       inset: 0;
-      background: rgba(255, 253, 246, 0.88);
+      background: rgba(248, 250, 252, 0.92);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -166,44 +149,23 @@
     }
     .lock-panel[hidden] { display: none; }
     .lock-box {
-      width: min(360px, 100%);
+      width: min(380px, 100%);
       background: #fff;
-      border: 1px solid #f3e27a;
-      border-radius: 20px;
-      padding: 18px 18px 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 20px 18px 16px;
       box-shadow: var(--shadow);
-      text-align: center;
     }
-    .lock-face {
-      width: 54px;
-      height: 54px;
-      margin: 0 auto 8px;
-      border-radius: 50%;
-      background: var(--yellow);
-      position: relative;
-      box-shadow: 0 4px 0 #f0d400;
-    }
-    .lock-face::before, .lock-face::after {
-      content: "";
-      position: absolute;
-      width: 6px;
-      height: 7px;
-      background: #191919;
-      border-radius: 50%;
-      top: 20px;
-    }
-    .lock-face::before { left: 16px; }
-    .lock-face::after { right: 16px; }
     .lock-box h3 { font-size: 15px; margin-bottom: 4px; }
-    .lock-box p { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+    .lock-box p { font-size: 12px; color: var(--muted); margin-bottom: 12px; }
     .lock-row { display: flex; gap: 8px; }
     .lock-row input {
       flex: 1;
-      border: 1px solid #eee4a8;
-      border-radius: 999px;
-      padding: 10px 14px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 9px 12px;
       font-size: 13px;
-      background: #fffdf2;
+      background: #fff;
     }
 
     .rules { padding: 0 18px 16px; font-size: 13px; }
@@ -220,7 +182,7 @@
       padding: 7px 8px;
       text-align: left;
     }
-    .mail-map th { background: #fff6b8; }
+    .mail-map th { background: #f3f5f8; color: #3b4450; }
 
     .kpis {
       display: grid;
@@ -237,11 +199,11 @@
     }
     .kpi span { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
     .kpi strong { font-size: 18px; letter-spacing: -0.03em; }
-    .kpi em { display: block; margin-top: 6px; font-style: normal; font-size: 12px; color: #6b6b6b; }
-    .kpi .amt-line { display: block; margin-top: 2px; font-size: 12px; color: #6b6b6b; font-variant-numeric: tabular-nums; }
-    .kpi.diff-kpi { background: #fff5f6; }
+    .kpi em { display: block; margin-top: 6px; font-style: normal; font-size: 12px; color: #5b6573; }
+    .kpi .amt-line { display: block; margin-top: 2px; font-size: 12px; color: #5b6573; font-variant-numeric: tabular-nums; }
+    .kpi.diff-kpi { background: #fff7f8; }
     .kpi.diff-kpi strong { color: var(--danger); }
-    .kpi:first-child { background: #fff9c8; }
+    .kpi:first-child { border-top: 3px solid var(--red); }
 
     .owner-grid {
       display: grid;
@@ -255,19 +217,19 @@
       background: #fff;
       padding: 12px;
       cursor: pointer;
-      border-radius: 18px;
+      border-radius: 6px;
     }
-    .owner-card:hover { border-color: #f0d400; background: #fffced; }
+    .owner-card:hover { border-color: #b8c0cb; background: #f8fafc; }
     .owner-card-top { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
     .owner-card-top strong { font-size: 13px; }
     .owner-card p { font-size: 12px; color: var(--muted); }
     .owner-money { color: var(--ink) !important; font-weight: 700; margin-top: 4px; }
     .owner-rank { margin-top: 4px; }
-    .tone-south { box-shadow: inset 0 4px 0 var(--sky); }
-    .tone-edu { box-shadow: inset 0 4px 0 var(--mint); }
-    .tone-public { box-shadow: inset 0 4px 0 var(--yellow); }
-    .tone-hist { box-shadow: inset 0 4px 0 #ddd; }
-    .tone-unset { box-shadow: inset 0 4px 0 var(--peach); }
+    .tone-south { border-top: 3px solid #3d5a80; }
+    .tone-edu { border-top: 3px solid #2a7a62; }
+    .tone-public { border-top: 3px solid #b45309; }
+    .tone-hist { border-top: 3px solid #6b7280; }
+    .tone-unset { border-top: 3px solid var(--red); }
 
     .toolbar {
       display: flex;
@@ -278,52 +240,49 @@
     }
     .toolbar label { font-size: 12px; color: var(--muted); }
     select, .toolbar input[type="search"], .toolbar input[type="month"] {
-      border: 1px solid #eee6b0;
+      border: 1px solid var(--line);
       background: #fff;
-      padding: 7px 10px;
+      padding: 7px 9px;
       font-size: 13px;
-      border-radius: 999px;
+      border-radius: 6px;
     }
     .spacer { flex: 1; }
     .btn {
       border: 0;
-      background: #191919;
-      color: var(--yellow);
+      background: var(--red);
+      color: #fff;
       padding: 8px 14px;
       font-size: 13px;
-      font-weight: 800;
+      font-weight: 700;
       cursor: pointer;
-      border-radius: 999px;
+      border-radius: 6px;
     }
-    .btn.ghost { background: #fff; color: #191919; border: 1px solid #eee4a8; }
+    .btn.ghost { background: #fff; color: var(--navy); border: 1px solid var(--line); }
     .btn:active { transform: translateY(1px); }
 
     .table-wrap { overflow: visible; padding: 0 12px 14px; }
     table.data {
       width: 100%;
-      border-collapse: separate;
-      border-spacing: 0;
+      border-collapse: collapse;
       font-size: 12px;
     }
     table.data th {
-      background: #191919;
-      color: var(--yellow);
+      background: var(--navy);
+      color: #fff;
       font-weight: 700;
       text-align: left;
       padding: 8px 7px;
     }
-    table.data th:first-child { border-radius: 12px 0 0 12px; }
-    table.data th:last-child { border-radius: 0 12px 12px 0; }
-    table.data th.grp-erp { text-align: center; background: #3b2f12; }
-    table.data th.grp-nts { text-align: center; background: #16362e; }
-    table.data th.grp-diff { text-align: center; background: #3a1c22; }
+    table.data th.grp-erp { text-align: center; background: #2c3e50; }
+    table.data th.grp-nts { text-align: center; background: #1f5c4d; }
+    table.data th.grp-diff { text-align: center; background: #7a1f32; }
     table.data td {
-      border-bottom: 1px solid #f4f1e6;
+      border-bottom: 1px solid #eef1f4;
       padding: 7px 6px;
       vertical-align: top;
     }
     table.data td small { display: block; color: var(--muted); margin-top: 2px; }
-    table.data tr:hover td { background: #fffced; }
+    table.data tr:hover td { background: #f7f9fb; }
     .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
     .amt-box { min-width: 118px; }
     .amt-row {
@@ -333,10 +292,10 @@
       font-variant-numeric: tabular-nums;
       line-height: 1.45;
     }
-    .amt-row em { font-style: normal; color: #9a9a9a; font-size: 11px; }
+    .amt-row em { font-style: normal; color: #8a93a0; font-size: 11px; }
     .amt-row b { font-weight: 700; }
-    .amt-erp { background: #fffaf0; }
-    .amt-nts { background: #f3fbf8; }
+    .amt-erp { background: #f6f8fa; }
+    .amt-nts { background: #f3f8f6; }
     .amt-diff { background: #fff7f8; }
     .diff-nonzero .amt-row b { color: var(--danger); }
     tr.has-diff td { background: #fff8f8; }
@@ -344,24 +303,24 @@
 
     .pill {
       display: inline-block;
-      padding: 2px 8px;
+      padding: 2px 7px;
       font-size: 11px;
-      font-weight: 800;
-      background: #f6f6f6;
+      font-weight: 700;
+      background: #eef1f4;
       color: var(--ink);
       white-space: nowrap;
-      border-radius: 999px;
+      border-radius: 4px;
     }
-    .kind-매출 { background: #e8f4fb; color: #24586d; }
-    .kind-매입 { background: #e7f8f2; color: #1b6b54; }
-    .rank-1 { background: #e7f7ee; color: var(--ok); }
-    .rank-2 { background: #fff3c4; color: #7a5610; }
-    .rank-0 { background: #ffe4e8; color: var(--danger); }
-    .pill.tone-south { background: #e7f4fb; color: #24586d; }
-    .pill.tone-edu { background: #e5f7f1; color: #1b6b54; }
-    .pill.tone-public { background: #fff3c4; color: #6b5b00; }
-    .pill.tone-hist { background: #f3f3f3; color: #555; }
-    .pill.tone-unset { background: #ffe4e8; color: #b13b4a; }
+    .kind-매출 { background: #e8eef6; color: #24405f; }
+    .kind-매입 { background: #e7f3ee; color: #1b5c45; }
+    .rank-1 { background: #e6f4ec; color: var(--ok); }
+    .rank-2 { background: #fff4dc; color: #8a5a10; }
+    .rank-0 { background: var(--red-soft); color: var(--danger); }
+    .pill.tone-south { background: #e8eef6; color: #24405f; }
+    .pill.tone-edu { background: #e7f3ee; color: #1b5c45; }
+    .pill.tone-public { background: #fff4dc; color: #8a5a10; }
+    .pill.tone-hist { background: #eef1f4; color: #4b5563; }
+    .pill.tone-unset { background: var(--red-soft); color: var(--danger); }
 
     .result-meta { margin-left: auto; font-size: 12px; color: var(--muted); }
 
@@ -370,12 +329,10 @@
       left: 50%;
       bottom: 24px;
       transform: translateX(-50%) translateY(20px);
-      background: #191919;
-      color: var(--yellow);
+      background: var(--navy-2);
+      color: #fff;
       padding: 10px 16px;
       font-size: 13px;
-      font-weight: 700;
-      border-radius: 999px;
       opacity: 0;
       pointer-events: none;
       transition: 0.25s ease;
@@ -385,7 +342,7 @@
     .footer {
       color: var(--muted);
       font-size: 12px;
-      padding-top: 10px;
+      padding-top: 14px;
       text-align: center;
     }
 
@@ -395,86 +352,34 @@
       .header-meta { text-align: left; }
     }
     @media print {
-      .header, .upload-row, .toolbar, .btn, .toast, .lock-panel { display: none !important; }
+      .topbar, .header, .upload-row, .toolbar, .btn, .toast, .lock-panel { display: none !important; }
       body { background: #fff; }
       .card, .kpi { box-shadow: none; }
     }
   </style>
 </head>
 <body>
+  <div class="topbar">
+    <div class="topbar-inner">
+      <span>ATEC · 회계 월마감</span>
+      <span>ERP / 국세청 비교 · 예상담당자</span>
+    </div>
+  </div>
   <header class="header">
     <div class="header-inner">
-      <div class="brand">
-        <div class="friends" aria-hidden="true">
-          <span class="buddy y"><i class="cheek l"></i><i class="cheek r"></i></span>
-          <span class="buddy p"><i class="cheek l"></i><i class="cheek r"></i></span>
-          <span class="buddy b"><i class="cheek l"></i><i class="cheek r"></i></span>
-        </div>
-        <div>
-          <p class="eyebrow">월마감 친구들</p>
-          <h1>세금계산서 미처리현황</h1>
-        </div>
+      <div>
+        <div class="brand-mark">AT</div>
+        <p class="eyebrow">Month-end close</p>
+        <h1>세금계산서 미처리현황</h1>
       </div>
       <div class="header-meta">
         <strong id="closeMonthLabel">2026.07 마감</strong>
-        <div>ERP · 국세청 비교 · 예상담당자</div>
+        <div>공급가액 · 세액 · 합계 비교</div>
       </div>
     </div>
   </header>
 
   <main class="layout wrap">
-    <section class="grid-2">
-      <article class="card upload-card">
-        <h2>원본 파일</h2>
-        <p class="hint">비밀번호를 연 뒤에만 올릴 수 있어요. ERP-U / 국세청 비교 양식 그대로 두면 됩니다.</p>
-        <div class="lock-panel" id="uploadLock">
-          <form class="lock-box" id="unlockForm">
-            <div class="lock-face" aria-hidden="true"></div>
-            <h3>나만 올리는 칸이에요</h3>
-            <p>비밀번호를 치면 원본 파일을 올릴 수 있어요.</p>
-            <div class="lock-row">
-              <input id="uploadPassword" type="password" autocomplete="current-password" placeholder="비밀번호" />
-              <button type="submit" class="btn">열기</button>
-            </div>
-          </form>
-        </div>
-        <div class="upload-row is-locked" id="uploadFields">
-          <label class="drop">
-            <strong>1. 세금계산서 미처리현황</strong>
-            <p>유형·거래처명·사업자번호·발생일자·ERP/국세청 금액·이메일. 매입은 공급받는자이메일1로 1순위를 봐요.</p>
-            <input id="fileOpen" type="file" accept=".xlsx,.xls,.csv" disabled />
-            <div class="file-name" id="fileUnprocessed">샘플 데이터 사용 중</div>
-          </label>
-          <label class="drop">
-            <strong>2. 과거 처리 데이터</strong>
-            <p>거래처사업자번호·거래처명·처리담당자. 1순위가 없을 때 제일 많이 처리한 사람을 2순위로 써요.</p>
-            <input id="fileHist" type="file" accept=".xlsx,.xls,.csv" disabled />
-            <div class="file-name" id="fileHistory">샘플 데이터 사용 중</div>
-          </label>
-        </div>
-      </article>
-      <article class="card">
-        <h2>판정 규칙</h2>
-        <div class="rules">
-          <ol>
-            <li><b>1순위 이메일</b> — 매입: 공급받는자이메일1 / 매출: 공급자이메일</li>
-            <li><b>2순위 과거처리</b> — 1순위가 없거나 매핑 밖이면 사업자번호 → 거래처명 순으로 찾고, 여러 명이면 처리 건수가 많은 사람</li>
-          </ol>
-          <table class="mail-map">
-            <thead>
-              <tr><th>이메일</th><th>예상담당자</th></tr>
-            </thead>
-            <tbody>
-              <tr><td>fatec@ateccomputer.kr</td><td>남부,중부사업부</td></tr>
-              <tr><td>eatec@ateccomputer.kr</td><td>이은정(교육,전자칠판)</td></tr>
-              <tr><td>tatec@ateccomputer.kr</td><td>강소라(공공,수도권)</td></tr>
-            </tbody>
-          </table>
-          <p class="hint" style="padding: 10px 0 0;">과거 처리 적재 <b id="historyCount">0건</b></p>
-        </div>
-      </article>
-    </section>
-
     <section class="kpis" aria-label="집계">
       <div class="kpi">
         <span>미처리 전체</span>
@@ -561,7 +466,58 @@
       </div>
     </section>
 
-    <p class="footer">이 HTML만 열면 돼요. 원본 파일은 비밀번호를 연 뒤에만 올릴 수 있어요.</p>
+    <section class="grid-2" style="margin-top:16px">
+      <article class="card upload-card">
+        <h2>원본 파일</h2>
+        <p class="hint">비밀번호 입력 후에만 업로드할 수 있습니다. ERP-U / 국세청 비교 양식 그대로 올리면 됩니다.</p>
+        <div class="lock-panel" id="uploadLock">
+          <form class="lock-box" id="unlockForm">
+            <h3>원본 업로드 잠금</h3>
+            <p>담당자 비밀번호를 입력하면 파일을 올릴 수 있습니다.</p>
+            <div class="lock-row">
+              <input id="uploadPassword" type="password" autocomplete="current-password" placeholder="비밀번호" />
+              <button type="submit" class="btn">확인</button>
+            </div>
+          </form>
+        </div>
+        <div class="upload-row is-locked" id="uploadFields">
+          <label class="drop">
+            <strong>1. 세금계산서 미처리현황</strong>
+            <p>유형·거래처명·사업자번호·발생일자·ERP/국세청 금액·이메일. 매입은 공급받는자이메일1로 1순위를 봅니다.</p>
+            <input id="fileOpen" type="file" accept=".xlsx,.xls,.csv" disabled />
+            <div class="file-name" id="fileUnprocessed">샘플 데이터 사용 중</div>
+          </label>
+          <label class="drop">
+            <strong>2. 과거 처리 데이터</strong>
+            <p>거래처사업자번호·거래처명·처리담당자. 1순위가 없을 때 최다 처리 담당자를 2순위로 씁니다.</p>
+            <input id="fileHist" type="file" accept=".xlsx,.xls,.csv" disabled />
+            <div class="file-name" id="fileHistory">샘플 데이터 사용 중</div>
+          </label>
+        </div>
+      </article>
+      <article class="card">
+        <h2>판정 규칙</h2>
+        <div class="rules">
+          <ol>
+            <li><b>1순위 이메일</b> — 매입: 공급받는자이메일1 / 매출: 공급자이메일</li>
+            <li><b>2순위 과거처리</b> — 1순위가 없거나 매핑 밖이면 사업자번호 → 거래처명 순으로 찾고, 여러 명이면 처리 건수가 많은 사람</li>
+          </ol>
+          <table class="mail-map">
+            <thead>
+              <tr><th>이메일</th><th>예상담당자</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>fatec@ateccomputer.kr</td><td>남부,중부사업부</td></tr>
+              <tr><td>eatec@ateccomputer.kr</td><td>이은정(교육,전자칠판)</td></tr>
+              <tr><td>tatec@ateccomputer.kr</td><td>강소라(공공,수도권)</td></tr>
+            </tbody>
+          </table>
+          <p class="hint" style="padding: 10px 0 0;">과거 처리 적재 <b id="historyCount">0건</b></p>
+        </div>
+      </article>
+    </section>
+
+    <p class="footer">이 HTML 파일만 브라우저로 열면 됩니다. 원본 파일은 하단에서 비밀번호 확인 후 업로드합니다.</p>
   </main>
 
   <div class="toast" id="toast" role="status"></div>
@@ -3823,7 +3779,7 @@ function renderTable(rows) {
   const body = document.getElementById("tableBody");
   document.getElementById("resultMeta").textContent = `표시 ${formatCount(rows.length)} / 전체 ${formatCount(state.assigned.length)}`;
   if (!rows.length) {
-    body.innerHTML = `<tr><td colspan="9" class="empty-cell">조건에 맞는 건이 없어요.</td></tr>`;
+    body.innerHTML = `<tr><td colspan="9" class="empty-cell">조건에 맞는 건이 없습니다.</td></tr>`;
     return;
   }
   body.innerHTML = rows
@@ -4038,13 +3994,13 @@ function applyUploadLock() {
 async function tryUnlock(password) {
   const hex = await sha256hex(String(password || ""));
   if (hex !== UPLOAD_PASS_SHA256) {
-    showToast("비밀번호가 달라요.");
+    showToast("비밀번호가 일치하지 않습니다.");
     return false;
   }
   state.uploadUnlocked = true;
   try { sessionStorage.setItem("taxUploadUnlocked", "1"); } catch {}
   applyUploadLock();
-  showToast("원본 파일을 올릴 수 있어요.");
+  showToast("원본 파일을 업로드할 수 있습니다.");
   return true;
 }
 
@@ -4090,15 +4046,15 @@ function bindUi() {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
     if (!state.uploadUnlocked) {
-      showToast("비밀번호를 먼저 쳐 주세요.");
+      showToast("비밀번호를 먼저 입력해 주세요.");
       e.target.value = "";
       return;
     }
     try {
       await onUnprocessedFile(file);
-      showToast("미처리현황을 반영했어요.");
+      showToast("미처리현황을 반영했습니다.");
     } catch (err) {
-      showToast(err.message || "파일을 읽지 못했어요.");
+      showToast(err.message || "파일을 읽지 못했습니다.");
     }
     e.target.value = "";
   });
@@ -4106,15 +4062,15 @@ function bindUi() {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
     if (!state.uploadUnlocked) {
-      showToast("비밀번호를 먼저 쳐 주세요.");
+      showToast("비밀번호를 먼저 입력해 주세요.");
       e.target.value = "";
       return;
     }
     try {
       await onHistoryFile(file);
-      showToast("과거 처리 데이터를 반영했어요.");
+      showToast("과거 처리 데이터를 반영했습니다.");
     } catch (err) {
-      showToast(err.message || "파일을 읽지 못했어요.");
+      showToast(err.message || "파일을 읽지 못했습니다.");
     }
     e.target.value = "";
   });
