@@ -325,7 +325,7 @@
     }
     table.data col.col-id { width: 34px; }
     table.data col.col-kind { width: 44px; }
-    table.data col.col-name { width: 120px; }
+    table.data col.col-name { width: 78px; }
     table.data col.col-date { width: 48px; }
     table.data col.col-owner { width: 78px; }
     table.data col.col-judge { width: 82px; }
@@ -338,11 +338,30 @@
     }
     table.data td.col-owner .pill,
     table.data td.col-judge .pill { white-space: normal; }
+    table.data th.col-name,
     table.data td.col-name {
-      word-break: keep-all;
-      overflow-wrap: anywhere;
+      width: 78px;
+      max-width: 78px;
+      min-width: 0;
+      padding-left: 4px;
+      padding-right: 4px;
     }
-    table.data td.col-name strong { display: block; line-height: 1.3; }
+    table.data td.col-name {
+      overflow: hidden;
+    }
+    table.data td.col-name strong {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      line-height: 1.25;
+      word-break: break-all;
+    }
+    table.data td.col-name small {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
     table.data th {
       background: var(--navy);
       color: #fff;
