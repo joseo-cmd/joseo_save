@@ -85,12 +85,25 @@
       letter-spacing: -0.03em;
       margin-top: 2px;
     }
+    .email-unlock {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .email-unlock input {
+      flex: 1;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-size: 12px;
+    }
     .email-add {
       display: grid;
-      grid-template-columns: 1.2fr 1fr 0.8fr auto;
+      grid-template-columns: 1.2fr 1fr auto;
       gap: 6px;
       margin-top: 10px;
     }
+    .email-add[hidden], .email-unlock[hidden] { display: none; }
     .email-add input {
       border: 1px solid var(--line);
       border-radius: 6px;
@@ -544,13 +557,16 @@
             </thead>
             <tbody id="mailMapBody"></tbody>
           </table>
-          <form id="emailAddForm" class="email-add">
+          <form id="emailUnlockForm" class="email-unlock">
+            <input id="emailUnlockPassword" type="password" autocomplete="current-password" placeholder="비밀번호" />
+            <button type="submit" class="btn">입력창 열기</button>
+          </form>
+          <form id="emailAddForm" class="email-add" hidden>
             <input id="newEmail" type="email" placeholder="이메일" required />
             <input id="newOwner" type="text" placeholder="예상담당자" required />
-            <input id="emailPassword" type="password" autocomplete="current-password" placeholder="비밀번호" required />
             <button type="submit" class="btn">추가</button>
           </form>
-          <p class="hint" style="padding: 10px 0 0;">이메일 추가는 비밀번호가 필요합니다. 과거 처리 적재 <b id="historyCount">0건</b></p>
+          <p class="hint" style="padding: 10px 0 0;">이메일 입력창은 비밀번호를 확인한 뒤에 열립니다. 과거 처리 적재 <b id="historyCount">0건</b></p>
         </div>
       </article>
     </section>
@@ -3027,6 +3043,7 @@ const state = {
   history: [],
   assigned: [],
   uploadUnlocked: false,
+  emailUnlocked: false,
   filters: {
     kind: "전체",
     owner: "전체",
@@ -3261,16 +3278,15 @@ function renderMailMap() {
       return `<tr>
         <td>${escapeHtml(email)}</td>
         <td>${escapeHtml(EMAIL_OWNERS[email])}</td>
-        <td>${custom ? `<button type="button" class="btn-del" data-del-email="${escapeHtml(email)}">삭제</button>` : ""}</td>
+        <td>${custom && state.emailUnlocked ? `<button type="button" class="btn-del" data-del-email="${escapeHtml(email)}">삭제</button>` : ""}</td>
       </tr>`;
     })
     .join("");
 }
 
-async function addEmailOwner(email, owner, password) {
-  const ok = (await sha256hex(String(password || ""))) === APP_PASS_SHA256;
-  if (!ok) {
-    showToast("비밀번호가 일치하지 않습니다.");
+async function addEmailOwner(email, owner) {
+  if (!state.emailUnlocked) {
+    showToast("비밀번호를 먼저 입력해 입력창을 열어 주세요.");
     return false;
   }
   const name = String(owner || "").trim();
@@ -3288,10 +3304,9 @@ async function addEmailOwner(email, owner, password) {
   return true;
 }
 
-async function removeEmailOwner(email, password) {
-  const ok = (await sha256hex(String(password || ""))) === APP_PASS_SHA256;
-  if (!ok) {
-    showToast("비밀번호가 일치하지 않습니다.");
+async function removeEmailOwner(email) {
+  if (!state.emailUnlocked) {
+    showToast("비밀번호를 먼저 입력해 입력창을 열어 주세요.");
     return false;
   }
   emailAliases(email).forEach((alias) => {
@@ -4129,6 +4144,28 @@ async function tryUnlock(password) {
   return true;
 }
 
+function applyEmailLock() {
+  const unlocked = state.emailUnlocked;
+  const gate = document.getElementById("emailUnlockForm");
+  const form = document.getElementById("emailAddForm");
+  if (gate) gate.hidden = unlocked;
+  if (form) form.hidden = !unlocked;
+  renderMailMap();
+}
+
+async function tryUnlockEmail(password) {
+  const hex = await sha256hex(String(password || ""));
+  if (hex !== APP_PASS_SHA256) {
+    showToast("비밀번호가 일치하지 않습니다.");
+    return false;
+  }
+  state.emailUnlocked = true;
+  try { sessionStorage.setItem("taxEmailUnlocked", "1"); } catch {}
+  applyEmailLock();
+  showToast("이메일 입력창을 열었습니다.");
+  return true;
+}
+
 function bindUi() {
   document.getElementById("filterKind").addEventListener("change", (e) => {
     state.filters.kind = e.target.value;
@@ -4211,33 +4248,35 @@ function bindUi() {
     await tryUnlock(input.value);
     input.value = "";
   });
+  document.getElementById("emailUnlockForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const input = document.getElementById("emailUnlockPassword");
+    await tryUnlockEmail(input.value);
+    input.value = "";
+  });
   document.getElementById("emailAddForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const email = document.getElementById("newEmail");
     const owner = document.getElementById("newOwner");
-    const pass = document.getElementById("emailPassword");
-    const ok = await addEmailOwner(email.value, owner.value, pass.value);
+    const ok = await addEmailOwner(email.value, owner.value);
     if (ok) {
       email.value = "";
       owner.value = "";
     }
-    pass.value = "";
   });
   document.getElementById("mailMapBody").addEventListener("click", async (e) => {
     const btn = e.target.closest("[data-del-email]");
     if (!btn) return;
-    const passInput = document.getElementById("emailPassword");
-    const pass = passInput.value || window.prompt("삭제하려면 비밀번호를 입력하세요.");
-    if (pass == null || pass === "") return;
-    await removeEmailOwner(btn.dataset.delEmail, pass);
-    passInput.value = "";
+    await removeEmailOwner(btn.dataset.delEmail);
   });
 }
 
 document.addEventListener("DOMContentLoaded", () => {
   try { state.uploadUnlocked = sessionStorage.getItem("taxUploadUnlocked") === "1"; } catch {}
+  try { state.emailUnlocked = sessionStorage.getItem("taxEmailUnlocked") === "1"; } catch {}
   loadEmailOwners();
   applyUploadLock();
+  applyEmailLock();
   bindUi();
   loadSample();
   const monthInput = document.getElementById("closeMonthInput");
