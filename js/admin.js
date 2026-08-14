@@ -33,6 +33,7 @@
     welcomeForm: document.getElementById("welcomeForm"),
     welcomeText: document.getElementById("welcomeText"),
     btnPublish: document.getElementById("btnPublish"),
+    btnPublish2: document.getElementById("btnPublish2"),
     toast: document.getElementById("toast")
   };
 
@@ -756,6 +757,7 @@
   });
 
   if (els.btnPublish) els.btnPublish.addEventListener("click", downloadGuide);
+  if (els.btnPublish2) els.btnPublish2.addEventListener("click", downloadGuide);
 
   applyLock();
   if (isUnlocked()) {
