@@ -63,6 +63,26 @@
     return Number(n || 0).toLocaleString("ko-KR") + "원";
   }
 
+  function journalCodes(node) {
+    return (node.journal || []).map((l) => String(l.code || "").trim()).filter(Boolean).join("\n");
+  }
+
+  function copyText(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      return navigator.clipboard.writeText(text);
+    }
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.setAttribute("readonly", "");
+    ta.style.position = "fixed";
+    ta.style.left = "-9999px";
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand("copy");
+    ta.remove();
+    return Promise.resolve();
+  }
+
   function journalTable(node) {
     if (!node.journal || !node.journal.length) return `<p class="hint">등록된 분개가 없습니다.</p>`;
     return `<table class="t-table">
@@ -90,7 +110,10 @@
           <h3>${escapeHtml(vat.label)}</h3>
         </section>
         <section class="panel journal-panel">
-          <h4>분개</h4>
+          <div class="journal-head">
+            <h4>분개</h4>
+            ${journalCodes(node) ? `<button type="button" class="copy-codes" data-copy-codes="${encodeURIComponent(journalCodes(node))}">계정코드 복사</button>` : ""}
+          </div>
           ${journalTable(node)}
         </section>
       </div>
@@ -255,6 +278,16 @@
   els.thread.addEventListener("click", (e) => {
     if (e.target.closest("[data-back]")) {
       goBack();
+      return;
+    }
+    const copyBtn = e.target.closest("[data-copy-codes]");
+    if (copyBtn) {
+      const text = decodeURIComponent(copyBtn.getAttribute("data-copy-codes") || "");
+      if (!text) {
+        showToast("복사할 계정코드가 없습니다.");
+        return;
+      }
+      copyText(text).then(() => showToast("계정코드를 복사했어요")).catch(() => showToast("복사하지 못했어요"));
       return;
     }
     const btn = e.target.closest("[data-next]");
