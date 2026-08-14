@@ -34,6 +34,7 @@
     welcomeText: document.getElementById("welcomeText"),
     btnPublish: document.getElementById("btnPublish"),
     btnPublish2: document.getElementById("btnPublish2"),
+    btnPublishNav: document.getElementById("btnPublishNav"),
     toast: document.getElementById("toast")
   };
 
@@ -709,6 +710,15 @@
   });
 
   function downloadGuide() {
+    if (!isUnlocked()) {
+      showToast("먼저 비밀번호를 입력해 주세요.");
+      if (els.password) els.password.focus();
+      return;
+    }
+    if (!state.data) {
+      showToast("잠시 후 다시 눌러 주세요.");
+      return;
+    }
     if (state.page === "topics") currentTopicPatch();
     readWelcomeIntoData();
     const rec = JournalStore.saveData(state.data);
@@ -758,6 +768,7 @@
 
   if (els.btnPublish) els.btnPublish.addEventListener("click", downloadGuide);
   if (els.btnPublish2) els.btnPublish2.addEventListener("click", downloadGuide);
+  if (els.btnPublishNav) els.btnPublishNav.addEventListener("click", downloadGuide);
 
   applyLock();
   if (isUnlocked()) {
