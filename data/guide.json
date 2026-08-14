@@ -1,7 +1,23 @@
 {
   "version": 1,
-  "updatedAt": "2026-08-14T00:00:00.000Z",
+  "updatedAt": "2026-08-14T07:13:02.306Z",
   "topics": [
+    {
+      "id": "t-msslnuqb-kybz",
+      "title": "낑꿍say",
+      "keywords": [
+        "낑",
+        "낑꿍",
+        "낑꽁"
+      ],
+      "startNodeId": "n-msslnuqb-wt8y",
+      "questionOrder": [
+        "n-msslnuqb-wt8y"
+      ],
+      "resultOrder": [
+        "n-msslolyl-odjn"
+      ]
+    },
     {
       "id": "t-welfare",
       "title": "복리후생비",
@@ -15,7 +31,20 @@
         "경조사",
         "구내식당"
       ],
-      "startNodeId": "n-welfare-who"
+      "startNodeId": "n-welfare-who",
+      "questionOrder": [
+        "n-welfare-who",
+        "n-welfare-kind",
+        "n-welfare-meal-doc",
+        "n-welfare-other-doc"
+      ],
+      "resultOrder": [
+        "n-welfare-meal-ok",
+        "n-welfare-meal-no",
+        "n-welfare-other-ok",
+        "n-welfare-other-no",
+        "n-entertain"
+      ]
     },
     {
       "id": "t-entertain",
@@ -27,7 +56,9 @@
         "골프",
         "선물"
       ],
-      "startNodeId": "n-entertain"
+      "startNodeId": "n-entertain",
+      "questionOrder": [],
+      "resultOrder": []
     },
     {
       "id": "t-sales",
@@ -41,7 +72,9 @@
         "영세율",
         "면세매출"
       ],
-      "startNodeId": "n-sales-kind"
+      "startNodeId": "n-sales-kind",
+      "questionOrder": [],
+      "resultOrder": []
     },
     {
       "id": "t-buy",
@@ -53,7 +86,9 @@
         "영수증",
         "공제"
       ],
-      "startNodeId": "n-buy-doc"
+      "startNodeId": "n-buy-doc",
+      "questionOrder": [],
+      "resultOrder": []
     },
     {
       "id": "t-travel",
@@ -67,7 +102,9 @@
         "숙박",
         "여비"
       ],
-      "startNodeId": "n-travel-kind"
+      "startNodeId": "n-travel-kind",
+      "questionOrder": [],
+      "resultOrder": []
     },
     {
       "id": "t-rent",
@@ -79,7 +116,9 @@
         "사무실",
         "보증금"
       ],
-      "startNodeId": "n-rent"
+      "startNodeId": "n-rent",
+      "questionOrder": [],
+      "resultOrder": []
     },
     {
       "id": "t-utility",
@@ -92,7 +131,9 @@
         "공과금",
         "한전"
       ],
-      "startNodeId": "n-utility"
+      "startNodeId": "n-utility",
+      "questionOrder": [],
+      "resultOrder": []
     },
     {
       "id": "t-supply",
@@ -105,7 +146,9 @@
         "비품",
         "노트북"
       ],
-      "startNodeId": "n-supply-kind"
+      "startNodeId": "n-supply-kind",
+      "questionOrder": [],
+      "resultOrder": []
     },
     {
       "id": "t-car",
@@ -118,7 +161,9 @@
         "승용차",
         "주차"
       ],
-      "startNodeId": "n-car"
+      "startNodeId": "n-car",
+      "questionOrder": [],
+      "resultOrder": []
     },
     {
       "id": "t-asset",
@@ -129,7 +174,9 @@
         "기계",
         "취득"
       ],
-      "startNodeId": "n-asset"
+      "startNodeId": "n-asset",
+      "questionOrder": [],
+      "resultOrder": []
     },
     {
       "id": "t-dep",
@@ -139,7 +186,9 @@
         "상각",
         "감가상각누계액"
       ],
-      "startNodeId": "n-dep"
+      "startNodeId": "n-dep",
+      "questionOrder": [],
+      "resultOrder": []
     },
     {
       "id": "t-pay",
@@ -150,7 +199,9 @@
         "원천세",
         "상여"
       ],
-      "startNodeId": "n-pay"
+      "startNodeId": "n-pay",
+      "questionOrder": [],
+      "resultOrder": []
     },
     {
       "id": "t-ins",
@@ -162,7 +213,9 @@
         "고용",
         "산재"
       ],
-      "startNodeId": "n-ins"
+      "startNodeId": "n-ins",
+      "questionOrder": [],
+      "resultOrder": []
     },
     {
       "id": "t-int",
@@ -172,7 +225,9 @@
         "대출",
         "금융비용"
       ],
-      "startNodeId": "n-int"
+      "startNodeId": "n-int",
+      "questionOrder": [],
+      "resultOrder": []
     },
     {
       "id": "t-bank",
@@ -182,7 +237,9 @@
         "은행",
         "수수료"
       ],
-      "startNodeId": "n-bank"
+      "startNodeId": "n-bank",
+      "questionOrder": [],
+      "resultOrder": []
     },
     {
       "id": "t-prepay",
@@ -192,7 +249,9 @@
         "선금",
         "계약금"
       ],
-      "startNodeId": "n-prepay"
+      "startNodeId": "n-prepay",
+      "questionOrder": [],
+      "resultOrder": []
     },
     {
       "id": "t-advance",
@@ -202,7 +261,9 @@
         "선수",
         "선수금입금"
       ],
-      "startNodeId": "n-advance"
+      "startNodeId": "n-advance",
+      "questionOrder": [],
+      "resultOrder": []
     },
     {
       "id": "t-vatpay",
@@ -214,7 +275,9 @@
         "예수금",
         "대급금"
       ],
-      "startNodeId": "n-vatpay"
+      "startNodeId": "n-vatpay",
+      "questionOrder": [],
+      "resultOrder": []
     },
     {
       "id": "t-wh",
@@ -224,7 +287,9 @@
         "소득세",
         "지방소득세"
       ],
-      "startNodeId": "n-wh"
+      "startNodeId": "n-wh",
+      "questionOrder": [],
+      "resultOrder": []
     },
     {
       "id": "t-suspense",
@@ -234,13 +299,16 @@
         "가수금",
         "전도금"
       ],
-      "startNodeId": "n-suspense"
+      "startNodeId": "n-suspense",
+      "questionOrder": [],
+      "resultOrder": []
     }
   ],
   "nodes": {
     "n-welfare-who": {
       "id": "n-welfare-who",
       "type": "question",
+      "topicId": "",
       "prompt": "누구를 위한 비용인가요?",
       "options": [
         {
@@ -264,6 +332,7 @@
     "n-welfare-kind": {
       "id": "n-welfare-kind",
       "type": "question",
+      "topicId": "",
       "prompt": "식대인가요, 아니면 기타 복리후생인가요?",
       "options": [
         {
@@ -283,6 +352,7 @@
     "n-welfare-meal-doc": {
       "id": "n-welfare-meal-doc",
       "type": "question",
+      "topicId": "",
       "prompt": "세금계산서나 회사 카드(지출증빙)가 있나요?",
       "options": [
         {
@@ -298,6 +368,7 @@
     "n-welfare-other-doc": {
       "id": "n-welfare-other-doc",
       "type": "question",
+      "topicId": "",
       "prompt": "세금계산서나 회사 카드(지출증빙)가 있나요?",
       "options": [
         {
@@ -313,22 +384,26 @@
     "n-welfare-meal-ok": {
       "id": "n-welfare-meal-ok",
       "type": "result",
+      "topicId": "",
       "title": "직원 식대 · 야근식대 (적격증빙 있음)",
       "vat": "taxable_purchase",
       "vatNote": "직원 복리후생 목적 식대는 세금계산서·카드가 있으면 매입세액 공제가 가능한 경우가 많습니다. 공급가액은 복리후생비, 세액은 부가세대급금입니다.",
       "journal": [
         {
           "side": "debit",
+          "code": "1",
           "account": "복리후생비",
           "memo": "공급가액"
         },
         {
           "side": "debit",
+          "code": "2",
           "account": "부가세대급금",
           "memo": "세액"
         },
         {
           "side": "credit",
+          "code": "3",
           "account": "보통예금",
           "memo": "합계금액"
         }
@@ -340,17 +415,20 @@
     "n-welfare-meal-no": {
       "id": "n-welfare-meal-no",
       "type": "result",
+      "topicId": "",
       "title": "직원 식대 (적격증빙 없음)",
       "vat": "no_deduct",
       "vatNote": "영수증만 있으면 매입세액을 공제할 수 없습니다. 지급액 전액을 복리후생비로 처리합니다.",
       "journal": [
         {
           "side": "debit",
+          "code": "",
           "account": "복리후생비",
           "memo": "지급액 전액 (부가세 포함)"
         },
         {
           "side": "credit",
+          "code": "",
           "account": "보통예금",
           "memo": "지급액 전액"
         }
@@ -362,22 +440,26 @@
     "n-welfare-other-ok": {
       "id": "n-welfare-other-ok",
       "type": "result",
+      "topicId": "",
       "title": "기타 복리후생 (적격증빙 있음)",
       "vat": "taxable_purchase",
       "vatNote": "직원 대상 경조사·생일·동호회 등도 복리후생입니다. 적격증빙이 있으면 매입세액 공제를 검토합니다.",
       "journal": [
         {
           "side": "debit",
+          "code": "",
           "account": "복리후생비",
           "memo": "공급가액"
         },
         {
           "side": "debit",
+          "code": "",
           "account": "부가세대급금",
           "memo": "세액"
         },
         {
           "side": "credit",
+          "code": "",
           "account": "보통예금",
           "memo": "합계금액"
         }
@@ -389,17 +471,20 @@
     "n-welfare-other-no": {
       "id": "n-welfare-other-no",
       "type": "result",
+      "topicId": "",
       "title": "기타 복리후생 (적격증빙 없음)",
       "vat": "no_deduct",
       "vatNote": "증빙이 약하면 공제하지 않고 전액을 복리후생비로 처리합니다.",
       "journal": [
         {
           "side": "debit",
+          "code": "",
           "account": "복리후생비",
           "memo": "지급액 전액"
         },
         {
           "side": "credit",
+          "code": "",
           "account": "보통예금",
           "memo": "지급액 전액"
         }
@@ -411,17 +496,20 @@
     "n-entertain": {
       "id": "n-entertain",
       "type": "result",
+      "topicId": "",
       "title": "접대비 · 기업업무추진비",
       "vat": "no_deduct",
       "vatNote": "접대비 관련 매입세액은 원칙적으로 불공제입니다. 세금계산서가 있어도 세액까지 접대비로 처리합니다.",
       "journal": [
         {
           "side": "debit",
+          "code": "",
           "account": "접대비",
           "memo": "지급액 전액 (부가세 포함)"
         },
         {
           "side": "credit",
+          "code": "",
           "account": "보통예금(또는 미지급금)",
           "memo": "지급액 전액"
         }
@@ -433,6 +521,7 @@
     "n-sales-kind": {
       "id": "n-sales-kind",
       "type": "question",
+      "topicId": "",
       "prompt": "어떤 매출인가요?",
       "options": [
         {
@@ -456,22 +545,26 @@
     "n-sales-tax": {
       "id": "n-sales-tax",
       "type": "result",
+      "topicId": "",
       "title": "일반 매출 (세금계산서 발행)",
       "vat": "taxable_sales",
       "vatNote": "작성일 기준으로 공급가액은 매출, 세액은 부가세예수금, 합계는 외상매출금(또는 보통예금)입니다.",
       "journal": [
         {
           "side": "debit",
+          "code": "",
           "account": "외상매출금",
           "memo": "합계금액 (공급가액 + 세액)"
         },
         {
           "side": "credit",
+          "code": "",
           "account": "제품매출(또는 상품매출)",
           "memo": "공급가액"
         },
         {
           "side": "credit",
+          "code": "",
           "account": "부가세예수금",
           "memo": "세액"
         }
@@ -483,42 +576,50 @@
     "n-sales-card": {
       "id": "n-sales-card",
       "type": "result",
+      "topicId": "",
       "title": "카드 매출 (VAN 입금)",
       "vat": "taxable_sales",
       "vatNote": "카드 매출도 과세 매출입니다. 승인(합계)금액으로 매출·예수금을 잡고, VAN 수수료는 별도 비용입니다.",
       "journal": [
         {
           "side": "debit",
+          "code": "",
           "account": "신용카드수취채권",
           "memo": "매출 합계금액"
         },
         {
           "side": "credit",
+          "code": "",
           "account": "제품매출",
           "memo": "공급가액"
         },
         {
           "side": "credit",
+          "code": "",
           "account": "부가세예수금",
           "memo": "세액"
         },
         {
           "side": "debit",
+          "code": "",
           "account": "지급수수료",
           "memo": "VAN 수수료 공급가액 (입금 시)"
         },
         {
           "side": "debit",
+          "code": "",
           "account": "부가세대급금",
           "memo": "VAN 수수료 세액 (세금계산서 있는 경우)"
         },
         {
           "side": "debit",
+          "code": "",
           "account": "보통예금",
           "memo": "실입금액"
         },
         {
           "side": "credit",
+          "code": "",
           "account": "신용카드수취채권",
           "memo": "매출 합계금액"
         }
@@ -530,17 +631,20 @@
     "n-sales-export": {
       "id": "n-sales-export",
       "type": "result",
+      "topicId": "",
       "title": "수출 매출 (영세율)",
       "vat": "zero_rate",
       "vatNote": "수출은 영세율입니다. 세금계산서(또는 수출실적 증빙)는 보관하되 세액은 0원, 부가세예수금은 쓰지 않습니다.",
       "journal": [
         {
           "side": "debit",
+          "code": "",
           "account": "외상매출금(외화)",
           "memo": "외화금액 × 환율"
         },
         {
           "side": "credit",
+          "code": "",
           "account": "수출매출",
           "memo": "공급가액 (세액 없음)"
         }
@@ -552,17 +656,20 @@
     "n-sales-exempt": {
       "id": "n-sales-exempt",
       "type": "result",
+      "topicId": "",
       "title": "면세 매출",
       "vat": "exempt",
       "vatNote": "부가세가 없습니다. 계산서를 발행하고 공급가액만 매출로 잡습니다.",
       "journal": [
         {
           "side": "debit",
+          "code": "",
           "account": "외상매출금",
           "memo": "공급가액 전액"
         },
         {
           "side": "credit",
+          "code": "",
           "account": "면세매출",
           "memo": "공급가액"
         }
@@ -574,6 +681,7 @@
     "n-buy-doc": {
       "id": "n-buy-doc",
       "type": "question",
+      "topicId": "",
       "prompt": "매입·비용 증빙이 어떻게 되나요?",
       "options": [
         {
@@ -593,22 +701,26 @@
     "n-buy-ok": {
       "id": "n-buy-ok",
       "type": "result",
+      "topicId": "",
       "title": "일반 매입 · 비용 (공제)",
       "vat": "taxable_purchase",
       "vatNote": "적격 세금계산서를 받으면 세액은 부가세대급금, 공급가액만 비용 또는 자산입니다.",
       "journal": [
         {
           "side": "debit",
+          "code": "",
           "account": "원재료비(또는 해당 비용/자산)",
           "memo": "공급가액"
         },
         {
           "side": "debit",
+          "code": "",
           "account": "부가세대급금",
           "memo": "세액"
         },
         {
           "side": "credit",
+          "code": "",
           "account": "미지급금(또는 보통예금)",
           "memo": "합계금액"
         }
@@ -620,17 +732,20 @@
     "n-buy-no": {
       "id": "n-buy-no",
       "type": "result",
+      "topicId": "",
       "title": "세금계산서 없는 매입",
       "vat": "no_deduct",
       "vatNote": "적격증빙이 없으면 매입세액을 공제할 수 없습니다. 지급액 전액이 비용입니다.",
       "journal": [
         {
           "side": "debit",
+          "code": "",
           "account": "해당 비용",
           "memo": "지급액 전액 (부가세 포함)"
         },
         {
           "side": "credit",
+          "code": "",
           "account": "보통예금",
           "memo": "지급액 전액"
         }
@@ -642,6 +757,7 @@
     "n-travel-kind": {
       "id": "n-travel-kind",
       "type": "question",
+      "topicId": "",
       "prompt": "어떤 출장·교통 비용인가요?",
       "options": [
         {
@@ -661,17 +777,20 @@
     "n-travel-taxi": {
       "id": "n-travel-taxi",
       "type": "result",
+      "topicId": "",
       "title": "택시 · 대중교통",
       "vat": "no_deduct",
       "vatNote": "택시·버스·지하철은 보통 매입세액 공제가 안 됩니다. 전액 여비교통비입니다.",
       "journal": [
         {
           "side": "debit",
+          "code": "",
           "account": "여비교통비",
           "memo": "지급액 전액"
         },
         {
           "side": "credit",
+          "code": "",
           "account": "보통예금(또는 미지급금)",
           "memo": "지급액"
         }
@@ -683,22 +802,26 @@
     "n-travel-ok": {
       "id": "n-travel-ok",
       "type": "result",
+      "topicId": "",
       "title": "KTX · 항공 · 숙박 (적격증빙)",
       "vat": "taxable_purchase",
       "vatNote": "사업 출장의 KTX·항공·숙박은 세금계산서·카드가 있으면 매입세액 공제를 검토합니다.",
       "journal": [
         {
           "side": "debit",
+          "code": "",
           "account": "여비교통비",
           "memo": "공급가액"
         },
         {
           "side": "debit",
+          "code": "",
           "account": "부가세대급금",
           "memo": "세액"
         },
         {
           "side": "credit",
+          "code": "",
           "account": "보통예금",
           "memo": "합계금액"
         }
@@ -710,22 +833,26 @@
     "n-rent": {
       "id": "n-rent",
       "type": "result",
+      "topicId": "",
       "title": "사무실 임차료 (세금계산서)",
       "vat": "taxable_purchase",
       "vatNote": "사업용 부동산 임대는 과세입니다. 세액은 매입공제, 공급가액만 임차료입니다. 보증금은 부가세가 없습니다.",
       "journal": [
         {
           "side": "debit",
+          "code": "",
           "account": "임차료",
           "memo": "공급가액"
         },
         {
           "side": "debit",
+          "code": "",
           "account": "부가세대급금",
           "memo": "세액"
         },
         {
           "side": "credit",
+          "code": "",
           "account": "보통예금",
           "memo": "합계금액"
         }
@@ -737,22 +864,26 @@
     "n-utility": {
       "id": "n-utility",
       "type": "result",
+      "topicId": "",
       "title": "전기료 · 통신비 · 가스료",
       "vat": "taxable_purchase",
       "vatNote": "사업자 앞으로 된 세금계산서·카드가 있으면 매입세액 공제합니다.",
       "journal": [
         {
           "side": "debit",
+          "code": "",
           "account": "통신비(또는 수도광열비)",
           "memo": "공급가액"
         },
         {
           "side": "debit",
+          "code": "",
           "account": "부가세대급금",
           "memo": "세액"
         },
         {
           "side": "credit",
+          "code": "",
           "account": "보통예금",
           "memo": "합계금액"
         }
@@ -764,6 +895,7 @@
     "n-supply-kind": {
       "id": "n-supply-kind",
       "type": "question",
+      "topicId": "",
       "prompt": "소액 소모품인가요, 오래 쓰는 비품인가요?",
       "options": [
         {
@@ -779,22 +911,26 @@
     "n-supply": {
       "id": "n-supply",
       "type": "result",
+      "topicId": "",
       "title": "사무용품 · 소모품",
       "vat": "taxable_purchase",
       "vatNote": "사업용 소모품은 세금계산서·카드가 있으면 매입공제합니다.",
       "journal": [
         {
           "side": "debit",
+          "code": "",
           "account": "소모품비(또는 사무용품비)",
           "memo": "공급가액"
         },
         {
           "side": "debit",
+          "code": "",
           "account": "부가세대급금",
           "memo": "세액"
         },
         {
           "side": "credit",
+          "code": "",
           "account": "보통예금",
           "memo": "합계금액"
         }
@@ -806,17 +942,20 @@
     "n-car": {
       "id": "n-car",
       "type": "result",
+      "topicId": "",
       "title": "업무용 승용차 주유 · 수리 · 보험",
       "vat": "no_deduct",
       "vatNote": "개별소비세 대상 승용차의 구입·임차·유지 매입세액은 원칙적으로 불공제입니다. 보험료는 부가세 해당없음입니다.",
       "journal": [
         {
           "side": "debit",
+          "code": "",
           "account": "차량유지비",
           "memo": "지급액 전액 (부가세 포함)"
         },
         {
           "side": "credit",
+          "code": "",
           "account": "보통예금",
           "memo": "지급액 전액"
         }
@@ -828,22 +967,26 @@
     "n-asset": {
       "id": "n-asset",
       "type": "result",
+      "topicId": "",
       "title": "비품 · 설비 등 고정자산 구입",
       "vat": "taxable_purchase",
       "vatNote": "과세 사업에 쓰는 자산은 세금계산서가 있으면 매입세액 공제합니다. 공급가액은 자산원가, 세액은 부가세대급금입니다. (승용차 등 불공제 자산 제외)",
       "journal": [
         {
           "side": "debit",
+          "code": "",
           "account": "비품(또는 기계장치)",
           "memo": "공급가액 + 취득부대비용"
         },
         {
           "side": "debit",
+          "code": "",
           "account": "부가세대급금",
           "memo": "세액"
         },
         {
           "side": "credit",
+          "code": "",
           "account": "보통예금",
           "memo": "합계금액"
         }
@@ -855,17 +998,20 @@
     "n-dep": {
       "id": "n-dep",
       "type": "result",
+      "topicId": "",
       "title": "감가상각비 계상",
       "vat": "not_applicable",
       "vatNote": "감가상각은 내부 회계 처리이며 부가세와 무관합니다.",
       "journal": [
         {
           "side": "debit",
+          "code": "",
           "account": "감가상각비",
           "memo": "당월 상각액"
         },
         {
           "side": "credit",
+          "code": "",
           "account": "감가상각누계액",
           "memo": "당월 상각액"
         }
@@ -877,32 +1023,38 @@
     "n-pay": {
       "id": "n-pay",
       "type": "result",
+      "topicId": "",
       "title": "급여 지급 (원천세·사회보험 공제)",
       "vat": "not_applicable",
       "vatNote": "급여·상여·원천세·4대보험은 부가세 과세대상이 아닙니다.",
       "journal": [
         {
           "side": "debit",
+          "code": "",
           "account": "급여",
           "memo": "지급총액(세전)"
         },
         {
           "side": "credit",
+          "code": "",
           "account": "예수금-소득세",
           "memo": "원천징수 소득세"
         },
         {
           "side": "credit",
+          "code": "",
           "account": "예수금-지방소득세",
           "memo": "원천징수 지방소득세"
         },
         {
           "side": "credit",
+          "code": "",
           "account": "예수금-4대보험(근로자)",
           "memo": "근로자 부담분"
         },
         {
           "side": "credit",
+          "code": "",
           "account": "보통예금",
           "memo": "실지급액"
         }
@@ -914,32 +1066,38 @@
     "n-ins": {
       "id": "n-ins",
       "type": "result",
+      "topicId": "",
       "title": "4대보험 회사부담분 및 납부",
       "vat": "not_applicable",
       "vatNote": "사회보험료는 부가세 해당없음입니다.",
       "journal": [
         {
           "side": "debit",
+          "code": "",
           "account": "복리후생비(또는 보험료)",
           "memo": "회사 부담분"
         },
         {
           "side": "credit",
+          "code": "",
           "account": "미지급금-사회보험",
           "memo": "회사 부담분"
         },
         {
           "side": "debit",
+          "code": "",
           "account": "미지급금-사회보험",
           "memo": "납부 시 회사분"
         },
         {
           "side": "debit",
+          "code": "",
           "account": "예수금-4대보험",
           "memo": "납부 시 근로자분"
         },
         {
           "side": "credit",
+          "code": "",
           "account": "보통예금",
           "memo": "고지서 납부액"
         }
@@ -951,17 +1109,20 @@
     "n-int": {
       "id": "n-int",
       "type": "result",
+      "topicId": "",
       "title": "대출이자 지급",
       "vat": "not_applicable",
       "vatNote": "금융 이자는 부가세 면세(해당없음)입니다.",
       "journal": [
         {
           "side": "debit",
+          "code": "",
           "account": "이자비용",
           "memo": "이자 금액"
         },
         {
           "side": "credit",
+          "code": "",
           "account": "보통예금",
           "memo": "이자 금액"
         }
@@ -973,17 +1134,20 @@
     "n-bank": {
       "id": "n-bank",
       "type": "result",
+      "topicId": "",
       "title": "은행 이체수수료",
       "vat": "not_applicable",
       "vatNote": "은행 수수료는 금융용역으로 부가세가 없습니다. VAN·PG 수수료는 과세라서 다릅니다.",
       "journal": [
         {
           "side": "debit",
+          "code": "",
           "account": "지급수수료",
           "memo": "수수료 전액"
         },
         {
           "side": "credit",
+          "code": "",
           "account": "보통예금",
           "memo": "수수료 전액"
         }
@@ -995,37 +1159,44 @@
     "n-prepay": {
       "id": "n-prepay",
       "type": "result",
+      "topicId": "",
       "title": "선급금 지급 후 입고·정산",
       "vat": "case_by_case",
       "vatNote": "선금만 보낼 때는 보통 부가세가 없습니다. 세금계산서를 받는 시점에 매입세액을 인식합니다.",
       "journal": [
         {
           "side": "debit",
+          "code": "",
           "account": "선급금",
           "memo": "선지급액"
         },
         {
           "side": "credit",
+          "code": "",
           "account": "보통예금",
           "memo": "선지급액"
         },
         {
           "side": "debit",
+          "code": "",
           "account": "원재료(또는 비용/자산)",
           "memo": "공급가액 (정산 시)"
         },
         {
           "side": "debit",
+          "code": "",
           "account": "부가세대급금",
           "memo": "세액 (세금계산서 수취 시)"
         },
         {
           "side": "credit",
+          "code": "",
           "account": "선급금",
           "memo": "기존 선급금 대체"
         },
         {
           "side": "credit",
+          "code": "",
           "account": "보통예금",
           "memo": "잔금"
         }
@@ -1037,37 +1208,44 @@
     "n-advance": {
       "id": "n-advance",
       "type": "result",
+      "topicId": "",
       "title": "선수금 수령 후 매출 인식",
       "vat": "case_by_case",
       "vatNote": "계약금만 받은 시점이 곧 매출일이 아닙니다. 세금계산서 작성일(공급 시기)에 매출과 부가세예수금을 인식합니다.",
       "journal": [
         {
           "side": "debit",
+          "code": "",
           "account": "보통예금",
           "memo": "선수금 입금"
         },
         {
           "side": "credit",
+          "code": "",
           "account": "선수금",
           "memo": "선수금 입금"
         },
         {
           "side": "debit",
+          "code": "",
           "account": "선수금",
           "memo": "매출 대체"
         },
         {
           "side": "debit",
+          "code": "",
           "account": "외상매출금",
           "memo": "잔금"
         },
         {
           "side": "credit",
+          "code": "",
           "account": "제품매출",
           "memo": "공급가액"
         },
         {
           "side": "credit",
+          "code": "",
           "account": "부가세예수금",
           "memo": "세액"
         }
@@ -1079,22 +1257,26 @@
     "n-vatpay": {
       "id": "n-vatpay",
       "type": "result",
+      "topicId": "",
       "title": "부가세 신고 후 납부(또는 환급)",
       "vat": "not_applicable",
       "vatNote": "부가세 납부는 새로운 과세거래가 아닙니다. 예수금과 대급금을 상계하고 차액을 납부하거나 환급받습니다.",
       "journal": [
         {
           "side": "debit",
+          "code": "",
           "account": "부가세예수금",
           "memo": "매출세액 합계"
         },
         {
           "side": "credit",
+          "code": "",
           "account": "부가세대급금",
           "memo": "매입세액 합계"
         },
         {
           "side": "credit",
+          "code": "",
           "account": "미지급금-부가세(또는 보통예금)",
           "memo": "납부할 세액"
         }
@@ -1106,22 +1288,26 @@
     "n-wh": {
       "id": "n-wh",
       "type": "result",
+      "topicId": "",
       "title": "원천세 납부",
       "vat": "not_applicable",
       "vatNote": "원천세 납부는 부가세와 무관합니다. 급여 때 잡아 둔 예수금을 소멸시킵니다.",
       "journal": [
         {
           "side": "debit",
+          "code": "",
           "account": "예수금-소득세",
           "memo": "납부 소득세"
         },
         {
           "side": "debit",
+          "code": "",
           "account": "예수금-지방소득세",
           "memo": "납부 지방소득세"
         },
         {
           "side": "credit",
+          "code": "",
           "account": "보통예금",
           "memo": "원천세 합계"
         }
@@ -1133,17 +1319,20 @@
     "n-suspense": {
       "id": "n-suspense",
       "type": "result",
+      "topicId": "",
       "title": "가지급금 · 가수금",
       "vat": "not_applicable",
       "vatNote": "내용을 모르면 부가세를 추정하지 않습니다. 증빙이 나오면 본계정·부가세로 대체합니다.",
       "journal": [
         {
           "side": "debit",
+          "code": "",
           "account": "가지급금",
           "memo": "용도 미확인 출금"
         },
         {
           "side": "credit",
+          "code": "",
           "account": "보통예금",
           "memo": "출금액"
         }
@@ -1151,6 +1340,30 @@
       "guide": "임직원 개인 사용이 확인되면 상여·회수 이슈가 있습니다. 빨리 정산하세요.",
       "caution": "가지급금에 부가세대급금을 미리 넣지 마세요.",
       "example": "미확인 출금 220,000 → 가지급금 220,000"
+    },
+    "n-msslnuqb-wt8y": {
+      "id": "n-msslnuqb-wt8y",
+      "type": "question",
+      "topicId": "t-msslnuqb-kybz",
+      "prompt": "다음 중 어떤 경우인가요?",
+      "options": [
+        {
+          "label": "당신은 낑꿍이인가요?",
+          "nextId": "n-msslolyl-odjn"
+        }
+      ]
+    },
+    "n-msslolyl-odjn": {
+      "id": "n-msslolyl-odjn",
+      "type": "result",
+      "topicId": "t-msslnuqb-kybz",
+      "title": "낑꿍아 사랑해♥",
+      "vat": "exempt",
+      "vatNote": "낑꿍 부가세",
+      "journal": [],
+      "guide": "낑꿍아 사랑해♥",
+      "caution": "낑랑해♥",
+      "example": ""
     }
   },
   "popular": [
@@ -1186,5 +1399,6 @@
       "label": "사무용품 · 비품",
       "topicId": "t-supply"
     }
-  ]
+  ],
+  "welcome": "왼쪽에서 거래를 검색하거나, 자주 찾는 항목을 눌러 주세요.\n예: 복리후생비"
 }
