@@ -542,6 +542,11 @@
     { id: "t-suspense", title: "가지급금 · 가수금", keywords: ["가지급", "가수금", "전도금"], startNodeId: "n-suspense" }
   ];
 
+  const SEED_POPULAR = SEED_TOPICS.slice(0, 8).map((t) => ({
+    label: t.title,
+    topicId: t.id
+  }));
+
   function clone(data) {
     return JSON.parse(JSON.stringify(data));
   }
@@ -601,15 +606,43 @@
     };
   }
 
+  function defaultPopular(topics) {
+    return (topics || []).slice(0, 8).map((t) => ({
+      label: t.title,
+      topicId: t.id
+    }));
+  }
+
+  function normalizePopularItem(raw) {
+    if (typeof raw === "string") {
+      const label = raw.trim();
+      return label ? { label, topicId: "" } : null;
+    }
+    if (!raw || typeof raw !== "object") return null;
+    const label = String(raw.label || "").trim();
+    if (!label) return null;
+    return {
+      label,
+      topicId: String(raw.topicId || "").trim()
+    };
+  }
+
+  function normalizePopular(raw, topics) {
+    if (!Array.isArray(raw)) return defaultPopular(topics);
+    return raw.map(normalizePopularItem).filter(Boolean);
+  }
+
   function seedData() {
     const nodes = {};
     SEED_NODES.forEach((n) => {
       const node = normalizeNode(n);
       nodes[node.id] = node;
     });
+    const topics = SEED_TOPICS.map((t) => normalizeTopic(t));
     return {
-      topics: SEED_TOPICS.map((t) => normalizeTopic(t)),
-      nodes
+      topics,
+      nodes,
+      popular: normalizePopular(SEED_POPULAR, topics)
     };
   }
 
@@ -659,9 +692,11 @@
           const node = normalizeNode(rec.nodes[id]);
           if (node) nodes[node.id] = node;
         });
+        const topics = (rec.topics || []).map(normalizeTopic).filter(Boolean);
         return {
-          topics: (rec.topics || []).map(normalizeTopic).filter(Boolean),
+          topics,
           nodes,
+          popular: normalizePopular(rec.popular, topics),
           isCustom: true,
           updatedAt: rec.updatedAt || null
         };
@@ -675,11 +710,13 @@
         const node = normalizeNode(data.nodes[id]);
         if (node) nodes[node.id] = node;
       });
+      const topics = ((data && data.topics) || []).map(normalizeTopic).filter(Boolean);
       const record = {
         version: 1,
         updatedAt: nowIso(),
-        topics: ((data && data.topics) || []).map(normalizeTopic).filter(Boolean),
-        nodes
+        topics,
+        nodes,
+        popular: normalizePopular(data && data.popular, topics)
       };
       memory = record;
       try { localStorage.setItem(STORAGE_KEY, JSON.stringify(record)); } catch {}
@@ -692,6 +729,11 @@
       try { localStorage.removeItem(STORAGE_KEY); } catch {}
       notify();
       return api.loadData();
+    },
+
+    getPopular() {
+      const data = api.loadData();
+      return Array.isArray(data.popular) ? data.popular : [];
     },
 
     searchTopics(query) {

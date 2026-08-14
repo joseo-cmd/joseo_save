@@ -28,13 +28,13 @@
     setTimeout(() => els.toast.classList.remove("show"), 1600);
   }
 
-  function popularTopics() {
-    return JournalStore.loadData().topics.slice(0, 8);
+  function popularItems() {
+    return JournalStore.getPopular();
   }
 
   function renderPopular() {
-    els.popular.innerHTML = popularTopics()
-      .map((t) => `<button type="button" class="chip" data-topic="${escapeHtml(t.id)}">${escapeHtml(t.title)}</button>`)
+    els.popular.innerHTML = popularItems()
+      .map((item) => `<button type="button" class="chip" data-popular-label="${escapeHtml(item.label)}" data-topic="${escapeHtml(item.topicId || "")}">${escapeHtml(item.label)}</button>`)
       .join("");
   }
 
@@ -180,10 +180,17 @@
     runSearch(els.q.value);
   });
   els.popular.addEventListener("click", (e) => {
-    const btn = e.target.closest("[data-topic]");
+    const btn = e.target.closest("[data-popular-label]");
     if (!btn) return;
-    const topic = JournalStore.loadData().topics.find((t) => t.id === btn.dataset.topic);
-    if (topic) startTopic(topic);
+    const topicId = btn.dataset.topic;
+    if (topicId) {
+      const topic = JournalStore.loadData().topics.find((t) => t.id === topicId);
+      if (topic) {
+        startTopic(topic);
+        return;
+      }
+    }
+    runSearch(btn.dataset.popularLabel);
   });
   els.thread.addEventListener("click", (e) => {
     const btn = e.target.closest("[data-next]");
@@ -194,4 +201,8 @@
 
   renderPopular();
   renderThread();
+  window.addEventListener("journal-tree-changed", renderPopular);
+  window.addEventListener("storage", (e) => {
+    if (e.key === JournalStore.STORAGE_KEY) renderPopular();
+  });
 })();

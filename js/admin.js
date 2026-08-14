@@ -21,6 +21,15 @@
     btnNew: document.getElementById("btnNew"),
     btnDelete: document.getElementById("btnDelete"),
     btnReset: document.getElementById("btnReset"),
+    pageTopics: document.getElementById("pageTopics"),
+    pagePopular: document.getElementById("pagePopular"),
+    viewTopics: document.getElementById("viewTopics"),
+    viewPopular: document.getElementById("viewPopular"),
+    popularForm: document.getElementById("popularForm"),
+    popularList: document.getElementById("popularList"),
+    popularPool: document.getElementById("popularPool"),
+    popularCustom: document.getElementById("popularCustom"),
+    btnAddPopular: document.getElementById("btnAddPopular"),
     toast: document.getElementById("toast")
   };
 
@@ -28,6 +37,7 @@
     data: null,
     topicId: null,
     tab: "question",
+    page: "topics",
     editingNodeId: null
   };
 
@@ -82,10 +92,95 @@
 
   function load() {
     state.data = JournalStore.loadData();
+    if (!Array.isArray(state.data.popular)) state.data.popular = [];
     if (!state.topicId && state.data.topics[0]) state.topicId = state.data.topics[0].id;
     renderList();
+    renderPopularEditor();
     const topic = currentTopic();
     if (topic) fillTopic(topic, { keepTab: true });
+  }
+
+  function setPage(page) {
+    if (state.page === "topics") currentTopicPatch();
+    state.page = page;
+    els.pageTopics.classList.toggle("active", page === "topics");
+    els.pagePopular.classList.toggle("active", page === "popular");
+    els.viewTopics.hidden = page !== "topics";
+    els.viewPopular.hidden = page !== "popular";
+    if (page === "popular") renderPopularEditor();
+  }
+
+  function popularLabels() {
+    return (state.data.popular || []).map((p) => p.label.toLowerCase());
+  }
+
+  function addPopularItem(label, topicId) {
+    const text = String(label || "").trim();
+    if (!text) return false;
+    if (popularLabels().includes(text.toLowerCase())) {
+      showToast("이미 있는 키워드입니다.");
+      return false;
+    }
+    state.data.popular = state.data.popular || [];
+    state.data.popular.push({ label: text, topicId: topicId || "" });
+    renderPopularEditor();
+    return true;
+  }
+
+  function matchTopicForLabel(label) {
+    const q = String(label || "").trim().toLowerCase().replace(/\s+/g, "");
+    const hits = (state.data.topics || []).filter((t) => {
+      const hay = [t.title, ...(t.keywords || [])].join(" ").toLowerCase().replace(/\s+/g, "");
+      return t.title.toLowerCase().replace(/\s+/g, "") === q || hay.includes(q);
+    });
+    return hits.length === 1 ? hits[0] : null;
+  }
+
+  function renderPopularEditor() {
+    const items = state.data.popular || [];
+    if (!items.length) {
+      els.popularList.innerHTML = `<div class="hint" style="padding:8px 0">아직 없습니다. 왼쪽에서 고르거나 직접 입력하세요.</div>`;
+    } else {
+      els.popularList.innerHTML = items.map((item, i) => {
+        const topic = item.topicId ? state.data.topics.find((t) => t.id === item.topicId) : null;
+        const meta = topic ? "주제: " + topic.title : "키워드 검색";
+        return `<div class="popular-row" data-idx="${i}">
+          <span class="idx">${i + 1}</span>
+          <div>
+            <strong>${escapeHtml(item.label)}</strong>
+            <small>${escapeHtml(meta)}</small>
+          </div>
+          <button type="button" class="icon-btn" data-pop-up ${i === 0 ? "disabled" : ""} aria-label="위로">↑</button>
+          <button type="button" class="icon-btn" data-pop-down ${i === items.length - 1 ? "disabled" : ""} aria-label="아래로">↓</button>
+          <button type="button" class="icon-btn" data-pop-del aria-label="삭제">×</button>
+        </div>`;
+      }).join("");
+    }
+
+    const used = new Set(popularLabels());
+    const chips = [];
+    (state.data.topics || []).forEach((t) => {
+      if (!used.has(t.title.toLowerCase())) {
+        chips.push({ label: t.title, topicId: t.id, kind: "주제" });
+      }
+      (t.keywords || []).forEach((k) => {
+        if (!used.has(k.toLowerCase())) {
+          chips.push({ label: k, topicId: t.id, kind: "키워드" });
+        }
+      });
+    });
+    const seen = new Set();
+    const unique = chips.filter((c) => {
+      const key = c.label.toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+    els.popularPool.innerHTML = unique.length
+      ? unique.map((c) =>
+          `<button type="button" class="chip ${c.kind === "주제" ? "chip-topic" : ""}" data-add-label="${escapeHtml(c.label)}" data-add-topic="${escapeHtml(c.topicId)}">${escapeHtml(c.label)}</button>`
+        ).join("")
+      : `<div class="hint">넣을 수 있는 키워드가 없습니다. 검색 주제의 키워드를 먼저 등록하세요.</div>`;
   }
 
   function renderList() {
@@ -359,7 +454,60 @@
 
   els.tabQuestion.addEventListener("click", () => setTab("question"));
   els.tabResult.addEventListener("click", () => setTab("result"));
+  els.pageTopics.addEventListener("click", () => setPage("topics"));
+  els.pagePopular.addEventListener("click", () => setPage("popular"));
   els.btnAddNode.addEventListener("click", addNode);
+
+  els.popularPool.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-add-label]");
+    if (!btn) return;
+    addPopularItem(btn.dataset.addLabel, btn.dataset.addTopic);
+  });
+
+  els.btnAddPopular.addEventListener("click", () => {
+    const label = els.popularCustom.value.trim();
+    const topic = matchTopicForLabel(label);
+    if (addPopularItem(label, topic ? topic.id : "")) els.popularCustom.value = "";
+  });
+
+  els.popularCustom.addEventListener("keydown", (e) => {
+    if (e.key !== "Enter") return;
+    e.preventDefault();
+    els.btnAddPopular.click();
+  });
+
+  els.popularList.addEventListener("click", (e) => {
+    const row = e.target.closest(".popular-row");
+    if (!row) return;
+    const idx = Number(row.dataset.idx);
+    const list = state.data.popular || [];
+    if (e.target.closest("[data-pop-del]")) {
+      list.splice(idx, 1);
+      renderPopularEditor();
+      return;
+    }
+    if (e.target.closest("[data-pop-up]") && idx > 0) {
+      const cur = list[idx];
+      list[idx] = list[idx - 1];
+      list[idx - 1] = cur;
+      renderPopularEditor();
+      return;
+    }
+    if (e.target.closest("[data-pop-down]") && idx < list.length - 1) {
+      const cur = list[idx];
+      list[idx] = list[idx + 1];
+      list[idx + 1] = cur;
+      renderPopularEditor();
+    }
+  });
+
+  els.popularForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    JournalStore.saveData(state.data);
+    state.data = JournalStore.loadData();
+    renderPopularEditor();
+    showToast("자주 찾는 항목을 저장했습니다. 안내 페이지에 반영됩니다.");
+  });
 
   els.nodeList.addEventListener("click", (e) => {
     const btn = e.target.closest("[data-node]");
@@ -428,6 +576,7 @@
     JournalStore.saveData(state.data);
     state.data = JournalStore.loadData();
     renderList();
+    renderPopularEditor();
     refreshEditor();
     showToast("저장했습니다. 안내 페이지 검색에 반영됩니다.");
   });
