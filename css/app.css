@@ -198,7 +198,7 @@ a { color: inherit; text-decoration: none; }
   bottom: 4%;
   width: min(78%, 520px);
   height: auto;
-  opacity: 0.38;
+  opacity: 0.22;
   pointer-events: none;
   z-index: 0;
 }
