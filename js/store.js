@@ -714,7 +714,6 @@
     };
   }
 
-  const GITHUB_TOKEN_KEY = "atec-journal-github-token";
   const DATA_PATH = "data/guide.json";
   const DATA_REPO = { owner: "joseo-cmd", repo: "joseo_save" };
   const DATA_BRANCHES = ["cursor/popular-keywords-admin-4d7f", "main"];
@@ -751,14 +750,7 @@
       popular: normalizePopular(rec && rec.popular, topics),
       isCustom: !!(rec && rec.topics),
       updatedAt: (rec && rec.updatedAt) || null
-    }, extra || {});
-  }
-
-  function utf8ToBase64(text) {
-    const bytes = new TextEncoder().encode(String(text || ""));
-    let bin = "";
-    for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
-    return btoa(bin);
+    },     extra || {});
   }
 
   function inferRefs() {
@@ -812,73 +804,9 @@
     return null;
   }
 
-  function getPublishToken() {
-    try { return localStorage.getItem(GITHUB_TOKEN_KEY) || ""; }
-    catch { return ""; }
-  }
-
-  function setPublishToken(token) {
-    const value = String(token || "").trim();
-    try {
-      if (value) localStorage.setItem(GITHUB_TOKEN_KEY, value);
-      else localStorage.removeItem(GITHUB_TOKEN_KEY);
-    } catch {}
-    return value;
-  }
-
-  async function githubContents(branch, token) {
-    const url = "https://api.github.com/repos/" + DATA_REPO.owner + "/" + DATA_REPO.repo + "/contents/" + DATA_PATH + "?ref=" + encodeURIComponent(branch);
-    const res = await fetch(url, {
-      headers: {
-        Accept: "application/vnd.github+json",
-        Authorization: "Bearer " + token
-      }
-    });
-    if (res.status === 404) return { sha: null };
-    if (!res.ok) {
-      const err = new Error("GitHub 파일을 읽지 못했습니다. (" + res.status + ")");
-      err.status = res.status;
-      throw err;
-    }
-    const body = await res.json();
-    return { sha: body.sha || null };
-  }
-
-  async function publishToBranch(record, token, branch) {
-    const current = await githubContents(branch, token);
-    const payload = {
-      message: "관리자: 안내 내용을 다른 사람에게도 보이게 저장",
-      content: utf8ToBase64(JSON.stringify(record, null, 2)),
-      branch
-    };
-    if (current.sha) payload.sha = current.sha;
-    const url = "https://api.github.com/repos/" + DATA_REPO.owner + "/" + DATA_REPO.repo + "/contents/" + DATA_PATH;
-    const res = await fetch(url, {
-      method: "PUT",
-      headers: {
-        Accept: "application/vnd.github+json",
-        Authorization: "Bearer " + token,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(payload)
-    });
-    if (res.status === 401 || res.status === 403) {
-      const err = new Error("토큰이 만료됐거나 저장 권한이 없습니다.");
-      err.status = res.status;
-      throw err;
-    }
-    if (!res.ok) {
-      const err = new Error("전체에 저장하지 못했습니다. (" + res.status + ")");
-      err.status = res.status;
-      throw err;
-    }
-    return true;
-  }
-
   const api = {
     STORAGE_KEY,
     ADMIN_UNLOCK_KEY,
-    GITHUB_TOKEN_KEY,
     APP_PASS_SHA256,
     VAT,
     DATA_REPO,
@@ -930,48 +858,6 @@
       try { localStorage.setItem(STORAGE_KEY, JSON.stringify(record)); } catch {}
       notify();
       return record;
-    },
-
-    hasPublishToken() {
-      return !!getPublishToken();
-    },
-
-    getPublishToken,
-
-    setPublishToken,
-
-    async publishData(record, token) {
-      const auth = String(token || getPublishToken() || "").trim();
-      if (!auth) {
-        const err = new Error("no-token");
-        err.status = 401;
-        throw err;
-      }
-      const branches = inferRefs();
-      const ok = [];
-      let lastErr = null;
-      for (let i = 0; i < branches.length; i++) {
-        try {
-          await publishToBranch(record, auth, branches[i]);
-          ok.push(branches[i]);
-        } catch (err) {
-          lastErr = err;
-          if (err && (err.status === 401 || err.status === 403)) throw err;
-        }
-      }
-      if (!ok.length) throw lastErr || new Error("전체에 저장하지 못했습니다.");
-      return { branches: ok };
-    },
-
-    async saveAndShare(data) {
-      const record = api.saveData(data);
-      if (!getPublishToken()) return { record, published: false, reason: "no-token" };
-      try {
-        await api.publishData(record);
-        return { record, published: true };
-      } catch (err) {
-        return { record, published: false, reason: String((err && err.message) || err) };
-      }
     },
 
     resetToSeed() {
