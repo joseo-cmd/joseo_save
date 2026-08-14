@@ -43,9 +43,11 @@
     const data = JournalStore.loadEntries();
     state.entries = data.entries;
     els.count.textContent = data.entries.length + "건";
-    els.source.textContent = data.isCustom
-      ? "관리자 저장 안내 · " + new Date(data.updatedAt).toLocaleString("ko-KR")
-      : "기본 예시 안내";
+    if (els.source) {
+      els.source.textContent = data.isCustom
+        ? "관리자 저장 안내 · " + new Date(data.updatedAt).toLocaleString("ko-KR")
+        : "기본 예시 안내";
+    }
   }
 
   function filtered() {
