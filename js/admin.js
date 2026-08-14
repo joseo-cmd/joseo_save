@@ -72,7 +72,7 @@
     JournalStore.saveData(state.data);
     state.data = JournalStore.loadData();
     if (state.page === "asks") renderAsks();
-    showToast(okMsg || "이 컴퓨터에 저장했습니다. 다른 사람이 보려면 ‘다른 사람에게 보이기’를 눌러 주세요.");
+    showToast(okMsg || "저장했습니다. 다른 사람 화면에도 바로 반영됩니다.");
   }
 
   function readWelcomeIntoData() {
@@ -671,14 +671,14 @@
 
   els.popularForm.addEventListener("submit", (e) => {
     e.preventDefault();
-    persist("자주 찾는 항목을 이 컴퓨터에 저장했습니다. 다른 사람이 보려면 ‘다른 사람에게 보이기’를 눌러 주세요.");
+    persist("자주 찾는 항목을 저장했습니다. 다른 사람 화면에도 바로 반영됩니다.");
     renderPopularEditor();
   });
 
   if (els.welcomeForm) {
     els.welcomeForm.addEventListener("submit", (e) => {
       e.preventDefault();
-      persist("첫 멘트를 이 컴퓨터에 저장했습니다. 다른 사람이 보려면 ‘다른 사람에게 보이기’를 눌러 주세요.");
+      persist("첫 멘트를 저장했습니다. 다른 사람 화면에도 바로 반영됩니다.");
       renderPopularEditor();
     });
   }
@@ -811,7 +811,7 @@
       showToast("주제 이름을 입력하세요.");
       return;
     }
-    persist("이 컴퓨터에 저장했습니다. 다른 사람이 보려면 ‘다른 사람에게 보이기’를 눌러 주세요.");
+    persist("저장했습니다. 다른 사람 화면에도 바로 반영됩니다.");
     renderList();
     renderPopularEditor();
     refreshEditor();

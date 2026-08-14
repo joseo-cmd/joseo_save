@@ -386,6 +386,9 @@
     renderThread();
     renderUpdatedAt();
     renderAskBoard();
+    setInterval(function () {
+      JournalStore.pullSharedGuide();
+    }, 10000);
   });
   window.addEventListener("journal-tree-changed", () => {
     renderPopular();

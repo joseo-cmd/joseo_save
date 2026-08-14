@@ -7,6 +7,7 @@
   const ASK_REMOVED_KEY = "atec-ask-removed-v1";
   const ASK_PROFILE_KEY = "atec-ask-profile-v1";
   const ASK_BOARD_URL = "https://jsonblob.iiif.arthistoricum.net/api/jsonBlob/24b492ff-97b3-11f1-bdf1-351353d74d75";
+  const GUIDE_BOARD_URL = "https://jsonblob.iiif.arthistoricum.net/api/jsonBlob/ac82b2c1-97b4-11f1-bdf1-076f7318672b";
   const ADMIN_UNLOCK_KEY = "atec-journal-admin-unlocked";
   const APP_PASS_SHA256 = "4ec9599fc203d176a301536c2e091a19bc852759b255bd6818810a42c5fed14a";
 
@@ -831,6 +832,87 @@
     if (!res.ok) throw new Error("board save failed");
   }
 
+  function recTime(rec) {
+    return rec && rec.updatedAt ? String(rec.updatedAt) : "";
+  }
+
+  function isGuideRec(rec) {
+    return !!(rec && Array.isArray(rec.topics) && rec.nodes && typeof rec.nodes === "object");
+  }
+
+  function pickNewest(a, b) {
+    if (!isGuideRec(a)) return isGuideRec(b) ? b : null;
+    if (!isGuideRec(b)) return a;
+    return recTime(b) > recTime(a) ? b : a;
+  }
+
+  function guidePayload(rec) {
+    return {
+      version: 1,
+      updatedAt: rec && rec.updatedAt ? rec.updatedAt : nowIso(),
+      topics: rec.topics,
+      nodes: rec.nodes,
+      popular: rec.popular,
+      welcome: rec.welcome,
+      askEmail: normalizeAskEmail(rec && rec.askEmail)
+    };
+  }
+
+  function persistGuideLocal(rec) {
+    if (!isGuideRec(rec)) return;
+    const payload = guidePayload(rec);
+    payload.asks = mergeAsks(rec.asks, loadLocalAsks());
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(payload)); } catch {}
+  }
+
+  let guideWrite = Promise.resolve();
+
+  function enqueueGuide(job) {
+    const run = guideWrite.then(job, job);
+    guideWrite = run.then(function () {}, function () {});
+    return run;
+  }
+
+  async function fetchRemoteGuide() {
+    const ctrl = typeof AbortController === "function" ? new AbortController() : null;
+    const timer = ctrl ? setTimeout(() => ctrl.abort(), 8000) : null;
+    try {
+      const res = await fetch(GUIDE_BOARD_URL + "?t=" + Date.now(), {
+        cache: "no-store",
+        signal: ctrl ? ctrl.signal : undefined,
+        headers: { Accept: "application/json" }
+      });
+      if (!res.ok) return null;
+      const parsed = await res.json();
+      return isGuideRec(parsed) && parsed.topics.length ? parsed : null;
+    } catch {
+      return null;
+    } finally {
+      if (timer) clearTimeout(timer);
+    }
+  }
+
+  async function saveRemoteGuide(rec) {
+    if (!isGuideRec(rec)) return;
+    const res = await fetch(GUIDE_BOARD_URL, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify(guidePayload(rec))
+    });
+    if (!res.ok) throw new Error("guide save failed");
+  }
+
+  async function pullRemoteGuide() {
+    const remote = await fetchRemoteGuide();
+    if (!isGuideRec(remote)) return memory;
+    if (!memory || recTime(remote) > recTime(memory)) {
+      memory = remote;
+      persistGuideLocal(remote);
+      notify();
+    }
+    return memory;
+  }
+
   async function pullRemoteAsks() {
     const remote = await fetchRemoteBoard();
     if (!remote) return dropRemoved(mergeAsks(loadLocalAsks(), memory && memory.asks), loadRemoved());
@@ -1015,17 +1097,20 @@
     hydrate() {
       if (hydratePromise) return hydratePromise;
       hydratePromise = (async () => {
+        const remote = await fetchRemoteGuide();
         const shared = await fetchShared();
         const local = loadRecord();
-        const sharedAt = shared && shared.updatedAt ? String(shared.updatedAt) : "";
-        const localAt = local && local.updatedAt ? String(local.updatedAt) : "";
-        if (local && (!shared || localAt >= sharedAt)) memory = local;
-        else if (shared) memory = shared;
+        const winner = pickNewest(pickNewest(shared, local), remote);
+        if (winner) memory = winner;
         if (memory && shared) {
           memory.asks = mergeAsks(memory.asks, shared.asks);
           persistLocalAsks(mergeAsks(loadLocalAsks(), memory.asks));
         }
+        if (memory) persistGuideLocal(memory);
         await pullRemoteAsks();
+        if (isGuideRec(memory) && (!isGuideRec(remote) || recTime(memory) > recTime(remote))) {
+          enqueueGuide(() => saveRemoteGuide(memory)).catch(function () {});
+        }
       })();
       return hydratePromise;
     },
@@ -1050,7 +1135,8 @@
       };
       memory = record;
       persistLocalAsks(record.asks);
-      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(record)); } catch {}
+      persistGuideLocal(record);
+      enqueueGuide(() => saveRemoteGuide(record)).catch(function () {});
       notify();
       return record;
     },
@@ -1084,6 +1170,10 @@
 
     pullSharedAsks() {
       return pullRemoteAsks().catch(() => api.getAsks());
+    },
+
+    pullSharedGuide() {
+      return pullRemoteGuide().catch(() => memory);
     },
 
     addAsk(input) {
