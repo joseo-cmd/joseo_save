@@ -499,6 +499,15 @@
     };
   }
 
+  let memoryRecord = null;
+
+  function notifyChanged(record) {
+    try {
+      global.JOURNAL_EMBEDDED = (record && record.entries) || [];
+      global.dispatchEvent(new CustomEvent("journal-guides-changed", { detail: record }));
+    } catch {}
+  }
+
   function loadRecord() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
@@ -518,11 +527,11 @@
       source: (meta && meta.source) || "admin",
       entries: entries.map((e, i) => normalizeEntry(e, i)).filter(Boolean)
     };
+    memoryRecord = record;
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(record));
-    } catch {
-      throw new Error("이 브라우저에 저장할 수 없습니다. JSON으로 내보내 보관하세요.");
-    }
+    } catch {}
+    notifyChanged(record);
     return record;
   }
 
@@ -533,6 +542,9 @@
     VAT,
     CATEGORIES,
     SEED,
+    _baked: Array.isArray(global.JOURNAL_EMBEDDED) && global.JOURNAL_EMBEDDED.length
+      ? clone(global.JOURNAL_EMBEDDED)
+      : clone(SEED),
 
     vatList() {
       return Object.keys(VAT).map((id) => VAT[id]);
@@ -543,13 +555,12 @@
     },
 
     seedEntries() {
-      const embedded = global.JOURNAL_EMBEDDED;
-      const source = Array.isArray(embedded) && embedded.length ? embedded : SEED;
-      return clone(source).map((e, i) => normalizeEntry(e, i));
+      const baked = Array.isArray(api._baked) && api._baked.length ? api._baked : SEED;
+      return clone(baked).map((e, i) => normalizeEntry(e, i));
     },
 
     loadEntries() {
-      const record = loadRecord();
+      const record = memoryRecord || loadRecord();
       if (record) {
         return {
           entries: record.entries.map((e, i) => normalizeEntry(e, i)).filter(Boolean),
@@ -571,8 +582,11 @@
     },
 
     resetToSeed() {
+      memoryRecord = null;
       try { localStorage.removeItem(STORAGE_KEY); } catch {}
-      return api.loadEntries();
+      const data = api.loadEntries();
+      try { global.dispatchEvent(new CustomEvent("journal-guides-changed", { detail: data })); } catch {}
+      return data;
     },
 
     exportPayload(entries) {

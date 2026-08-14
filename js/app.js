@@ -199,6 +199,16 @@
 
   load();
   refresh();
+  window.refreshJournalGuide = function () {
+    load();
+    refresh();
+  };
+  window.addEventListener("journal-guides-changed", function () {
+    window.refreshJournalGuide();
+  });
+  window.addEventListener("storage", function (e) {
+    if (e.key === JournalStore.STORAGE_KEY) window.refreshJournalGuide();
+  });
   const hash = decodeURIComponent((location.hash || "").replace(/^#/, ""));
-  if (hash) openDetail(hash);
+  if (hash && hash !== "admin" && hash !== "guide") openDetail(hash);
 })();

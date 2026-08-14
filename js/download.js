@@ -184,6 +184,7 @@
         if (foot) foot.hidden = isAdmin;
         if (isAdmin && location.hash !== "#admin") location.hash = "admin";
         if (!isAdmin && location.hash === "#admin") history.replaceState(null, "", location.pathname + location.search);
+        if (!isAdmin && typeof window.refreshJournalGuide === "function") window.refreshJournalGuide();
       }
       document.addEventListener("click", function(e){
         var link = e.target.closest("[data-view]");

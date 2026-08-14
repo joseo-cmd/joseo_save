@@ -148,14 +148,11 @@
   }
 
   function persist(next, message) {
-    try {
-      JournalStore.saveEntries(next);
-      state.entries = next;
-      renderList();
-      if (message) showToast(message);
-    } catch (err) {
-      showToast(err.message || "저장하지 못했습니다.");
-    }
+    const record = JournalStore.saveEntries(next);
+    state.entries = record.entries;
+    renderList();
+    if (typeof window.refreshJournalGuide === "function") window.refreshJournalGuide();
+    if (message) showToast(message);
   }
 
   els.formLock.addEventListener("submit", async (e) => {
@@ -214,7 +211,7 @@
       next.unshift(entry);
     }
     state.selectedId = entry.id;
-    persist(next, "저장했습니다. 안내 페이지에 반영됩니다.");
+    persist(next, "저장했습니다. 안내 목록에 바로 반영됩니다.");
     fillForm(entry);
   });
 
@@ -256,6 +253,7 @@
       state.selectedId = state.entries[0] ? state.entries[0].id : null;
       renderList();
       if (state.entries[0]) fillForm(state.entries[0]);
+      if (typeof window.refreshJournalGuide === "function") window.refreshJournalGuide();
       showToast("가져오기를 반영했습니다.");
     } catch (err) {
       showToast(err.message || "JSON을 읽지 못했습니다.");
@@ -269,6 +267,7 @@
     state.selectedId = state.entries[0] ? state.entries[0].id : null;
     renderList();
     if (state.entries[0]) fillForm(state.entries[0]);
+    if (typeof window.refreshJournalGuide === "function") window.refreshJournalGuide();
     showToast("기본 예시로 되돌렸습니다.");
   });
 
