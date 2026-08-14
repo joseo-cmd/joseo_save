@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>관리자 · 분개 안내</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
-  <link rel="stylesheet" href="css/app.css" />
+  <link rel="stylesheet" href="css/app.css?v=tab2" />
 </head>
 <body>
   <nav class="nav">
@@ -14,14 +14,21 @@
         <span class="logo-mark" aria-hidden="true"></span>
         <span class="logo-text">분개<span>안내</span></span>
       </a>
-      <a class="nav-cta" href="index.html">안내 페이지</a>
+      <div class="nav-right">
+        <span class="ver-pill">질문 탭 · 결과 탭</span>
+        <a class="nav-cta" href="index.html">안내 페이지</a>
+      </div>
     </div>
   </nav>
 
   <section class="lock-screen" id="lockScreen">
     <div class="lock-box">
       <h2>관리자 비밀번호</h2>
-      <p>질문과 결과(부가세·분개)를 나누어 수정합니다.</p>
+      <p>로그인 후 <b>파란 질문 탭</b>과 <b>초록 결과 탭</b>이 나뉩니다.</p>
+      <div class="lock-preview">
+        <div class="lock-preview-q">질문<br /><small>무엇을 물을지</small></div>
+        <div class="lock-preview-r">결과<br /><small>부가세 · 분개</small></div>
+      </div>
       <form id="lockForm">
         <input id="password" type="password" autocomplete="current-password" placeholder="비밀번호" />
         <button type="submit" class="btn btn-ok">확인</button>
@@ -57,11 +64,21 @@
             <input id="keywords" placeholder="식대, 야근, 회식" />
           </label>
 
-          <div class="tabs" role="tablist">
-            <button type="button" class="tab active" id="tabQuestion" data-tab="question">질문 <span class="count" id="qCount">0</span></button>
-            <button type="button" class="tab" id="tabResult" data-tab="result">결과 <span class="count" id="rCount">0</span></button>
+          <div class="mode-tabs" role="tablist">
+            <button type="button" class="mode-tab is-q active" id="tabQuestion" data-tab="question">
+              <span class="mode-kicker">1단계</span>
+              <strong>질문</strong>
+              <em>현업에게 무엇을 물을지</em>
+              <span class="count" id="qCount">0</span>
+            </button>
+            <button type="button" class="mode-tab is-r" id="tabResult" data-tab="result">
+              <span class="mode-kicker">2단계</span>
+              <strong>결과</strong>
+              <em>부가세 · 분개 안내</em>
+              <span class="count" id="rCount">0</span>
+            </button>
           </div>
-          <p class="help-box" id="tabHelp">질문은 현업에게 묻는 말입니다. 보기에서 다음 질문 또는 최종 결과로 연결하세요.</p>
+          <p class="help-box" id="tabHelp">지금은 <b>질문</b>을 수정하는 화면입니다. 보기에서 다음이 질문인지 결과인지를 고르세요.</p>
           <div class="split-edit">
             <div>
               <div class="btn-row" style="margin-bottom:8px">
@@ -76,7 +93,7 @@
     </div>
   </section>
   <div class="toast" id="toast" role="status"></div>
-  <script src="js/store.js"></script>
-  <script src="js/admin.js"></script>
+  <script src="js/store.js?v=tab2"></script>
+  <script src="js/admin.js?v=tab2"></script>
 </body>
 </html>

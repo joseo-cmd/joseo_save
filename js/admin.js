@@ -119,9 +119,9 @@
     els.rCount.textContent = String(rn);
     els.tabQuestion.classList.toggle("active", state.tab === "question");
     els.tabResult.classList.toggle("active", state.tab === "result");
-    els.tabHelp.textContent = state.tab === "question"
-      ? "질문은 현업에게 묻는 말입니다. 보기마다 ‘다음이 질문인지, 결과인지’를 고르세요."
-      : "결과는 질문이 끝난 뒤 보여주는 부가세 처리와 분개입니다.";
+    els.tabHelp.innerHTML = state.tab === "question"
+      ? "지금은 <b>파란 질문 탭</b>입니다. 현업에게 물을 말과 보기를 수정하세요."
+      : "지금은 <b>초록 결과 탭</b>입니다. 부가세 처리와 분개를 수정하세요.";
     els.btnAddNode.textContent = state.tab === "question" ? "질문 추가" : "결과 추가";
   }
 
