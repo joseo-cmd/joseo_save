@@ -896,7 +896,7 @@
   const DEFAULT_WELCOME = "왼쪽에서 거래를 검색하거나, 자주 찾는 항목을 눌러 주세요.\n예: 복리후생비";
   const DATA_PATH = "data/guide.json";
   const DATA_REPO = { owner: "joseo-cmd", repo: "joseo_save" };
-  const DATA_BRANCHES = ["cursor/popular-keywords-admin-4d7f", "main"];
+  const DATA_BRANCHES = ["main"];
 
   let memory = null;
   let hydratePromise = null;
