@@ -100,13 +100,11 @@ a { color: inherit; text-decoration: none; }
   font-size: 13px;
   font-weight: 800;
 }
-
-.page-foot {
-  width: min(1280px, calc(100% - 32px));
-  margin: -8px auto 28px;
+.nav-updated {
   color: var(--muted);
   font-size: 13px;
   font-weight: 700;
+  white-space: nowrap;
 }
 .shell {
   width: min(1280px, calc(100% - 32px));
@@ -624,4 +622,5 @@ label.field textarea { min-height: 80px; resize: vertical; }
   .shell, .admin-layout, .two-col, .journal-cols, .journal-row, .option-row, .split-edit, .page-tabs, .result-grid { grid-template-columns: 1fr; }
   .journal-cols { display: none; }
   .pane-chat { min-height: 420px; }
+  .nav-updated { font-size: 12px; }
 }
