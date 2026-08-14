@@ -83,7 +83,7 @@
 
   function resultHtml(node) {
     const vat = JournalStore.vatInfo(node.vat);
-    return `<div class="result-title">${escapeHtml(node.title)}</div>
+    return `<div class="result-title"><span>${escapeHtml(node.title)}</span></div>
       <div class="result-grid">
         <section class="vat-callout ${vat.tone}">
           <div class="kicker">부가세</div>
