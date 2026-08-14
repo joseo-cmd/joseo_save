@@ -87,6 +87,9 @@
       const n = state.data.nodes[id];
       if (n.topicId === topic.id) seen.add(id);
     });
+    (topic.questionOrder || []).concat(topic.resultOrder || []).forEach((id) => {
+      if (state.data.nodes[id]) seen.add(id);
+    });
     return seen;
   }
 
