@@ -320,6 +320,10 @@
 
   function renderAskBoard() {
     if (!els.askFeed) return;
+    const openForm = els.askFeed.querySelector(".ask-reply-form:not([hidden])");
+    const keepOpen = openForm && openForm.getAttribute("data-ask-id");
+    const draft = keepOpen && openForm.querySelector("textarea") ? openForm.querySelector("textarea").value : "";
+    const keepFocus = !!(openForm && document.activeElement && openForm.contains(document.activeElement));
     const asks = JournalStore.getAsks().filter((a) => !a.done);
     if (!asks.length) {
       els.askFeed.innerHTML = '<p class="ask-empty">아직 문의가 없습니다. 2~3줄로 남겨 주세요.</p>';
@@ -328,11 +332,37 @@
     els.askFeed.innerHTML = asks.map((ask) => {
       const who = [ask.dept, ask.nick].filter(Boolean).join(" · ") || "익명";
       const when = formatAskWhen(ask.createdAt);
-      return `<article class="ask-post">
+      const replies = (ask.replies || []).map((rep) => {
+        const rWho = [rep.dept, rep.nick].filter(Boolean).join(" · ") || "익명";
+        const rWhen = formatAskWhen(rep.createdAt);
+        const staff = rep.staff ? " is-staff" : "";
+        return `<div class="ask-reply${staff}">
+          <div class="ask-post-meta"><span>${escapeHtml(rWho)}${rep.staff ? " <em>재경</em>" : ""}</span>${rWhen ? `<span>${escapeHtml(rWhen)}</span>` : ""}</div>
+          <p>${escapeHtml(rep.text)}</p>
+        </div>`;
+      }).join("");
+      return `<article class="ask-post" data-ask-id="${escapeHtml(ask.id)}">
         <div class="ask-post-meta"><span>${escapeHtml(who)}</span>${when ? `<span>${escapeHtml(when)}</span>` : ""}</div>
         <p>${escapeHtml(ask.text)}</p>
+        ${replies ? `<div class="ask-replies">${replies}</div>` : ""}
+        <button type="button" class="ask-reply-open" data-reply-open>답글</button>
+        <form class="ask-reply-form" data-ask-id="${escapeHtml(ask.id)}" hidden>
+          <textarea rows="2" maxlength="90" placeholder="답글을 남겨 주세요."></textarea>
+          <button type="submit" class="btn btn-ok">답글 남기기</button>
+        </form>
       </article>`;
     }).join("");
+    if (keepOpen) {
+      els.askFeed.querySelectorAll(".ask-reply-form").forEach((form) => {
+        if (form.getAttribute("data-ask-id") !== keepOpen) return;
+        form.hidden = false;
+        const ta = form.querySelector("textarea");
+        if (ta) {
+          ta.value = draft;
+          if (keepFocus) ta.focus();
+        }
+      });
+    }
   }
 
   let askPoll = 0;
@@ -381,6 +411,49 @@
       renderAskBoard();
       if (els.askFeed) els.askFeed.scrollTop = 0;
       showToast("게시판에 남겼어요.");
+    });
+  }
+
+  if (els.askFeed) {
+    els.askFeed.addEventListener("click", (e) => {
+      const openBtn = e.target.closest("[data-reply-open]");
+      if (!openBtn) return;
+      const post = openBtn.closest(".ask-post");
+      const form = post && post.querySelector(".ask-reply-form");
+      if (!form) return;
+      const willOpen = form.hidden;
+      els.askFeed.querySelectorAll(".ask-reply-form").forEach((f) => { f.hidden = true; });
+      form.hidden = !willOpen;
+      if (willOpen) {
+        fillAskProfile();
+        const ta = form.querySelector("textarea");
+        if (ta) ta.focus();
+      }
+    });
+    els.askFeed.addEventListener("submit", (e) => {
+      const form = e.target.closest(".ask-reply-form");
+      if (!form) return;
+      e.preventDefault();
+      fillAskProfile();
+      const dept = (els.askDept && els.askDept.value.trim()) || "";
+      const nick = (els.askNick && els.askNick.value.trim()) || "";
+      const ta = form.querySelector("textarea");
+      const text = ta ? ta.value.trim() : "";
+      if (!dept || !nick) {
+        showToast("위에 부서와 닉네임을 먼저 적어 주세요.");
+        if (els.askDept) els.askDept.focus();
+        return;
+      }
+      if (!text) {
+        showToast("답글을 적어 주세요.");
+        return;
+      }
+      JournalStore.saveAskProfile(dept, nick);
+      JournalStore.addAskReply(form.getAttribute("data-ask-id"), { dept, nick, text });
+      if (ta) ta.value = "";
+      form.hidden = true;
+      renderAskBoard();
+      showToast("답글을 남겼어요.");
     });
   }
 

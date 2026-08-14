@@ -730,6 +730,38 @@
     return String(raw == null ? "" : raw).trim();
   }
 
+  function normalizeReply(raw) {
+    if (!raw || typeof raw !== "object") return null;
+    const text = String(raw.text || "").trim().slice(0, 90);
+    if (!text) return null;
+    return {
+      id: String(raw.id || ("rep-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 6))),
+      dept: String(raw.dept || "").trim(),
+      nick: String(raw.nick || "").trim(),
+      text,
+      createdAt: raw.createdAt || nowIso(),
+      staff: !!raw.staff
+    };
+  }
+
+  function normalizeReplies(raw) {
+    if (!Array.isArray(raw)) return [];
+    const map = {};
+    raw.forEach((item) => {
+      const n = normalizeReply(item);
+      if (!n) return;
+      if (!map[n.id] || String(n.createdAt) >= String(map[n.id].createdAt)) map[n.id] = n;
+    });
+    return Object.keys(map)
+      .map((id) => map[id])
+      .sort((a, b) => String(a.createdAt).localeCompare(String(b.createdAt)))
+      .slice(0, 20);
+  }
+
+  function mergeReplies(a, b) {
+    return normalizeReplies([].concat(a || [], b || []));
+  }
+
   function normalizeAsk(raw) {
     if (!raw || typeof raw !== "object") return null;
     const text = String(raw.text || "").trim().slice(0, 90);
@@ -740,7 +772,8 @@
       nick: String(raw.nick || "").trim(),
       text,
       createdAt: raw.createdAt || nowIso(),
-      done: !!raw.done
+      done: !!raw.done,
+      replies: normalizeReplies(raw.replies)
     };
   }
 
@@ -919,9 +952,15 @@
     const removed = [].concat(remote.removed || [], loadRemoved());
     const asks = dropRemoved(mergeAsks(remote.asks, loadLocalAsks()), removed).slice(0, 40);
     applyBoard(asks, removed);
-    const remoteIds = {};
-    (remote.asks || []).forEach((a) => { remoteIds[a.id] = true; });
-    const hasNew = asks.some((a) => !remoteIds[a.id]);
+    const remoteById = {};
+    (remote.asks || []).forEach((a) => { remoteById[a.id] = a; });
+    const hasNew = asks.some((a) => {
+      const remoteAsk = remoteById[a.id];
+      if (!remoteAsk) return true;
+      const remoteReplyIds = {};
+      (remoteAsk.replies || []).forEach((r) => { remoteReplyIds[r.id] = true; });
+      return (a.replies || []).some((r) => !remoteReplyIds[r.id]);
+    });
     if (hasNew) {
       try { await saveRemoteBoard(asks, removed); } catch {}
     }
@@ -948,7 +987,15 @@
     [].concat(a || [], b || []).forEach((item) => {
       const n = normalizeAsk(item);
       if (!n) return;
-      if (!map[n.id] || String(n.createdAt) >= String(map[n.id].createdAt)) map[n.id] = n;
+      const prev = map[n.id];
+      if (!prev) {
+        map[n.id] = n;
+        return;
+      }
+      const newer = String(n.createdAt) >= String(prev.createdAt) ? n : prev;
+      map[n.id] = Object.assign({}, newer, {
+        replies: mergeReplies(prev.replies, n.replies)
+      });
     });
     return Object.keys(map).map((id) => map[id]).sort((x, y) => String(y.createdAt).localeCompare(String(x.createdAt)));
   }
@@ -1219,6 +1266,49 @@
           nick: String(nick || "").trim()
         }));
       } catch {}
+    },
+
+    addAskReply(askId, input) {
+      const reply = normalizeReply({
+        id: "rep-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 6),
+        dept: input && input.dept,
+        nick: input && input.nick,
+        text: input && input.text,
+        createdAt: nowIso(),
+        staff: !!(input && input.staff)
+      });
+      if (!reply) return null;
+      const patchAsk = (list) => (list || []).map((a) => {
+        if (a.id !== askId) return a;
+        return Object.assign({}, a, { replies: mergeReplies(a.replies, [reply]).slice(0, 20) });
+      });
+      const asks = patchAsk(api.getAsks());
+      persistLocalAsks(asks);
+      if (memory) memory.asks = asks;
+      notify();
+      commitBoard((list, removed) => ({
+        asks: patchAsk(list),
+        removed
+      })).catch(() => {});
+      return reply;
+    },
+
+    removeAskReply(askId, replyId) {
+      const patchAsk = (list) => (list || []).map((a) => {
+        if (a.id !== askId) return a;
+        return Object.assign({}, a, {
+          replies: (a.replies || []).filter((r) => r.id !== replyId)
+        });
+      });
+      const asks = patchAsk(api.getAsks());
+      persistLocalAsks(asks);
+      if (memory) memory.asks = asks;
+      notify();
+      commitBoard((list, removed) => ({
+        asks: patchAsk(list),
+        removed
+      })).catch(() => {});
+      return asks;
     },
 
     updateAsk(id, patch) {
