@@ -23,8 +23,10 @@
     btnReset: document.getElementById("btnReset"),
     pageTopics: document.getElementById("pageTopics"),
     pagePopular: document.getElementById("pagePopular"),
+    pageAsks: document.getElementById("pageAsks"),
     viewTopics: document.getElementById("viewTopics"),
     viewPopular: document.getElementById("viewPopular"),
+    viewAsks: document.getElementById("viewAsks"),
     popularForm: document.getElementById("popularForm"),
     popularList: document.getElementById("popularList"),
     popularPool: document.getElementById("popularPool"),
@@ -32,6 +34,9 @@
     btnAddPopular: document.getElementById("btnAddPopular"),
     welcomeForm: document.getElementById("welcomeForm"),
     welcomeText: document.getElementById("welcomeText"),
+    askEmailForm: document.getElementById("askEmailForm"),
+    askEmail: document.getElementById("askEmail"),
+    askList: document.getElementById("askList"),
     btnPublish: document.getElementById("btnPublish"),
     btnPublish2: document.getElementById("btnPublish2"),
     btnPublishNav: document.getElementById("btnPublishNav"),
@@ -62,14 +67,21 @@
 
   function persist(okMsg) {
     readWelcomeIntoData();
+    readAskEmailIntoData();
     JournalStore.saveData(state.data);
     state.data = JournalStore.loadData();
+    if (state.page === "asks") renderAsks();
     showToast(okMsg || "이 컴퓨터에 저장했습니다. 다른 사람이 보려면 ‘다른 사람에게 보이기’를 눌러 주세요.");
   }
 
   function readWelcomeIntoData() {
     if (!els.welcomeText || els.welcomeText.dataset.ready !== "1") return;
     state.data.welcome = els.welcomeText.value;
+  }
+
+  function readAskEmailIntoData() {
+    if (!els.askEmail) return;
+    state.data.askEmail = els.askEmail.value.trim();
   }
 
   function isUnlocked() {
@@ -162,6 +174,7 @@
     if (!state.topicId && state.data.topics[0]) state.topicId = state.data.topics[0].id;
     renderList();
     renderPopularEditor();
+    renderAsks();
     const topic = currentTopic();
     if (topic) fillTopic(topic, { keepTab: true });
   }
@@ -171,9 +184,35 @@
     state.page = page;
     els.pageTopics.classList.toggle("active", page === "topics");
     els.pagePopular.classList.toggle("active", page === "popular");
+    if (els.pageAsks) els.pageAsks.classList.toggle("active", page === "asks");
     els.viewTopics.hidden = page !== "topics";
     els.viewPopular.hidden = page !== "popular";
+    if (els.viewAsks) els.viewAsks.hidden = page !== "asks";
     if (page === "popular") renderPopularEditor();
+    if (page === "asks") renderAsks();
+  }
+
+  function renderAsks() {
+    if (!els.askList) return;
+    if (els.askEmail) els.askEmail.value = JournalStore.getAskEmail();
+    const asks = JournalStore.getAsks();
+    if (!asks.length) {
+      els.askList.innerHTML = '<p class="hint" style="padding:8px 0">아직 질문이 없습니다.</p>';
+      return;
+    }
+    els.askList.innerHTML = asks.map((ask) => {
+      const when = ask.createdAt
+        ? new Date(ask.createdAt).toLocaleString("ko-KR", { dateStyle: "short", timeStyle: "short" })
+        : "";
+      return `<article class="ask-item${ask.done ? " is-done" : ""}" data-ask-id="${escapeHtml(ask.id)}">
+        <div class="ask-meta">${escapeHtml(ask.dept)} · ${escapeHtml(ask.nick)}${when ? `<span>${escapeHtml(when)}</span>` : ""}</div>
+        <p>${escapeHtml(ask.text)}</p>
+        <div class="ask-item-actions">
+          <button type="button" class="btn btn-ghost" data-ask-done>${ask.done ? "미완료로" : "완료"}</button>
+          <button type="button" class="btn btn-ghost" data-ask-del>삭제</button>
+        </div>
+      </article>`;
+    }).join("");
   }
 
   function popularLabels() {
@@ -555,6 +594,30 @@
   els.tabResult.addEventListener("click", () => setTab("result"));
   els.pageTopics.addEventListener("click", () => setPage("topics"));
   els.pagePopular.addEventListener("click", () => setPage("popular"));
+  els.pageAsks?.addEventListener("click", () => setPage("asks"));
+
+  els.askEmailForm?.addEventListener("submit", (e) => {
+    e.preventDefault();
+    persist("질문 받을 메일을 저장했습니다.");
+  });
+
+  els.askList?.addEventListener("click", (e) => {
+    const item = e.target.closest(".ask-item");
+    if (!item) return;
+    const id = item.dataset.askId;
+    if (e.target.closest("[data-ask-del]")) {
+      JournalStore.removeAsk(id);
+      if (state.data) state.data.asks = JournalStore.getAsks();
+      persist("질문을 삭제했습니다.");
+      return;
+    }
+    if (e.target.closest("[data-ask-done]")) {
+      const ask = JournalStore.getAsks().find((a) => a.id === id);
+      JournalStore.updateAsk(id, { done: !(ask && ask.done) });
+      if (state.data) state.data.asks = JournalStore.getAsks();
+      persist();
+    }
+  });
   els.btnAddNode.addEventListener("click", addNode);
 
   els.popularPool.addEventListener("click", (e) => {
@@ -721,9 +784,11 @@
     }
     if (state.page === "topics") currentTopicPatch();
     readWelcomeIntoData();
+    readAskEmailIntoData();
     const rec = JournalStore.saveData(state.data);
     state.data = JournalStore.loadData();
-    const blob = new Blob([JSON.stringify(rec, null, 2)], { type: "application/json" });
+    const published = Object.assign({}, rec, { asks: [] });
+    const blob = new Blob([JSON.stringify(published, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;

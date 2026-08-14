@@ -3,6 +3,8 @@
  */
 (function (global) {
   const STORAGE_KEY = "atec-journal-tree-v1";
+  const ASK_KEY = "atec-ask-box-v1";
+  const ASK_PROFILE_KEY = "atec-ask-profile-v1";
   const ADMIN_UNLOCK_KEY = "atec-journal-admin-unlocked";
   const APP_PASS_SHA256 = "4ec9599fc203d176a301536c2e091a19bc852759b255bd6818810a42c5fed14a";
 
@@ -721,6 +723,52 @@
     return raw.map(normalizePopularItem).filter(Boolean);
   }
 
+  function normalizeAskEmail(raw) {
+    return String(raw == null ? "" : raw).trim();
+  }
+
+  function normalizeAsk(raw) {
+    if (!raw || typeof raw !== "object") return null;
+    const text = String(raw.text || "").trim();
+    if (!text) return null;
+    return {
+      id: String(raw.id || ("ask-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 6))),
+      dept: String(raw.dept || "").trim(),
+      nick: String(raw.nick || "").trim(),
+      text,
+      createdAt: raw.createdAt || nowIso(),
+      done: !!raw.done
+    };
+  }
+
+  function normalizeAsks(raw) {
+    if (!Array.isArray(raw)) return [];
+    return raw.map(normalizeAsk).filter(Boolean);
+  }
+
+  function loadLocalAsks() {
+    try {
+      const parsed = JSON.parse(localStorage.getItem(ASK_KEY) || "[]");
+      return normalizeAsks(parsed);
+    } catch {
+      return [];
+    }
+  }
+
+  function persistLocalAsks(list) {
+    try { localStorage.setItem(ASK_KEY, JSON.stringify(list)); } catch {}
+  }
+
+  function mergeAsks(a, b) {
+    const map = {};
+    [].concat(a || [], b || []).forEach((item) => {
+      const n = normalizeAsk(item);
+      if (!n) return;
+      if (!map[n.id] || String(n.createdAt) > String(map[n.id].createdAt)) map[n.id] = n;
+    });
+    return Object.keys(map).map((id) => map[id]).sort((x, y) => String(y.createdAt).localeCompare(String(x.createdAt)));
+  }
+
   function normalizeWelcome(raw) {
     const text = String(raw == null ? "" : raw).replace(/\r\n/g, "\n").trim();
     return text || DEFAULT_WELCOME;
@@ -737,7 +785,9 @@
       topics,
       nodes,
       popular: normalizePopular(SEED_POPULAR, topics),
-      welcome: DEFAULT_WELCOME
+      welcome: DEFAULT_WELCOME,
+      askEmail: "",
+      asks: []
     };
   }
 
@@ -777,6 +827,8 @@
       nodes,
       popular: normalizePopular(rec && rec.popular, topics),
       welcome: normalizeWelcome(rec && rec.welcome),
+      askEmail: normalizeAskEmail(rec && rec.askEmail),
+      asks: mergeAsks(normalizeAsks(rec && rec.asks), loadLocalAsks()),
       isCustom: !!(rec && rec.topics),
       updatedAt: (rec && rec.updatedAt) || null
     },     extra || {});
@@ -884,9 +936,12 @@
         topics: built.topics,
         nodes: built.nodes,
         popular: built.popular,
-        welcome: built.welcome
+        welcome: built.welcome,
+        askEmail: normalizeAskEmail(built.askEmail),
+        asks: mergeAsks(built.asks, loadLocalAsks())
       };
       memory = record;
+      persistLocalAsks(record.asks);
       try { localStorage.setItem(STORAGE_KEY, JSON.stringify(record)); } catch {}
       notify();
       return record;
@@ -907,6 +962,72 @@
     getWelcome() {
       const data = api.loadData();
       return normalizeWelcome(data && data.welcome);
+    },
+
+    getAskEmail() {
+      const data = api.loadData();
+      return normalizeAskEmail(data && data.askEmail);
+    },
+
+    getAsks() {
+      const data = api.loadData();
+      return mergeAsks(data && data.asks, loadLocalAsks());
+    },
+
+    addAsk(input) {
+      const item = normalizeAsk({
+        id: "ask-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 6),
+        dept: input && input.dept,
+        nick: input && input.nick,
+        text: input && input.text,
+        createdAt: nowIso(),
+        done: false
+      });
+      if (!item) return null;
+      const rec = memory || loadRecord() || {};
+      const asks = mergeAsks(rec.asks, loadLocalAsks());
+      asks.unshift(item);
+      persistLocalAsks(asks);
+      if (memory) memory.asks = asks;
+      notify();
+      return item;
+    },
+
+    getAskProfile() {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(ASK_PROFILE_KEY) || "{}");
+        return {
+          dept: String(parsed.dept || "").trim(),
+          nick: String(parsed.nick || "").trim()
+        };
+      } catch {
+        return { dept: "", nick: "" };
+      }
+    },
+
+    saveAskProfile(dept, nick) {
+      try {
+        localStorage.setItem(ASK_PROFILE_KEY, JSON.stringify({
+          dept: String(dept || "").trim(),
+          nick: String(nick || "").trim()
+        }));
+      } catch {}
+    },
+
+    updateAsk(id, patch) {
+      const asks = api.getAsks().map((a) => a.id === id ? Object.assign({}, a, patch || {}) : a);
+      persistLocalAsks(asks);
+      if (memory) memory.asks = asks;
+      notify();
+      return asks;
+    },
+
+    removeAsk(id) {
+      const asks = api.getAsks().filter((a) => a.id !== id);
+      persistLocalAsks(asks);
+      if (memory) memory.asks = asks;
+      notify();
+      return asks;
     },
 
     searchTopics(query) {

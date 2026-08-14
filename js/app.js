@@ -7,7 +7,13 @@
     restart: document.getElementById("btnRestart"),
     back: document.getElementById("btnBack"),
     toast: document.getElementById("toast"),
-    updatedAt: document.getElementById("updatedAt")
+    updatedAt: document.getElementById("updatedAt"),
+    btnAsk: document.getElementById("btnAsk"),
+    askForm: document.getElementById("askForm"),
+    askDept: document.getElementById("askDept"),
+    askNick: document.getElementById("askNick"),
+    askText: document.getElementById("askText"),
+    btnAskClose: document.getElementById("btnAskClose")
   };
 
   const state = {
@@ -296,6 +302,55 @@
   });
   els.restart.addEventListener("click", reset);
   if (els.back) els.back.addEventListener("click", goBack);
+
+  function fillAskProfile() {
+    const p = JournalStore.getAskProfile();
+    if (els.askDept && !els.askDept.value) els.askDept.value = p.dept;
+    if (els.askNick && !els.askNick.value) els.askNick.value = p.nick;
+  }
+
+  if (els.btnAsk && els.askForm) {
+    els.btnAsk.addEventListener("click", () => {
+      const open = els.askForm.hidden;
+      els.askForm.hidden = !open;
+      if (open) {
+        fillAskProfile();
+        (els.askDept.value ? els.askText : els.askDept).focus();
+      }
+    });
+  }
+  if (els.btnAskClose && els.askForm) {
+    els.btnAskClose.addEventListener("click", () => {
+      els.askForm.hidden = true;
+    });
+  }
+  if (els.askForm) {
+    els.askForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const dept = els.askDept.value.trim();
+      const nick = els.askNick.value.trim();
+      const text = els.askText.value.trim();
+      if (!dept || !nick || !text) {
+        showToast("부서, 닉네임, 질문을 모두 적어 주세요.");
+        return;
+      }
+      JournalStore.saveAskProfile(dept, nick);
+      JournalStore.addAsk({ dept, nick, text });
+      const email = JournalStore.getAskEmail();
+      const body = "부서: " + dept + "\n닉네임: " + nick + "\n\n" + text;
+      if (email) {
+        const href = "mailto:" + encodeURIComponent(email) +
+          "?subject=" + encodeURIComponent("[회계노트] " + dept + " / " + nick) +
+          "&body=" + encodeURIComponent(body);
+        window.location.href = href;
+        showToast("질문 창을 열었어요. 보내기만 누르면 재경팀에 전달됩니다.");
+      } else {
+        copyText(body).then(() => showToast("질문을 복사했어요. 재경팀에 보내 주세요.")).catch(() => showToast("질문을 남겼어요."));
+      }
+      els.askText.value = "";
+      els.askForm.hidden = true;
+    });
+  }
 
   JournalStore.hydrate().then(() => {
     renderPopular();
