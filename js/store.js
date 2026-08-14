@@ -58,6 +58,73 @@
     }
   };
 
+  const ACCOUNT_CODE_HINTS = [
+    ["신용카드수취채권", "113"],
+    ["예수금-지방소득세", "254"],
+    ["예수금-소득세", "254"],
+    ["예수금-4대보험", "254"],
+    ["미지급금-사회보험", "253"],
+    ["미지급금-부가세", "253"],
+    ["감가상각누계액", "215"],
+    ["부가세대급금", "135"],
+    ["부가세예수금", "255"],
+    ["외상매출금", "108"],
+    ["복리후생비", "811"],
+    ["여비교통비", "812"],
+    ["지급수수료", "817"],
+    ["차량유지비", "843"],
+    ["사무용품비", "821"],
+    ["소모품비", "821"],
+    ["수도광열비", "814"],
+    ["감가상각비", "851"],
+    ["보통예금", "103"],
+    ["수출매출", "403"],
+    ["면세매출", "401"],
+    ["제품매출", "401"],
+    ["상품매출", "401"],
+    ["원재료비", "501"],
+    ["이자비용", "931"],
+    ["통신비", "813"],
+    ["임차료", "830"],
+    ["접대비", "833"],
+    ["선급금", "120"],
+    ["선수금", "256"],
+    ["가지급금", "146"],
+    ["미지급금", "253"],
+    ["원재료", "147"],
+    ["예수금", "254"],
+    ["비품", "214"],
+    ["기계장치", "212"],
+    ["급여", "801"]
+  ];
+
+  function defaultAccountCode(account) {
+    const name = String(account || "");
+    let best = "";
+    let bestPos = Infinity;
+    let bestLen = 0;
+    for (let i = 0; i < ACCOUNT_CODE_HINTS.length; i++) {
+      const key = ACCOUNT_CODE_HINTS[i][0];
+      const pos = name.indexOf(key);
+      if (pos < 0) continue;
+      if (pos < bestPos || (pos === bestPos && key.length > bestLen)) {
+        best = ACCOUNT_CODE_HINTS[i][1];
+        bestPos = pos;
+        bestLen = key.length;
+      }
+    }
+    return best;
+  }
+
+  function withAccountCodes(journal) {
+    return (journal || []).map((line) => ({
+      side: line.side,
+      code: String(line.code || defaultAccountCode(line.account) || "").trim(),
+      account: line.account,
+      memo: line.memo
+    }));
+  }
+
   function result(id, title, vat, vatNote, journal, guide, caution, example) {
     return {
       id,
@@ -65,7 +132,7 @@
       title,
       vat,
       vatNote,
-      journal,
+      journal: withAccountCodes(journal),
       guide: guide || "",
       caution: caution || "",
       example: example || ""
@@ -575,10 +642,11 @@
       ? raw.journal
           .map((line) => ({
             side: line && line.side === "credit" ? "credit" : "debit",
+            code: String((line && line.code) || "").trim(),
             account: String((line && line.account) || "").trim(),
             memo: String((line && line.memo) || "").trim()
           }))
-          .filter((line) => line.account)
+          .filter((line) => line.account || line.code)
       : [];
     return {
       id: String(raw.id || api.newId("n")),
@@ -945,8 +1013,8 @@
         vat: "case_by_case",
         vatNote: "",
         journal: [
-          { side: "debit", account: "", memo: "" },
-          { side: "credit", account: "", memo: "" }
+          { side: "debit", code: "", account: "", memo: "" },
+          { side: "credit", code: "", account: "", memo: "" }
         ],
         guide: "",
         caution: "",
