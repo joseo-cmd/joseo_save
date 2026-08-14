@@ -184,12 +184,27 @@ a { color: inherit; text-decoration: none; }
 .chat-actions .back-q { margin-top: 0; }
 
 .pane-chat {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   padding: 22px 24px 28px;
   display: flex;
   flex-direction: column;
   min-height: 520px;
 }
+.pane-chat::before {
+  content: "";
+  position: absolute;
+  inset: 8% 6% 4% 10%;
+  background: url("../images/chat-notebook.svg") center / contain no-repeat;
+  opacity: 0.16;
+  filter: blur(0.6px);
+  pointer-events: none;
+  z-index: 0;
+}
 .thread {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   gap: 12px;
