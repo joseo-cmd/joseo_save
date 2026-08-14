@@ -1,35 +1,17 @@
 (function () {
   const els = {
+    form: document.getElementById("searchForm"),
     q: document.getElementById("q"),
-    cat: document.getElementById("catChips"),
-    vat: document.getElementById("vatChips"),
-    list: document.getElementById("list"),
-    meta: document.getElementById("resultMeta"),
-    count: document.getElementById("entryCount"),
-    source: document.getElementById("dataSource"),
-    overlay: document.getElementById("overlay"),
-    detailTitle: document.getElementById("detailTitle"),
-    detailCat: document.getElementById("detailCat"),
-    detailBody: document.getElementById("detailBody"),
-    close: document.getElementById("closeDetail"),
+    popular: document.getElementById("popular"),
+    thread: document.getElementById("thread"),
+    restart: document.getElementById("btnRestart"),
     toast: document.getElementById("toast")
   };
 
   const state = {
-    query: "",
-    category: "전체",
-    vat: "전체",
-    entries: [],
-    selectedId: null
+    history: [],
+    nodeId: null
   };
-
-  let toastTimer = null;
-  function showToast(msg) {
-    els.toast.textContent = msg;
-    els.toast.classList.add("show");
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => els.toast.classList.remove("show"), 1800);
-  }
 
   function escapeHtml(value) {
     return String(value || "")
@@ -39,85 +21,29 @@
       .replace(/"/g, "&quot;");
   }
 
-  function load() {
-    const data = JournalStore.loadEntries();
-    state.entries = data.entries;
-    els.count.textContent = data.entries.length + "건";
-    if (els.source) {
-      els.source.textContent = data.isCustom
-        ? "관리자 저장 안내 · " + new Date(data.updatedAt).toLocaleString("ko-KR")
-        : "기본 예시 안내";
-    }
+  function showToast(msg) {
+    if (!els.toast) return;
+    els.toast.textContent = msg;
+    els.toast.classList.add("show");
+    setTimeout(() => els.toast.classList.remove("show"), 1600);
   }
 
-  function filtered() {
-    const q = state.query.toLowerCase();
-    return state.entries.filter((e) => {
-      if (state.category !== "전체" && e.category !== state.category) return false;
-      if (state.vat !== "전체" && e.vat !== state.vat) return false;
-      if (!q) return true;
-      const vat = JournalStore.vatInfo(e.vat);
-      const hay = [
-        e.title, e.category, e.guide, e.caution, e.example, e.vatNote,
-        vat.label, vat.short,
-        ...(e.keywords || []),
-        ...e.journal.map((l) => l.account + " " + l.memo)
-      ].join(" ").toLowerCase();
-      return hay.includes(q);
-    });
+  function popularTopics() {
+    return JournalStore.loadData().topics.slice(0, 8);
   }
 
-  function renderChips() {
-    const cats = ["전체"].concat(JournalStore.CATEGORIES);
-    els.cat.innerHTML = cats.map((c) =>
-      `<button type="button" class="chip${state.category === c ? " active" : ""}" data-cat="${escapeHtml(c)}" role="listitem">${escapeHtml(c)}</button>`
-    ).join("");
-    const vats = [{ id: "전체", short: "부가세 전체" }].concat(JournalStore.vatList());
-    els.vat.innerHTML = vats.map((v) =>
-      `<button type="button" class="vat-chip${state.vat === v.id ? " active" : ""}" data-vat="${v.id}">
-        ${v.id === "전체" ? "" : `<span class="badge ${v.tone}">●</span>`}${escapeHtml(v.short)}
-      </button>`
-    ).join("");
+  function renderPopular() {
+    els.popular.innerHTML = popularTopics()
+      .map((t) => `<button type="button" class="chip" data-topic="${escapeHtml(t.id)}">${escapeHtml(t.title)}</button>`)
+      .join("");
   }
 
-  function journalPreview(entry) {
-    const debit = entry.journal.filter((l) => l.side === "debit").map((l) => l.account);
-    const credit = entry.journal.filter((l) => l.side === "credit").map((l) => l.account);
-    if (!debit.length && !credit.length) return "분개 미등록";
-    return "차 " + (debit.join(", ") || "-") + "  /  대 " + (credit.join(", ") || "-");
-  }
-
-  function renderList() {
-    const list = filtered();
-    els.meta.textContent = list.length + "건 표시";
-    if (!list.length) {
-      els.list.innerHTML = `<div class="empty"><strong>조건에 맞는 안내가 없습니다</strong>검색어를 바꾸거나 관리자 페이지에서 안내를 추가하세요.</div>`;
-      return;
-    }
-    els.list.innerHTML = list.map((e) => {
-      const vat = JournalStore.vatInfo(e.vat);
-      return `<article class="card">
-        <button type="button" class="entry" data-open="${escapeHtml(e.id)}">
-          <div class="entry-top">
-            <div>
-              <div class="entry-cat">${escapeHtml(e.category)}</div>
-              <h3>${escapeHtml(e.title)}</h3>
-            </div>
-            <span class="badge ${vat.tone}">${escapeHtml(vat.short)}</span>
-          </div>
-          <p class="entry-preview">${escapeHtml(e.vatNote || vat.summary)}</p>
-          <p class="entry-journal">${escapeHtml(journalPreview(e))}</p>
-        </button>
-      </article>`;
-    }).join("");
-  }
-
-  function journalTable(entry) {
-    if (!entry.journal.length) return `<p class="hint">등록된 분개가 없습니다.</p>`;
+  function journalTable(node) {
+    if (!node.journal || !node.journal.length) return `<p class="hint">등록된 분개가 없습니다.</p>`;
     return `<table class="t-table">
-      <thead><tr><th style="width:88px">구분</th><th>계정과목</th><th>적요 · 금액 기준</th></tr></thead>
+      <thead><tr><th style="width:72px">구분</th><th>계정과목</th><th>적요</th></tr></thead>
       <tbody>
-        ${entry.journal.map((l) => `
+        ${node.journal.map((l) => `
           <tr>
             <td class="${l.side === "debit" ? "side-debit" : "side-credit"}">${l.side === "debit" ? "차변" : "대변"}</td>
             <td class="account">${escapeHtml(l.account)}</td>
@@ -127,88 +53,145 @@
     </table>`;
   }
 
-  function openDetail(id) {
-    const entry = state.entries.find((e) => e.id === id);
-    if (!entry) {
-      showToast("해당 안내를 찾지 못했습니다.");
-      return;
-    }
-    state.selectedId = id;
-    const vat = JournalStore.vatInfo(entry.vat);
-    els.detailCat.textContent = entry.category;
-    els.detailTitle.textContent = entry.title;
-    els.detailBody.innerHTML = `
+  function resultHtml(node) {
+    const vat = JournalStore.vatInfo(node.vat);
+    return `<div class="result-title">${escapeHtml(node.title)}</div>
       <section class="vat-callout ${vat.tone}">
-        <div class="kicker">부가세 처리</div>
+        <div class="kicker">부가세</div>
         <h3>${escapeHtml(vat.label)}</h3>
-        <p>${escapeHtml(entry.vatNote || vat.summary)}</p>
+        <p>${escapeHtml(node.vatNote || vat.summary)}</p>
       </section>
       <section class="panel">
-        <h3>회계분개</h3>
-        ${journalTable(entry)}
+        <h4>분개</h4>
+        ${journalTable(node)}
       </section>
-      ${entry.example ? `<section class="panel"><h3>숫자 예시</h3><p class="example-text">${escapeHtml(entry.example)}</p></section>` : ""}
-      ${entry.guide ? `<section class="panel"><h3>안내사항</h3><p class="guide-text">${escapeHtml(entry.guide)}</p></section>` : ""}
-      ${entry.caution ? `<section class="panel"><h3>주의</h3><div class="caution-box">${escapeHtml(entry.caution)}</div></section>` : ""}
-    `;
-    els.overlay.hidden = false;
-    els.overlay.classList.add("open");
-    history.replaceState(null, "", "#" + encodeURIComponent(id));
+      ${node.example ? `<section class="panel"><h4>숫자 예시</h4><p class="example-text">${escapeHtml(node.example)}</p></section>` : ""}
+      ${node.guide ? `<section class="panel"><h4>안내</h4><p class="guide-text">${escapeHtml(node.guide)}</p></section>` : ""}
+      ${node.caution ? `<section class="panel"><h4>주의</h4><div class="caution-box">${escapeHtml(node.caution)}</div></section>` : ""}`;
   }
 
-  function closeDetail() {
-    els.overlay.classList.remove("open");
-    els.overlay.hidden = true;
-    state.selectedId = null;
-    if (location.hash) history.replaceState(null, "", location.pathname + location.search);
+  function push(msg) {
+    state.history.push(msg);
+    renderThread();
   }
 
-  function refresh() {
-    renderChips();
-    renderList();
+  function renderThread() {
+    if (!state.history.length) {
+      els.thread.innerHTML = `<div class="msg bot"><div class="bubble"><p>왼쪽에서 거래를 검색하거나, 자주 찾는 항목을 눌러 주세요.<br>예: <b>복리후생비</b></p></div></div>`;
+      return;
+    }
+    els.thread.innerHTML = state.history.map((m, idx) => {
+      if (m.kind === "user") {
+        return `<div class="msg user"><div class="bubble"><p>${escapeHtml(m.text)}</p></div></div>`;
+      }
+      if (m.kind === "question") {
+        const latest = idx === state.history.length - 1;
+        const options = (m.options || []).map((o, i) =>
+          latest
+            ? `<button type="button" class="choice" data-next="${escapeHtml(o.nextId)}" data-label="${escapeHtml(o.label)}">${escapeHtml(o.label)}</button>`
+            : ""
+        ).join("");
+        return `<div class="msg bot"><div class="bubble">
+          <p>${escapeHtml(m.text)}</p>
+          ${latest && options ? `<div class="choices">${options}</div>` : ""}
+        </div></div>`;
+      }
+      if (m.kind === "result") {
+        return `<div class="msg bot"><div class="bubble">${resultHtml(m.node)}</div></div>`;
+      }
+      return `<div class="msg bot"><div class="bubble"><p>${escapeHtml(m.text)}</p></div></div>`;
+    }).join("");
+    els.thread.parentElement.scrollTop = els.thread.parentElement.scrollHeight;
   }
 
-  els.q.addEventListener("input", () => {
-    state.query = els.q.value.trim();
-    renderList();
-  });
-  els.cat.addEventListener("click", (e) => {
-    const btn = e.target.closest("[data-cat]");
-    if (!btn) return;
-    state.category = btn.dataset.cat;
-    refresh();
-  });
-  els.vat.addEventListener("click", (e) => {
-    const btn = e.target.closest("[data-vat]");
-    if (!btn) return;
-    state.vat = btn.dataset.vat;
-    refresh();
-  });
-  els.list.addEventListener("click", (e) => {
-    const btn = e.target.closest("[data-open]");
-    if (!btn) return;
-    openDetail(btn.dataset.open);
-  });
-  els.close.addEventListener("click", closeDetail);
-  els.overlay.addEventListener("click", (e) => {
-    if (e.target === els.overlay) closeDetail();
-  });
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") closeDetail();
-  });
+  function showNode(nodeId) {
+    const node = JournalStore.getNode(nodeId);
+    if (!node) {
+      push({ kind: "bot", text: "이어서 연결할 안내가 아직 없습니다. 관리자에서 다음 질문을 등록해 주세요." });
+      return;
+    }
+    state.nodeId = node.id;
+    if (node.type === "question") {
+      push({ kind: "question", text: node.prompt, options: node.options || [] });
+      return;
+    }
+    push({ kind: "result", node });
+  }
 
-  load();
-  refresh();
-  window.refreshJournalGuide = function () {
-    load();
-    refresh();
-  };
-  window.addEventListener("journal-guides-changed", function () {
-    window.refreshJournalGuide();
+  function startTopic(topic) {
+    state.history = [];
+    push({ kind: "user", text: topic.title });
+    push({ kind: "bot", text: `${topic.title} 관련해서 몇 가지만 확인할게요.` });
+    showNode(topic.startNodeId);
+  }
+
+  function runSearch(raw) {
+    const query = String(raw || "").trim();
+    if (!query) return;
+    els.q.value = query;
+    const hits = JournalStore.searchTopics(query);
+    state.history = [];
+    push({ kind: "user", text: query });
+    if (!hits.length) {
+      push({
+        kind: "question",
+        text: "정확히 맞는 항목이 없어요. 아래 중에서 가까운 것을 골라 주세요.",
+        options: JournalStore.loadData().topics.map((t) => ({ label: t.title, nextId: "topic:" + t.id }))
+      });
+      return;
+    }
+    if (hits.length === 1) {
+      push({ kind: "bot", text: `${hits[0].title}로 찾아봤어요. 이어서 질문할게요.` });
+      showNode(hits[0].startNodeId);
+      return;
+    }
+    push({
+      kind: "question",
+      text: "여러 건이 나왔어요. 어떤 건가요?",
+      options: hits.map((t) => ({ label: t.title, nextId: "topic:" + t.id }))
+    });
+  }
+
+  function choose(nextId, label) {
+    push({ kind: "user", text: label });
+    if (String(nextId).indexOf("topic:") === 0) {
+      const id = nextId.slice(6);
+      const topic = JournalStore.loadData().topics.find((t) => t.id === id);
+      if (!topic) {
+        push({ kind: "bot", text: "주제를 찾지 못했습니다." });
+        return;
+      }
+      showNode(topic.startNodeId);
+      return;
+    }
+    showNode(nextId);
+  }
+
+  function reset() {
+    state.history = [];
+    state.nodeId = null;
+    els.q.value = "";
+    renderThread();
+    els.q.focus();
+  }
+
+  els.form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    runSearch(els.q.value);
   });
-  window.addEventListener("storage", function (e) {
-    if (e.key === JournalStore.STORAGE_KEY) window.refreshJournalGuide();
+  els.popular.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-topic]");
+    if (!btn) return;
+    const topic = JournalStore.loadData().topics.find((t) => t.id === btn.dataset.topic);
+    if (topic) startTopic(topic);
   });
-  const hash = decodeURIComponent((location.hash || "").replace(/^#/, ""));
-  if (hash && hash !== "admin" && hash !== "guide") openDetail(hash);
+  els.thread.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-next]");
+    if (!btn) return;
+    choose(btn.dataset.next, btn.dataset.label);
+  });
+  els.restart.addEventListener("click", reset);
+
+  renderPopular();
+  renderThread();
 })();

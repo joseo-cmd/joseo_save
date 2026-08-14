@@ -4,81 +4,46 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>회계분개 · 부가세 안내</title>
-  <meta name="description" content="현업 거래별로 회계분개와 부가세 처리 여부를 안내합니다." />
+  <meta name="description" content="검색 후 질문에 답하면 부가세 공제 여부와 분개가 나옵니다." />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
   <link rel="stylesheet" href="css/app.css" />
 </head>
 <body>
   <nav class="nav">
-    <div class="wrap nav-inner">
+    <div class="nav-inner">
       <a class="logo" href="index.html" aria-label="홈">
         <span class="logo-mark" aria-hidden="true"></span>
         <span class="logo-text">분개<span>안내</span></span>
       </a>
-      <div class="nav-links">
-        <button type="button" class="btn btn-download" id="btnDownloadHtml">HTML 다운받기</button>
-        <a class="nav-cta" href="admin.html">관리자</a>
-      </div>
+      <a class="nav-cta" href="admin.html">관리자</a>
     </div>
   </nav>
 
-  <header class="hero">
-    <div class="wrap">
-      <p class="eyebrow">현업 회계처리 가이드</p>
-      <h1>이 거래, 어떻게 분개하고<br /><em>부가세는?</em></h1>
-      <p class="hero-lead">거래 유형을 검색하면 분개와 부가세 처리 여부까지 바로 확인할 수 있어요.</p>
-      <label class="hero-search" for="q">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+  <div class="shell">
+    <aside class="pane pane-search">
+      <h1>이 거래,<br /><em>어떻게 처리하죠?</em></h1>
+      <p class="hint">검색하면 몇 가지를 확인한 뒤 부가세와 분개를 알려드려요.</p>
+      <form class="search-box" id="searchForm">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7a7a7a" stroke-width="2.2" aria-hidden="true">
           <circle cx="11" cy="11" r="7" /><path d="M20 20l-3.5-3.5" />
         </svg>
-        <input id="q" type="search" placeholder="접대비, 세금계산서, 택시, 급여, 수출…" autocomplete="off" />
-      </label>
-      <p class="hero-meta"><strong id="entryCount">0건</strong>의 안내가 준비되어 있습니다</p>
-      <div class="hero-actions">
-        <button type="button" class="btn btn-download" id="btnDownloadHtmlHero">HTML 다운받기</button>
+        <input id="q" type="search" placeholder="예: 복리후생비" autocomplete="off" />
+        <button type="submit">검색</button>
+      </form>
+      <div>
+        <p class="hint" style="margin-bottom:8px">자주 찾는 항목</p>
+        <div class="chips" id="popular"></div>
       </div>
-      <span class="hide-sm" id="dataSource" hidden>기본 예시 안내</span>
-    </div>
-  </header>
+      <button type="button" class="restart" id="btnRestart">대화 다시 시작</button>
+    </aside>
 
-  <main class="layout">
-    <div class="wrap">
-      <section class="search-card" aria-label="필터">
-        <div class="legend" id="catChips" role="list"></div>
-        <div class="legend" id="vatChips" role="list" aria-label="부가세 처리"></div>
-      </section>
-
-      <div class="results-head">
-        <h2>안내 목록</h2>
-        <span id="resultMeta">0건</span>
-      </div>
-      <div class="grid" id="list"></div>
-    </div>
-  </main>
-
-  <footer class="footer">
-    <div class="wrap footer-inner">
-      <span>현장 담당자용 분개·부가세 가이드 · 최종 판단은 증빙과 회계팀 확인</span>
-      <a href="admin.html">관리자 페이지</a>
-    </div>
-  </footer>
-
-  <div class="overlay" id="overlay" hidden>
-    <article class="modal" role="dialog" aria-modal="true" aria-labelledby="detailTitle">
-      <div class="modal-head">
-        <div>
-          <span class="entry-cat" id="detailCat"></span>
-          <h2 id="detailTitle"></h2>
-        </div>
-        <button type="button" class="close-btn" id="closeDetail" aria-label="닫기">×</button>
-      </div>
-      <div class="modal-body" id="detailBody"></div>
-    </article>
+    <section class="pane pane-chat" aria-live="polite">
+      <div class="thread" id="thread"></div>
+    </section>
   </div>
-  <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="js/store.js"></script>
   <script src="js/app.js"></script>
-  <script src="js/download.js"></script>
 </body>
 </html>

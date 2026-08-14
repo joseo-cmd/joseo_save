@@ -3,121 +3,65 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>관리자 · 회계분개 안내</title>
-  <meta name="description" content="회계분개와 부가세 안내를 등록·수정합니다." />
+  <title>관리자 · 분개 안내</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
   <link rel="stylesheet" href="css/app.css" />
 </head>
 <body>
   <nav class="nav">
-    <div class="wrap nav-inner">
-      <a class="logo" href="index.html" aria-label="홈">
+    <div class="nav-inner">
+      <a class="logo" href="index.html">
         <span class="logo-mark" aria-hidden="true"></span>
         <span class="logo-text">분개<span>안내</span></span>
       </a>
-      <div class="nav-links">
-        <button type="button" class="btn btn-download" id="btnDownloadHtml">HTML 다운받기</button>
-        <a class="hide-sm" href="index.html">안내 페이지</a>
-        <a class="nav-cta" href="index.html">저장 후 보기</a>
-      </div>
+      <a class="nav-cta" href="index.html">안내 페이지</a>
     </div>
   </nav>
 
-  <header class="hero" style="padding-bottom:8px">
-    <div class="wrap">
-      <p class="eyebrow">관리자</p>
-      <h1>분개 · 부가세 안내를<br /><em>직접 등록</em>하세요</h1>
-      <p class="hero-lead">비밀번호로 잠겨 있어요. 저장하면 같은 브라우저의 안내 페이지에 바로 반영됩니다.</p>
+  <section class="lock-screen" id="lockScreen">
+    <div class="lock-box">
+      <h2>관리자 비밀번호</h2>
+      <p>질문·분개·부가세 안내를 수정하려면 비밀번호를 입력하세요.</p>
+      <form id="lockForm">
+        <input id="password" type="password" autocomplete="current-password" placeholder="비밀번호" />
+        <button type="submit" class="btn btn-ok">확인</button>
+      </form>
     </div>
-  </header>
+  </section>
 
-  <main class="layout">
-    <div class="wrap">
-      <section class="lock-screen" id="lockScreen">
-        <div class="lock-box">
-          <h2>관리자 비밀번호</h2>
-          <p>안내 문구와 분개를 수정하려면 비밀번호를 입력하세요.</p>
-          <form id="lockForm">
-            <input id="password" type="password" autocomplete="current-password" placeholder="비밀번호" />
-            <button type="submit" class="btn btn-ok">확인</button>
-          </form>
+  <section id="adminApp" hidden>
+    <div class="wrap admin-layout">
+      <aside class="card">
+        <div class="card-head">
+          <h2>주제</h2>
+          <button type="button" class="btn btn-ok" id="btnNew">새 주제</button>
         </div>
-      </section>
-
-      <section id="adminApp" hidden>
-        <div class="note-box">
-          수정한 안내는 이 컴퓨터에 저장됩니다. <b>HTML 저장</b>을 누르면 안내+관리자가 들어 있는 파일 하나를 받을 수 있습니다.
+        <div class="admin-list" id="topicList"></div>
+      </aside>
+      <form class="card" id="topicForm">
+        <div class="card-head">
+          <h2>질문 트리 · 결과</h2>
+          <div class="btn-row">
+            <button type="button" class="btn btn-ghost" id="btnReset">기본값으로</button>
+            <button type="button" class="btn btn-danger" id="btnDelete">삭제</button>
+            <button type="submit" class="btn btn-ok">저장</button>
+          </div>
         </div>
-        <div class="btn-row" style="margin-bottom:14px">
-          <button type="button" class="btn btn-ok" id="btnNew">새 안내 추가</button>
-          <button type="button" class="btn btn-download" id="btnDownloadHtml2">HTML 다운받기</button>
-          <button type="button" class="btn btn-ghost" id="btnExport">JSON 내보내기</button>
-          <label class="btn btn-ghost" for="fileImport" style="margin:0">JSON 가져오기
-            <input id="fileImport" type="file" accept="application/json,.json" hidden />
+        <div class="form-body">
+          <input type="hidden" id="topicId" />
+          <label class="field">검색에 걸릴 이름
+            <input id="title" required placeholder="예: 복리후생비" />
           </label>
-          <button type="button" class="btn btn-ghost" id="btnReset">기본 예시로 되돌리기</button>
+          <label class="field">검색 키워드 (쉼표)
+            <input id="keywords" placeholder="식대, 야근, 회식" />
+          </label>
+          <div id="treeEditor"></div>
         </div>
-        <div class="admin-layout">
-          <aside class="card list-card">
-            <div class="card-head">
-              <h2>등록 목록</h2>
-              <span class="hint" id="listCount">0</span>
-            </div>
-            <div class="admin-list" id="adminList"></div>
-          </aside>
-          <form class="card form-card" id="entryForm">
-            <div class="card-head">
-              <h2>안내 내용</h2>
-              <div class="btn-row">
-                <button type="button" class="btn btn-danger" id="btnDelete">삭제</button>
-                <button type="submit" class="btn btn-ok">저장</button>
-              </div>
-            </div>
-            <div class="form-body">
-              <input type="hidden" id="entryId" />
-              <label class="field">거래명
-                <input id="title" required placeholder="예: 거래처 접대비 (세금계산서)" />
-              </label>
-              <div class="two-col">
-                <label class="field">분류
-                  <select id="category"></select>
-                </label>
-                <label class="field">부가세 처리
-                  <select id="vat"></select>
-                </label>
-              </div>
-              <label class="field">검색 키워드 (쉼표로 구분)
-                <input id="keywords" placeholder="접대, 식사, 불공제" />
-              </label>
-              <label class="field">부가세 안내
-                <textarea id="vatNote" placeholder="이 거래의 부가세 처리 방법을 적어 주세요."></textarea>
-              </label>
-              <div>
-                <div class="card-head" style="padding:0 0 8px; border:0">
-                  <h2>회계분개</h2>
-                  <button type="button" class="btn btn-ghost" id="btnAddLine">행 추가</button>
-                </div>
-                <div class="journal-editor" id="journalEditor"></div>
-              </div>
-              <label class="field">안내사항
-                <textarea id="guide" placeholder="현업에서 이렇게 처리하세요."></textarea>
-              </label>
-              <label class="field">주의
-                <textarea id="caution" placeholder="실수하기 쉬운 점, 회계팀 확인이 필요한 점"></textarea>
-              </label>
-              <label class="field">숫자 예시
-                <input id="example" placeholder="공급가 1,000,000 / 세액 100,000 / 합계 1,100,000" />
-              </label>
-            </div>
-          </form>
-        </div>
-      </section>
+      </form>
     </div>
-  </main>
-  <div class="toast" id="toast" role="status" aria-live="polite"></div>
-
+  </section>
+  <div class="toast" id="toast" role="status"></div>
   <script src="js/store.js"></script>
   <script src="js/admin.js"></script>
-  <script src="js/download.js"></script>
 </body>
 </html>
