@@ -5,6 +5,7 @@
     popular: document.getElementById("popular"),
     thread: document.getElementById("thread"),
     restart: document.getElementById("btnRestart"),
+    back: document.getElementById("btnBack"),
     toast: document.getElementById("toast"),
     updatedAt: document.getElementById("updatedAt")
   };
@@ -97,6 +98,34 @@
       ${node.caution ? `<section class="panel result-note"><h4>주의</h4><div class="caution-box">${escapeHtml(node.caution)}</div></section>` : ""}`;
   }
 
+  function questionCount() {
+    return state.history.filter((m) => m.kind === "question").length;
+  }
+
+  function canGoBack() {
+    if (!state.history.length) return false;
+    const last = state.history[state.history.length - 1];
+    if (last.kind === "result") return questionCount() >= 1;
+    if (last.kind === "question") return questionCount() >= 2;
+    return false;
+  }
+
+  function syncBackButton() {
+    if (!els.back) return;
+    els.back.hidden = !canGoBack();
+  }
+
+  function goBack() {
+    if (!canGoBack()) return;
+    const hist = state.history;
+    const last = hist[hist.length - 1];
+    if (last.kind === "result" || last.kind === "question" || last.kind === "bot") hist.pop();
+    if (hist.length && hist[hist.length - 1].kind === "user") hist.pop();
+    const prevQ = hist.slice().reverse().find((m) => m.kind === "question");
+    state.nodeId = prevQ && prevQ.nodeId ? prevQ.nodeId : null;
+    renderThread();
+  }
+
   function push(msg) {
     state.history.push(msg);
     renderThread();
@@ -105,6 +134,7 @@
   function renderThread() {
     if (!state.history.length) {
       els.thread.innerHTML = `<div class="msg bot"><div class="bubble"><p>왼쪽에서 거래를 검색하거나, 자주 찾는 항목을 눌러 주세요.<br>예: <b>복리후생비</b></p></div></div>`;
+      syncBackButton();
       return;
     }
     els.thread.innerHTML = state.history.map((m, idx) => {
@@ -121,14 +151,17 @@
         return `<div class="msg bot"><div class="bubble">
           <p>${escapeHtml(m.text)}</p>
           ${latest && options ? `<div class="choices">${options}</div>` : ""}
+          ${latest && canGoBack() ? `<button type="button" class="back-q" data-back>← 이전 질문</button>` : ""}
         </div></div>`;
       }
       if (m.kind === "result") {
-        return `<div class="msg bot"><div class="bubble">${resultHtml(m.node)}</div></div>`;
+        const latest = idx === state.history.length - 1;
+        return `<div class="msg bot"><div class="bubble">${resultHtml(m.node)}${latest && canGoBack() ? `<button type="button" class="back-q" data-back>← 이전 질문</button>` : ""}</div></div>`;
       }
       return `<div class="msg bot"><div class="bubble"><p>${escapeHtml(m.text)}</p></div></div>`;
     }).join("");
     els.thread.parentElement.scrollTop = els.thread.parentElement.scrollHeight;
+    syncBackButton();
   }
 
   function showNode(nodeId) {
@@ -139,7 +172,7 @@
     }
     state.nodeId = node.id;
     if (node.type === "question") {
-      push({ kind: "question", text: node.prompt, options: node.options || [] });
+      push({ kind: "question", text: node.prompt, options: node.options || [], nodeId: node.id });
       return;
     }
     push({ kind: "result", node });
@@ -220,11 +253,16 @@
     runSearch(btn.dataset.popularLabel);
   });
   els.thread.addEventListener("click", (e) => {
+    if (e.target.closest("[data-back]")) {
+      goBack();
+      return;
+    }
     const btn = e.target.closest("[data-next]");
     if (!btn) return;
     choose(btn.dataset.next, btn.dataset.label);
   });
   els.restart.addEventListener("click", reset);
+  if (els.back) els.back.addEventListener("click", goBack);
 
   JournalStore.hydrate().then(() => {
     renderPopular();

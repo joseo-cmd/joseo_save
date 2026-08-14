@@ -183,6 +183,19 @@ a { color: inherit; text-decoration: none; }
   text-decoration: underline;
   text-underline-offset: 3px;
 }
+.chat-actions { display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
+.back-q {
+  margin-top: 10px;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+  text-align: left;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.chat-actions .back-q { margin-top: 0; }
 
 .pane-chat {
   padding: 22px 24px 28px;
