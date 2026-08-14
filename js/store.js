@@ -9,7 +9,7 @@
   const ASK_BOARD_URL = "https://jsonblob.iiif.arthistoricum.net/api/jsonBlob/24b492ff-97b3-11f1-bdf1-351353d74d75";
   const GUIDE_BOARD_URL = "https://jsonblob.iiif.arthistoricum.net/api/jsonBlob/ac82b2c1-97b4-11f1-bdf1-076f7318672b";
   const ADMIN_UNLOCK_KEY = "atec-journal-admin-unlocked";
-  const APP_PASS_SHA256 = "4ec9599fc203d176a301536c2e091a19bc852759b255bd6818810a42c5fed14a";
+  const APP_PASS_SHA256 = "614cb3fc60cb6dc183a042b4603f2a88d5c7fdf4ec626f13b8e5121af01f09ea";
 
   const VAT = {
     taxable_sales: {

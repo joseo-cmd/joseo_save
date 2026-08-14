@@ -38,8 +38,6 @@
     askEmail: document.getElementById("askEmail"),
     askList: document.getElementById("askList"),
     btnPublish: document.getElementById("btnPublish"),
-    btnPublish2: document.getElementById("btnPublish2"),
-    btnPublishNav: document.getElementById("btnPublishNav"),
     toast: document.getElementById("toast")
   };
 
@@ -895,8 +893,6 @@
   });
 
   if (els.btnPublish) els.btnPublish.addEventListener("click", downloadGuide);
-  if (els.btnPublish2) els.btnPublish2.addEventListener("click", downloadGuide);
-  if (els.btnPublishNav) els.btnPublishNav.addEventListener("click", downloadGuide);
 
   applyLock();
   if (isUnlocked()) {
