@@ -72,9 +72,9 @@
     els.app.hidden = !on;
   }
 
-  function topicNodes(type) {
+  function topicMemberIds() {
     const topic = currentTopic();
-    if (!topic) return [];
+    if (!topic) return new Set();
     const seen = new Set();
     const walk = (id) => {
       if (!id || seen.has(id) || !state.data.nodes[id]) return;
@@ -87,9 +87,55 @@
       const n = state.data.nodes[id];
       if (n.topicId === topic.id) seen.add(id);
     });
-    return Array.from(seen)
-      .map((id) => state.data.nodes[id])
-      .filter((n) => n && (!type || n.type === type));
+    return seen;
+  }
+
+  function topicNodes(type) {
+    const topic = currentTopic();
+    if (!topic) return [];
+    const members = topicMemberIds();
+    const orderKey = type === "result" ? "resultOrder" : "questionOrder";
+    const order = Array.isArray(topic[orderKey]) ? topic[orderKey] : [];
+    const result = [];
+    const used = new Set();
+    order.forEach((id) => {
+      if (!members.has(id) || used.has(id)) return;
+      const n = state.data.nodes[id];
+      if (!n || (type && n.type !== type)) return;
+      result.push(n);
+      used.add(id);
+    });
+    Array.from(members).forEach((id) => {
+      if (used.has(id)) return;
+      const n = state.data.nodes[id];
+      if (!n || (type && n.type !== type)) return;
+      result.push(n);
+    });
+    return result;
+  }
+
+  function writeTabOrder(ids) {
+    const topic = currentTopic();
+    if (!topic) return;
+    if (state.tab === "result") topic.resultOrder = ids.slice();
+    else {
+      topic.questionOrder = ids.slice();
+      if (ids[0]) topic.startNodeId = ids[0];
+    }
+  }
+
+  function moveNode(id, dir) {
+    readCurrentNodeIntoData();
+    const items = topicNodes(state.tab);
+    const idx = items.findIndex((n) => n.id === id);
+    const swap = idx + dir;
+    if (idx < 0 || swap < 0 || swap >= items.length) return;
+    const ids = items.map((n) => n.id);
+    const cur = ids[idx];
+    ids[idx] = ids[swap];
+    ids[swap] = cur;
+    writeTabOrder(ids);
+    refreshEditor();
   }
 
   function currentTopic() {
@@ -221,8 +267,8 @@
     els.tabQuestion.classList.toggle("active", state.tab === "question");
     els.tabResult.classList.toggle("active", state.tab === "result");
     els.tabHelp.innerHTML = state.tab === "question"
-      ? "지금은 <b>파란 질문 탭</b>입니다. 현업에게 물을 말과 보기를 수정하세요."
-      : "지금은 <b>초록 결과 탭</b>입니다. 부가세 처리와 분개를 수정하세요.";
+      ? "지금은 <b>파란 질문 탭</b>입니다. 왼쪽에서 위·아래로 순서를 바꾸세요. 맨 위가 검색 첫 질문입니다."
+      : "지금은 <b>초록 결과 탭</b>입니다. 왼쪽에서 위·아래로 결과 순서를 바꿀 수 있습니다.";
     els.btnAddNode.textContent = state.tab === "question" ? "질문 추가" : "결과 추가";
   }
 
@@ -235,19 +281,23 @@
       return;
     }
     const startId = topic && topic.startNodeId;
-    els.nodeList.innerHTML = items.map((n) => {
+    els.nodeList.innerHTML = items.map((n, i) => {
       const active = n.id === state.editingNodeId;
       const cls = active ? (n.type === "question" ? " active-q" : " active-r") : "";
       const label = n.type === "question" ? (n.prompt || "새 질문") : (n.title || "새 결과");
       const meta = n.type === "question"
         ? `보기 ${(n.options || []).length}개`
         : (JournalStore.vatInfo(n.vat).short || "");
-      return `<button type="button" class="node-item${cls}" data-node="${escapeHtml(n.id)}">
-        <span class="tag ${n.type === "question" ? "tag-q" : "tag-r"}">${n.type === "question" ? "질문" : "결과"}</span>
-        ${n.id === startId ? '<span class="start-mark">검색 첫 질문</span>' : ""}
-        <strong>${escapeHtml(label)}</strong>
-        <small>${escapeHtml(meta)}</small>
-      </button>`;
+      return `<div class="node-item${cls}">
+        <button type="button" class="node-pick" data-node="${escapeHtml(n.id)}">
+          <span class="tag ${n.type === "question" ? "tag-q" : "tag-r"}">${n.type === "question" ? "질문" : "결과"} ${i + 1}</span>
+          ${n.id === startId ? '<span class="start-mark">검색 첫 질문</span>' : ""}
+          <strong>${escapeHtml(label)}</strong>
+          <small>${escapeHtml(meta)}</small>
+        </button>
+        <button type="button" class="icon-btn" data-node-up="${escapeHtml(n.id)}" ${i === 0 ? "disabled" : ""} aria-label="위로">↑</button>
+        <button type="button" class="icon-btn" data-node-down="${escapeHtml(n.id)}" ${i === items.length - 1 ? "disabled" : ""} aria-label="아래로">↓</button>
+      </div>`;
     }).join("");
   }
 
@@ -271,12 +321,14 @@
           <label class="field">현업에게 물어볼 말
             <input id="nodePrompt" value="${escapeHtml(node.prompt)}" placeholder="예: 식대인가요, 기타 복리후생인가요?" />
           </label>
-          <p class="hint">보기 하나 = 현업이 고르는 답. 오른쪽에서 다음에 질문으로 갈지, 결과로 갈지 고릅니다.</p>
+          <p class="hint">보기 하나 = 현업이 고르는 답. 위·아래로 보기 순서를 바꿀 수 있습니다.</p>
           <div class="option-editor" id="optionEditor">
             ${(node.options || []).map((o, i) => `
               <div class="option-row" data-idx="${i}">
                 <input data-field="label" value="${escapeHtml(o.label)}" placeholder="보기 문구" />
                 <select data-field="nextId">${nextSelect(o.nextId)}</select>
+                <button type="button" class="icon-btn" data-opt-up ${i === 0 ? "disabled" : ""} aria-label="보기 위로">↑</button>
+                <button type="button" class="icon-btn" data-opt-down ${(node.options || []).length - 1 === i ? "disabled" : ""} aria-label="보기 아래로">↓</button>
                 <button type="button" class="icon-btn" data-del-opt aria-label="보기 삭제">×</button>
               </div>`).join("")}
           </div>
@@ -351,7 +403,12 @@
       })).filter((o) => o.label);
       const asStart = document.getElementById("asStart");
       const topic = currentTopic();
-      if (asStart && asStart.checked && topic) topic.startNodeId = node.id;
+      if (asStart && asStart.checked && topic) {
+        topic.startNodeId = node.id;
+        const ids = topicNodes("question").map((n) => n.id).filter((id) => id !== node.id);
+        ids.unshift(node.id);
+        topic.questionOrder = ids;
+      }
       return;
     }
     const title = document.getElementById("resTitle");
@@ -395,6 +452,8 @@
     if (!topic) return;
     topic.title = els.title.value.trim();
     topic.keywords = els.keywords.value.split(/[,/，、]+/).map((k) => k.trim()).filter(Boolean);
+    topic.questionOrder = topicNodes("question").map((n) => n.id);
+    topic.resultOrder = topicNodes("result").map((n) => n.id);
   }
 
   function setTab(tab) {
@@ -417,6 +476,11 @@
     if (fresh.type === "question") fresh.prompt = "";
     state.data.nodes[fresh.id] = fresh;
     if (fresh.type === "question" && !topic.startNodeId) topic.startNodeId = fresh.id;
+    if (fresh.type === "question") {
+      topic.questionOrder = topicNodes("question").map((n) => n.id).concat([fresh.id]).filter((id, i, arr) => arr.indexOf(id) === i);
+    } else {
+      topic.resultOrder = topicNodes("result").map((n) => n.id).concat([fresh.id]).filter((id, i, arr) => arr.indexOf(id) === i);
+    }
     state.editingNodeId = fresh.id;
     refreshEditor();
   }
@@ -434,6 +498,10 @@
       }
     });
     const topic = currentTopic();
+    if (topic) {
+      topic.questionOrder = (topic.questionOrder || []).filter((nid) => nid !== id);
+      topic.resultOrder = (topic.resultOrder || []).filter((nid) => nid !== id);
+    }
     if (topic && topic.startNodeId === id) {
       const nextQ = topicNodes("question")[0];
       topic.startNodeId = nextQ ? nextQ.id : "";
@@ -521,6 +589,18 @@
   });
 
   els.nodeList.addEventListener("click", (e) => {
+    const up = e.target.closest("[data-node-up]");
+    if (up) {
+      e.preventDefault();
+      moveNode(up.dataset.nodeUp, -1);
+      return;
+    }
+    const down = e.target.closest("[data-node-down]");
+    if (down) {
+      e.preventDefault();
+      moveNode(down.dataset.nodeDown, 1);
+      return;
+    }
     const btn = e.target.closest("[data-node]");
     if (!btn) return;
     readCurrentNodeIntoData();
@@ -554,6 +634,32 @@
       readCurrentNodeIntoData();
       const idx = Number(delOpt.closest(".option-row").dataset.idx);
       state.data.nodes[state.editingNodeId].options.splice(idx, 1);
+      renderEditor();
+      return;
+    }
+    const optUp = e.target.closest("[data-opt-up]");
+    if (optUp) {
+      readCurrentNodeIntoData();
+      const idx = Number(optUp.closest(".option-row").dataset.idx);
+      const opts = state.data.nodes[state.editingNodeId].options || [];
+      if (idx > 0) {
+        const cur = opts[idx];
+        opts[idx] = opts[idx - 1];
+        opts[idx - 1] = cur;
+      }
+      renderEditor();
+      return;
+    }
+    const optDown = e.target.closest("[data-opt-down]");
+    if (optDown) {
+      readCurrentNodeIntoData();
+      const idx = Number(optDown.closest(".option-row").dataset.idx);
+      const opts = state.data.nodes[state.editingNodeId].options || [];
+      if (idx < opts.length - 1) {
+        const cur = opts[idx];
+        opts[idx] = opts[idx + 1];
+        opts[idx + 1] = cur;
+      }
       renderEditor();
       return;
     }
