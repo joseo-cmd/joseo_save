@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>관리자 · 에이텍컴퓨터 회계노트</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
-  <link rel="stylesheet" href="css/app.css?v=hash1" />
+  <link rel="stylesheet" href="css/app.css?v=pub1" />
 </head>
 <body>
   <nav class="nav">
@@ -37,6 +37,11 @@
 
   <section id="adminApp" hidden>
     <div class="wrap admin-page">
+      <div class="publish-bar">
+        <p>저장은 <b>이 컴퓨터에만</b> 됩니다. 다른 사람이 보게 하려면 <b>다른 사람에게 보이기</b>를 눌러 받은 <code>guide.json</code>을 GitHub <b>data</b> 폴더에 올려 주세요.</p>
+        <a class="publish-link" href="https://github.com/joseo-cmd/joseo_save/upload/main/data" target="_blank" rel="noopener">올리는 곳 열기</a>
+        <button type="button" class="btn btn-ok" id="btnPublish">다른 사람에게 보이기</button>
+      </div>
       <div class="page-tabs" role="tablist">
         <button type="button" class="page-tab active" id="pageTopics" data-page="topics">
           <span class="mode-kicker">내용</span>
@@ -149,7 +154,7 @@
   </section>
   <footer class="site-foot">Made by Seo</footer>
   <div class="toast" id="toast" role="status"></div>
-  <script src="js/store.js?v=hash1"></script>
-  <script src="js/admin.js?v=hash1"></script>
+  <script src="js/store.js?v=pub1"></script>
+  <script src="js/admin.js?v=pub1"></script>
 </body>
 </html>

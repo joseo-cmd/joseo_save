@@ -32,6 +32,7 @@
     btnAddPopular: document.getElementById("btnAddPopular"),
     welcomeForm: document.getElementById("welcomeForm"),
     welcomeText: document.getElementById("welcomeText"),
+    btnPublish: document.getElementById("btnPublish"),
     toast: document.getElementById("toast")
   };
 
@@ -61,7 +62,7 @@
     readWelcomeIntoData();
     JournalStore.saveData(state.data);
     state.data = JournalStore.loadData();
-    showToast(okMsg || "저장했습니다. 안내 페이지에 반영됩니다.");
+    showToast(okMsg || "이 컴퓨터에 저장했습니다. 다른 사람이 보려면 ‘다른 사람에게 보이기’를 눌러 주세요.");
   }
 
   function readWelcomeIntoData() {
@@ -599,14 +600,14 @@
 
   els.popularForm.addEventListener("submit", (e) => {
     e.preventDefault();
-    persist("자주 찾는 항목을 저장했습니다.");
+    persist("자주 찾는 항목을 이 컴퓨터에 저장했습니다. 다른 사람이 보려면 ‘다른 사람에게 보이기’를 눌러 주세요.");
     renderPopularEditor();
   });
 
   if (els.welcomeForm) {
     els.welcomeForm.addEventListener("submit", (e) => {
       e.preventDefault();
-      persist("첫 멘트를 저장했습니다. 안내 페이지에 반영됩니다.");
+      persist("첫 멘트를 이 컴퓨터에 저장했습니다. 다른 사람이 보려면 ‘다른 사람에게 보이기’를 눌러 주세요.");
       renderPopularEditor();
     });
   }
@@ -706,6 +707,23 @@
     els.title.focus();
   });
 
+  function downloadGuide() {
+    if (state.page === "topics") currentTopicPatch();
+    readWelcomeIntoData();
+    const rec = JournalStore.saveData(state.data);
+    state.data = JournalStore.loadData();
+    const blob = new Blob([JSON.stringify(rec, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "guide.json";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    showToast("guide.json 파일을 받았어요. GitHub data 폴더에 올려 주세요.");
+  }
+
   els.form.addEventListener("submit", (e) => {
     e.preventDefault();
     currentTopicPatch();
@@ -713,7 +731,7 @@
       showToast("주제 이름을 입력하세요.");
       return;
     }
-    persist("저장했습니다.");
+    persist("이 컴퓨터에 저장했습니다. 다른 사람이 보려면 ‘다른 사람에게 보이기’를 눌러 주세요.");
     renderList();
     renderPopularEditor();
     refreshEditor();
@@ -736,6 +754,8 @@
     persist("기본값으로 되돌렸습니다.");
     load();
   });
+
+  if (els.btnPublish) els.btnPublish.addEventListener("click", downloadGuide);
 
   applyLock();
   if (isUnlocked()) {
