@@ -9,7 +9,15 @@
     topicId: document.getElementById("topicId"),
     title: document.getElementById("title"),
     keywords: document.getElementById("keywords"),
-    tree: document.getElementById("treeEditor"),
+    tabQuestion: document.getElementById("tabQuestion"),
+    tabResult: document.getElementById("tabResult"),
+    tabHelp: document.getElementById("tabHelp"),
+    qCount: document.getElementById("qCount"),
+    rCount: document.getElementById("rCount"),
+    btnAddNode: document.getElementById("btnAddNode"),
+    nodeList: document.getElementById("nodeList"),
+    nodeEditor: document.getElementById("nodeEditor"),
+    editorTitle: document.getElementById("editorTitle"),
     btnNew: document.getElementById("btnNew"),
     btnDelete: document.getElementById("btnDelete"),
     btnReset: document.getElementById("btnReset"),
@@ -19,6 +27,7 @@
   const state = {
     data: null,
     topicId: null,
+    tab: "question",
     editingNodeId: null
   };
 
@@ -47,12 +56,36 @@
     els.app.hidden = !on;
   }
 
+  function topicNodes(type) {
+    const topic = currentTopic();
+    if (!topic) return [];
+    const seen = new Set();
+    const walk = (id) => {
+      if (!id || seen.has(id) || !state.data.nodes[id]) return;
+      seen.add(id);
+      const n = state.data.nodes[id];
+      if (n.type === "question") (n.options || []).forEach((o) => walk(o.nextId));
+    };
+    walk(topic.startNodeId);
+    Object.keys(state.data.nodes).forEach((id) => {
+      const n = state.data.nodes[id];
+      if (n.topicId === topic.id) seen.add(id);
+    });
+    return Array.from(seen)
+      .map((id) => state.data.nodes[id])
+      .filter((n) => n && (!type || n.type === type));
+  }
+
+  function currentTopic() {
+    return state.data.topics.find((t) => t.id === state.topicId) || null;
+  }
+
   function load() {
     state.data = JournalStore.loadData();
     if (!state.topicId && state.data.topics[0]) state.topicId = state.data.topics[0].id;
     renderList();
-    const topic = state.data.topics.find((t) => t.id === state.topicId);
-    if (topic) fillTopic(topic);
+    const topic = currentTopic();
+    if (topic) fillTopic(topic, { keepTab: true });
   }
 
   function renderList() {
@@ -64,48 +97,91 @@
     ).join("") || `<div class="hint" style="padding:16px">주제를 추가하세요.</div>`;
   }
 
-  function nodeSelect(selectedId) {
-    const nodes = state.data.nodes;
-    const opts = Object.keys(nodes).map((id) => {
-      const n = nodes[id];
-      const label = n.type === "question" ? "질문 · " + (n.prompt || id) : "결과 · " + (n.title || id);
-      return `<option value="${escapeHtml(id)}"${id === selectedId ? " selected" : ""}>${escapeHtml(label)}</option>`;
-    }).join("");
-    return `<option value="">(이어서 만들기)</option>${opts}`;
+  function nextSelect(selectedId) {
+    const questions = topicNodes("question");
+    const results = topicNodes("result");
+    const allQ = Object.values(state.data.nodes).filter((n) => n.type === "question");
+    const allR = Object.values(state.data.nodes).filter((n) => n.type === "result");
+    const qSet = new Set(questions.map((n) => n.id));
+    const rSet = new Set(results.map((n) => n.id));
+    const extraQ = allQ.filter((n) => !qSet.has(n.id));
+    const extraR = allR.filter((n) => !rSet.has(n.id));
+    const opt = (n) => `<option value="${escapeHtml(n.id)}"${n.id === selectedId ? " selected" : ""}>${escapeHtml(n.type === "question" ? (n.prompt || "질문") : (n.title || "결과"))}</option>`;
+    return `<option value="">연결 안 함</option>
+      <optgroup label="질문">${questions.map(opt).join("")}${extraQ.length ? extraQ.map(opt).join("") : ""}</optgroup>
+      <optgroup label="결과 (부가세·분개)">${results.map(opt).join("")}${extraR.length ? extraR.map(opt).join("") : ""}</optgroup>`;
   }
 
-  function renderTree() {
-    const topic = state.data.topics.find((t) => t.id === state.topicId);
-    if (!topic) {
-      els.tree.innerHTML = "";
+  function renderTabs() {
+    const qn = topicNodes("question").length;
+    const rn = topicNodes("result").length;
+    els.qCount.textContent = String(qn);
+    els.rCount.textContent = String(rn);
+    els.tabQuestion.classList.toggle("active", state.tab === "question");
+    els.tabResult.classList.toggle("active", state.tab === "result");
+    els.tabHelp.textContent = state.tab === "question"
+      ? "질문은 현업에게 묻는 말입니다. 보기마다 ‘다음이 질문인지, 결과인지’를 고르세요."
+      : "결과는 질문이 끝난 뒤 보여주는 부가세 처리와 분개입니다.";
+    els.btnAddNode.textContent = state.tab === "question" ? "질문 추가" : "결과 추가";
+  }
+
+  function renderNodeList() {
+    const topic = currentTopic();
+    const items = topicNodes(state.tab);
+    renderTabs();
+    if (!items.length) {
+      els.nodeList.innerHTML = `<div class="hint" style="padding:14px">${state.tab === "question" ? "질문을 추가하세요." : "결과를 추가하세요."}</div>`;
       return;
     }
-    const node = state.data.nodes[state.editingNodeId] || state.data.nodes[topic.startNodeId];
-    if (!node) {
-      els.tree.innerHTML = `<p class="hint">시작 질문이 없습니다.</p>`;
+    const startId = topic && topic.startNodeId;
+    els.nodeList.innerHTML = items.map((n) => {
+      const active = n.id === state.editingNodeId;
+      const cls = active ? (n.type === "question" ? " active-q" : " active-r") : "";
+      const label = n.type === "question" ? (n.prompt || "새 질문") : (n.title || "새 결과");
+      const meta = n.type === "question"
+        ? `보기 ${(n.options || []).length}개`
+        : (JournalStore.vatInfo(n.vat).short || "");
+      return `<button type="button" class="node-item${cls}" data-node="${escapeHtml(n.id)}">
+        <span class="tag ${n.type === "question" ? "tag-q" : "tag-r"}">${n.type === "question" ? "질문" : "결과"}</span>
+        ${n.id === startId ? '<span class="start-mark">검색 첫 질문</span>' : ""}
+        <strong>${escapeHtml(label)}</strong>
+        <small>${escapeHtml(meta)}</small>
+      </button>`;
+    }).join("");
+  }
+
+  function renderEditor() {
+    const node = state.data.nodes[state.editingNodeId];
+    if (!node || node.type !== state.tab) {
+      els.nodeEditor.innerHTML = `<div class="help-box">${state.tab === "question" ? "왼쪽에서 질문을 고르거나 질문 추가를 누르세요." : "왼쪽에서 결과를 고르거나 결과 추가를 누르세요."}</div>`;
       return;
     }
-    state.editingNodeId = node.id;
     if (node.type === "question") {
-      els.tree.innerHTML = `
+      const topic = currentTopic();
+      const isStart = topic && topic.startNodeId === node.id;
+      els.nodeEditor.innerHTML = `
         <div class="node-card">
-          <strong>질문</strong>
+          <div class="btn-row">
+            <span class="tag tag-q">질문</span>
+            <label class="hint" style="display:inline-flex;gap:6px;align-items:center;font-weight:700">
+              <input type="checkbox" id="asStart"${isStart ? " checked" : ""} /> 검색하면 이 질문부터 시작
+            </label>
+          </div>
           <label class="field">현업에게 물어볼 말
-            <input id="nodePrompt" value="${escapeHtml(node.prompt)}" />
+            <input id="nodePrompt" value="${escapeHtml(node.prompt)}" placeholder="예: 식대인가요, 기타 복리후생인가요?" />
           </label>
+          <p class="hint">보기 하나 = 현업이 고르는 답. 오른쪽에서 다음에 질문으로 갈지, 결과로 갈지 고릅니다.</p>
           <div class="option-editor" id="optionEditor">
             ${(node.options || []).map((o, i) => `
               <div class="option-row" data-idx="${i}">
-                <input data-field="label" value="${escapeHtml(o.label)}" placeholder="보기 (예: 식대인가요?)" />
-                <select data-field="nextId">${nodeSelect(o.nextId)}</select>
-                <button type="button" class="icon-btn" data-del-opt>×</button>
+                <input data-field="label" value="${escapeHtml(o.label)}" placeholder="보기 문구" />
+                <select data-field="nextId">${nextSelect(o.nextId)}</select>
+                <button type="button" class="icon-btn" data-del-opt aria-label="보기 삭제">×</button>
               </div>`).join("")}
           </div>
           <div class="btn-row">
             <button type="button" class="btn btn-ghost" id="btnAddOpt">보기 추가</button>
-            <button type="button" class="btn btn-ghost" id="btnNewQ">이 질문 뒤에 새 질문</button>
-            <button type="button" class="btn btn-ghost" id="btnNewR">이 질문 뒤에 새 결과</button>
-            <button type="button" class="btn btn-ghost" id="btnToResult">이 노드를 결과로 바꾸기</button>
+            <button type="button" class="btn btn-danger" id="btnDelNode">이 질문 삭제</button>
           </div>
         </div>`;
       return;
@@ -113,17 +189,17 @@
     const vatOpts = JournalStore.vatList().map((v) =>
       `<option value="${v.id}"${node.vat === v.id ? " selected" : ""}>${escapeHtml(v.label)}</option>`
     ).join("");
-    els.tree.innerHTML = `
+    els.nodeEditor.innerHTML = `
       <div class="node-card">
-        <strong>최종 안내 (부가세 · 분개)</strong>
+        <span class="tag tag-r">결과 · 부가세와 분개</span>
         <label class="field">결과 제목
-          <input id="resTitle" value="${escapeHtml(node.title)}" />
+          <input id="resTitle" value="${escapeHtml(node.title)}" placeholder="예: 직원 식대 (공제 가능)" />
         </label>
         <label class="field">부가세 처리
           <select id="resVat">${vatOpts}</select>
         </label>
         <label class="field">부가세 안내
-          <textarea id="resVatNote">${escapeHtml(node.vatNote)}</textarea>
+          <textarea id="resVatNote" placeholder="공제되는지, 예수금인지 적어 주세요.">${escapeHtml(node.vatNote)}</textarea>
         </label>
         <div>
           <div class="card-head" style="padding:0 0 8px;border:0">
@@ -131,7 +207,7 @@
             <button type="button" class="btn btn-ghost" id="btnAddLine">행 추가</button>
           </div>
           <div class="journal-editor" id="journalEditor">
-            ${(node.journal || []).map((l, i) => `
+            ${(node.journal && node.journal.length ? node.journal : [{ side: "debit", account: "", memo: "" }]).map((l, i) => `
               <div class="journal-row" data-idx="${i}">
                 <select data-field="side">
                   <option value="debit"${l.side === "debit" ? " selected" : ""}>차변</option>
@@ -152,7 +228,7 @@
         <label class="field">숫자 예시
           <input id="resExample" value="${escapeHtml(node.example)}" />
         </label>
-        <button type="button" class="btn btn-ghost" id="btnToQuestion">이 노드를 질문으로 바꾸기</button>
+        <button type="button" class="btn btn-danger" id="btnDelNode">이 결과 삭제</button>
       </div>`;
   }
 
@@ -161,11 +237,15 @@
     if (!node) return;
     if (node.type === "question") {
       const prompt = document.getElementById("nodePrompt");
-      if (prompt) node.prompt = prompt.value.trim();
+      if (!prompt) return;
+      node.prompt = prompt.value.trim();
       node.options = Array.from(document.querySelectorAll("#optionEditor .option-row")).map((row) => ({
         label: row.querySelector('[data-field="label"]').value.trim(),
         nextId: row.querySelector('[data-field="nextId"]').value
       })).filter((o) => o.label);
+      const asStart = document.getElementById("asStart");
+      const topic = currentTopic();
+      if (asStart && asStart.checked && topic) topic.startNodeId = node.id;
       return;
     }
     const title = document.getElementById("resTitle");
@@ -183,22 +263,77 @@
     })).filter((l) => l.account || l.memo);
   }
 
-  function fillTopic(topic) {
+  function refreshEditor() {
+    renderNodeList();
+    renderEditor();
+  }
+
+  function fillTopic(topic, opts) {
+    readCurrentNodeIntoData();
     state.topicId = topic.id;
-    state.editingNodeId = topic.startNodeId;
+    if (!opts || !opts.keepTab) state.tab = "question";
+    const first = topicNodes(state.tab)[0];
+    state.editingNodeId = first ? first.id : (state.tab === "question" ? topic.startNodeId : null);
     els.topicId.value = topic.id;
     els.title.value = topic.title || "";
     els.keywords.value = (topic.keywords || []).join(", ");
+    els.editorTitle.textContent = topic.title ? topic.title + " 수정" : "주제 수정";
     renderList();
-    renderTree();
+    refreshEditor();
   }
 
   function currentTopicPatch() {
     readCurrentNodeIntoData();
-    const topic = state.data.topics.find((t) => t.id === state.topicId);
+    const topic = currentTopic();
     if (!topic) return;
     topic.title = els.title.value.trim();
     topic.keywords = els.keywords.value.split(/[,/，、]+/).map((k) => k.trim()).filter(Boolean);
+  }
+
+  function setTab(tab) {
+    readCurrentNodeIntoData();
+    state.tab = tab;
+    const items = topicNodes(tab);
+    state.editingNodeId = items[0] ? items[0].id : null;
+    refreshEditor();
+  }
+
+  function addNode() {
+    readCurrentNodeIntoData();
+    const topic = currentTopic();
+    if (!topic) {
+      showToast("주제를 먼저 만드세요.");
+      return;
+    }
+    const fresh = state.tab === "question" ? JournalStore.emptyQuestion() : JournalStore.emptyResult();
+    fresh.topicId = topic.id;
+    if (fresh.type === "question") fresh.prompt = "";
+    state.data.nodes[fresh.id] = fresh;
+    if (fresh.type === "question" && !topic.startNodeId) topic.startNodeId = fresh.id;
+    state.editingNodeId = fresh.id;
+    refreshEditor();
+  }
+
+  function deleteNode() {
+    const node = state.data.nodes[state.editingNodeId];
+    if (!node) return;
+    if (!confirm((node.type === "question" ? "이 질문을" : "이 결과를") + " 삭제할까요?")) return;
+    const id = node.id;
+    delete state.data.nodes[id];
+    Object.keys(state.data.nodes).forEach((nid) => {
+      const n = state.data.nodes[nid];
+      if (n.type === "question") {
+        n.options = (n.options || []).map((o) => o.nextId === id ? Object.assign({}, o, { nextId: "" }) : o);
+      }
+    });
+    const topic = currentTopic();
+    if (topic && topic.startNodeId === id) {
+      const nextQ = topicNodes("question")[0];
+      topic.startNodeId = nextQ ? nextQ.id : "";
+    }
+    const items = topicNodes(state.tab);
+    state.editingNodeId = items[0] ? items[0].id : null;
+    refreshEditor();
   }
 
   els.formLock.addEventListener("submit", async (e) => {
@@ -222,54 +357,25 @@
     if (topic) fillTopic(topic);
   });
 
-  els.btnNew.addEventListener("click", () => {
-    const made = JournalStore.emptyTopic();
-    state.data.nodes[made.start.id] = made.start;
-    state.data.topics.unshift(made.topic);
-    fillTopic(made.topic);
-    els.title.focus();
+  els.tabQuestion.addEventListener("click", () => setTab("question"));
+  els.tabResult.addEventListener("click", () => setTab("result"));
+  els.btnAddNode.addEventListener("click", addNode);
+
+  els.nodeList.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-node]");
+    if (!btn) return;
+    readCurrentNodeIntoData();
+    state.editingNodeId = btn.dataset.node;
+    refreshEditor();
   });
 
-  els.tree.addEventListener("click", (e) => {
+  els.nodeEditor.addEventListener("click", (e) => {
     if (e.target.id === "btnAddOpt") {
       readCurrentNodeIntoData();
       const node = state.data.nodes[state.editingNodeId];
       node.options = node.options || [];
       node.options.push({ label: "", nextId: "" });
-      renderTree();
-      return;
-    }
-    if (e.target.id === "btnNewQ" || e.target.id === "btnNewR") {
-      readCurrentNodeIntoData();
-      const fresh = e.target.id === "btnNewQ" ? JournalStore.emptyQuestion() : JournalStore.emptyResult();
-      if (fresh.type === "question") fresh.prompt = "다음으로 확인할 것은?";
-      state.data.nodes[fresh.id] = fresh;
-      const node = state.data.nodes[state.editingNodeId];
-      const empty = (node.options || []).find((o) => !o.nextId);
-      if (empty) empty.nextId = fresh.id;
-      else node.options.push({ label: "다음", nextId: fresh.id });
-      state.editingNodeId = fresh.id;
-      renderTree();
-      return;
-    }
-    if (e.target.id === "btnToResult") {
-      readCurrentNodeIntoData();
-      const prev = state.data.nodes[state.editingNodeId];
-      const res = JournalStore.emptyResult();
-      res.id = prev.id;
-      res.title = prev.prompt || "안내";
-      state.data.nodes[res.id] = res;
-      renderTree();
-      return;
-    }
-    if (e.target.id === "btnToQuestion") {
-      readCurrentNodeIntoData();
-      const prev = state.data.nodes[state.editingNodeId];
-      const q = JournalStore.emptyQuestion();
-      q.id = prev.id;
-      q.prompt = prev.title || "어떤 경우인가요?";
-      state.data.nodes[q.id] = q;
-      renderTree();
+      renderEditor();
       return;
     }
     if (e.target.id === "btnAddLine") {
@@ -277,38 +383,39 @@
       const node = state.data.nodes[state.editingNodeId];
       node.journal = node.journal || [];
       node.journal.push({ side: "debit", account: "", memo: "" });
-      renderTree();
+      renderEditor();
+      return;
+    }
+    if (e.target.id === "btnDelNode") {
+      deleteNode();
       return;
     }
     const delOpt = e.target.closest("[data-del-opt]");
     if (delOpt) {
       readCurrentNodeIntoData();
-      const row = delOpt.closest(".option-row");
-      const idx = Number(row.dataset.idx);
-      const node = state.data.nodes[state.editingNodeId];
-      node.options.splice(idx, 1);
-      renderTree();
+      const idx = Number(delOpt.closest(".option-row").dataset.idx);
+      state.data.nodes[state.editingNodeId].options.splice(idx, 1);
+      renderEditor();
       return;
     }
     const delLine = e.target.closest("[data-del-line]");
     if (delLine) {
       readCurrentNodeIntoData();
-      const row = delLine.closest(".journal-row");
-      const idx = Number(row.dataset.idx);
-      const node = state.data.nodes[state.editingNodeId];
-      node.journal.splice(idx, 1);
-      renderTree();
+      const idx = Number(delLine.closest(".journal-row").dataset.idx);
+      state.data.nodes[state.editingNodeId].journal.splice(idx, 1);
+      renderEditor();
     }
   });
 
-  els.tree.addEventListener("change", (e) => {
-    const sel = e.target.closest('select[data-field="nextId"]');
-    if (!sel) return;
-    readCurrentNodeIntoData();
-    if (sel.value) {
-      state.editingNodeId = sel.value;
-      renderTree();
-    }
+  els.btnNew.addEventListener("click", () => {
+    const made = JournalStore.emptyTopic();
+    made.start.topicId = made.topic.id;
+    made.start.prompt = "";
+    state.data.nodes[made.start.id] = made.start;
+    state.data.topics.unshift(made.topic);
+    state.tab = "question";
+    fillTopic(made.topic);
+    els.title.focus();
   });
 
   els.form.addEventListener("submit", (e) => {
@@ -321,12 +428,13 @@
     JournalStore.saveData(state.data);
     state.data = JournalStore.loadData();
     renderList();
-    showToast("저장했습니다. 안내 페이지 검색에 바로 반영됩니다.");
+    refreshEditor();
+    showToast("저장했습니다. 안내 페이지 검색에 반영됩니다.");
   });
 
   els.btnDelete.addEventListener("click", () => {
     if (!state.topicId) return;
-    if (!confirm("이 주제를 삭제할까요?")) return;
+    if (!confirm("이 검색 주제를 삭제할까요? 질문·결과는 연결이 끊깁니다.")) return;
     state.data.topics = state.data.topics.filter((t) => t.id !== state.topicId);
     JournalStore.saveData(state.data);
     state.topicId = state.data.topics[0] ? state.data.topics[0].id : null;
@@ -335,9 +443,10 @@
   });
 
   els.btnReset.addEventListener("click", () => {
-    if (!confirm("관리자가 저장한 질문 트리를 지우고 기본값으로 되돌릴까요?")) return;
+    if (!confirm("관리자가 저장한 내용을 지우고 기본값으로 되돌릴까요?")) return;
     state.data = JournalStore.resetToSeed();
     state.topicId = state.data.topics[0] ? state.data.topics[0].id : null;
+    state.tab = "question";
     load();
     showToast("기본값으로 되돌렸습니다.");
   });
