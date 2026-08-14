@@ -133,7 +133,7 @@
 
   function renderThread() {
     if (!state.history.length) {
-      els.thread.innerHTML = `<div class="msg bot"><div class="bubble"><p>왼쪽에서 거래를 검색하거나, 자주 찾는 항목을 눌러 주세요.<br>예: <b>복리후생비</b></p></div></div>`;
+      els.thread.innerHTML = `<div class="msg bot"><div class="bubble"><p class="welcome-text">${escapeHtml(JournalStore.getWelcome())}</p></div></div>`;
       syncBackButton();
       return;
     }
@@ -272,11 +272,13 @@
   window.addEventListener("journal-tree-changed", () => {
     renderPopular();
     renderUpdatedAt();
+    if (!state.history.length) renderThread();
   });
   window.addEventListener("storage", (e) => {
     if (e.key === JournalStore.STORAGE_KEY) {
       renderPopular();
       renderUpdatedAt();
+      if (!state.history.length) renderThread();
     }
   });
 })();

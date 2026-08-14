@@ -721,6 +721,11 @@
     return raw.map(normalizePopularItem).filter(Boolean);
   }
 
+  function normalizeWelcome(raw) {
+    const text = String(raw == null ? "" : raw).replace(/\r\n/g, "\n").trim();
+    return text || DEFAULT_WELCOME;
+  }
+
   function seedData() {
     const nodes = {};
     SEED_NODES.forEach((n) => {
@@ -731,10 +736,12 @@
     return {
       topics,
       nodes,
-      popular: normalizePopular(SEED_POPULAR, topics)
+      popular: normalizePopular(SEED_POPULAR, topics),
+      welcome: DEFAULT_WELCOME
     };
   }
 
+  const DEFAULT_WELCOME = "왼쪽에서 거래를 검색하거나, 자주 찾는 항목을 눌러 주세요.\n예: 복리후생비";
   const DATA_PATH = "data/guide.json";
   const DATA_REPO = { owner: "joseo-cmd", repo: "joseo_save" };
   const DATA_BRANCHES = ["cursor/popular-keywords-admin-4d7f", "main"];
@@ -769,6 +776,7 @@
       topics,
       nodes,
       popular: normalizePopular(rec && rec.popular, topics),
+      welcome: normalizeWelcome(rec && rec.welcome),
       isCustom: !!(rec && rec.topics),
       updatedAt: (rec && rec.updatedAt) || null
     },     extra || {});
@@ -875,7 +883,8 @@
         updatedAt: nowIso(),
         topics: built.topics,
         nodes: built.nodes,
-        popular: built.popular
+        popular: built.popular,
+        welcome: built.welcome
       };
       memory = record;
       try { localStorage.setItem(STORAGE_KEY, JSON.stringify(record)); } catch {}
@@ -893,6 +902,11 @@
     getPopular() {
       const data = api.loadData();
       return Array.isArray(data.popular) ? data.popular : [];
+    },
+
+    getWelcome() {
+      const data = api.loadData();
+      return normalizeWelcome(data && data.welcome);
     },
 
     searchTopics(query) {
