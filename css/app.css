@@ -196,68 +196,18 @@ a { color: inherit; text-decoration: none; }
   text-underline-offset: 3px;
 }
 .chat-actions .back-q { margin-top: 0; }
-.ask-box {
-  margin-top: auto;
-  position: sticky;
-  bottom: 8px;
-  z-index: 5;
-  padding-top: 14px;
-  background: linear-gradient(180deg, transparent, rgba(255,255,255,0.94) 36%);
-}
+.ask-box { margin-top: auto; padding-top: 12px; }
 .ask-launch {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  border: 0;
+  border: 1px solid var(--line);
   background: #fff;
-  padding: 6px 14px 6px 6px;
-  border-radius: 999px;
-  color: var(--ink);
-  cursor: pointer;
-  box-shadow: 0 4px 14px rgba(17, 17, 17, 0.1);
-}
-.ask-launch-label {
-  font-size: 13px;
+  color: var(--ink-soft);
+  font-size: 12px;
   font-weight: 800;
+  padding: 6px 10px;
+  border-radius: 999px;
 }
-.ask-bulb {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  font-size: 26px;
-  line-height: 1;
-  background: #ffe566;
-  box-shadow: 0 0 0 3px #f3d34a;
-  transition: box-shadow 0.25s ease, transform 0.25s ease, background 0.25s ease;
-}
-.ask-launch:hover .ask-bulb {
-  transform: scale(1.06);
-  box-shadow: 0 0 16px 6px rgba(255, 214, 60, 0.45);
-}
-.ask-launch.is-on {
-  background: #fffceb;
-}
-.ask-launch.is-on .ask-bulb {
-  background: #ffe034;
-  box-shadow: 0 0 22px 8px rgba(255, 214, 40, 0.7);
-  animation: bulb-pop 0.55s cubic-bezier(0.2, 1.4, 0.4, 1) both, bulb-glow 1.4s ease-in-out 0.55s infinite;
-}
-.ask-launch.is-on .ask-launch-label { color: var(--brand-deep); }
-@keyframes bulb-pop {
-  0% { transform: scale(0.82); filter: brightness(0.75); }
-  40% { transform: scale(1.22); filter: brightness(1.45); }
-  70% { transform: scale(0.96); }
-  100% { transform: scale(1); filter: brightness(1); }
-}
-@keyframes bulb-glow {
-  0%, 100% { box-shadow: 0 0 18px 6px rgba(255, 214, 40, 0.45); }
-  50% { box-shadow: 0 0 28px 12px rgba(255, 214, 40, 0.8); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .ask-launch.is-on .ask-bulb { animation: none; }
-}
+.ask-launch:hover,
+.ask-launch.is-on { border-color: var(--brand); color: var(--brand-deep); background: var(--mint); }
 .ask-board {
   margin-top: 10px;
   padding: 10px;
