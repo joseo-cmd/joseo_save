@@ -115,6 +115,26 @@ a { color: inherit; text-decoration: none; }
   padding: 8px 14px;
   font-size: 13px;
 }
+.btn-download {
+  background: var(--lime) !important;
+  color: var(--ink) !important;
+  border: 0 !important;
+  font-weight: 800;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+.btn-download:hover { background: var(--lime-2) !important; }
+.hero-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 18px;
+}
+.hero-actions .btn {
+  min-width: 180px;
+  padding: 14px 22px;
+  font-size: 15px;
+}
 .nav-links a:hover { background: #f3f4f0; color: var(--ink); }
 .nav-cta {
   display: inline-flex;

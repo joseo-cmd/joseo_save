@@ -16,8 +16,7 @@
         <span class="logo-text">분개<span>안내</span></span>
       </a>
       <div class="nav-links">
-        <span class="ghost hide-sm" id="dataSource">기본 예시 안내</span>
-        <button type="button" class="btn btn-ghost" id="btnDownloadHtml">HTML 저장</button>
+        <button type="button" class="btn btn-download" id="btnDownloadHtml">HTML 다운받기</button>
         <a class="nav-cta" href="#admin" data-view="admin">관리자</a>
       </div>
     </div>
@@ -35,6 +34,10 @@
         <input id="q" type="search" placeholder="접대비, 세금계산서, 택시, 급여, 수출…" autocomplete="off" />
       </label>
       <p class="hero-meta"><strong id="entryCount">0건</strong>의 안내가 준비되어 있습니다</p>
+      <div class="hero-actions">
+        <button type="button" class="btn btn-download" id="btnDownloadHtmlHero">HTML 다운받기</button>
+      </div>
+      <span id="dataSource" hidden>기본 예시 안내</span>
     </div>
   </header>
 
@@ -77,7 +80,7 @@
           </div>
           <div class="btn-row" style="margin-bottom:14px">
             <button type="button" class="btn btn-ok" id="btnNew">새 안내 추가</button>
-            <button type="button" class="btn btn-ghost" id="btnDownloadHtml2">HTML 저장</button>
+            <button type="button" class="btn btn-download" id="btnDownloadHtml2">HTML 다운받기</button>
             <button type="button" class="btn btn-ghost" id="btnExport">JSON 내보내기</button>
             <label class="btn btn-ghost" for="fileImport" style="margin:0">JSON 가져오기
               <input id="fileImport" type="file" accept="application/json,.json" hidden />
@@ -294,7 +297,7 @@ ${viewScript()}
 
   if (global.document) {
     document.addEventListener("DOMContentLoaded", function () {
-      ["btnDownloadHtml", "btnDownloadHtml2"].forEach(function (id) {
+      ["btnDownloadHtml", "btnDownloadHtml2", "btnDownloadHtmlHero"].forEach(function (id) {
         const btn = document.getElementById(id);
         if (!btn) return;
         btn.addEventListener("click", function () {
