@@ -94,7 +94,7 @@ a { color: inherit; text-decoration: none; }
 }
 .shell {
   width: min(1280px, calc(100% - 32px));
-  margin: 16px auto 32px;
+  margin: 16px auto 18px;
   display: grid;
   grid-template-columns: 340px minmax(0, 1fr);
   gap: 16px;
@@ -159,6 +159,14 @@ a { color: inherit; text-decoration: none; }
   box-shadow: 0 1px 0 rgba(17,17,17,0.04);
 }
 .chip:hover, .chip.active { background: var(--ink); color: #fff; }
+.pane-search .chip::before {
+  content: "#";
+  margin-right: 1px;
+  font-weight: 800;
+  color: var(--brand-deep);
+}
+.pane-search .chip:hover::before,
+.pane-search .chip.active::before { color: inherit; }
 .restart {
   border: 0;
   background: transparent;
@@ -184,12 +192,27 @@ a { color: inherit; text-decoration: none; }
 .chat-actions .back-q { margin-top: 0; }
 
 .pane-chat {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   padding: 22px 24px 28px;
   display: flex;
   flex-direction: column;
   min-height: 520px;
 }
+.chat-notebook-bg {
+  position: absolute;
+  right: 2%;
+  bottom: 4%;
+  width: min(78%, 520px);
+  height: auto;
+  opacity: 0.22;
+  pointer-events: none;
+  z-index: 0;
+}
 .thread {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -342,7 +365,7 @@ a { color: inherit; text-decoration: none; }
   font-size: 14px;
   overflow: hidden;
   border-radius: 12px;
-  border: 1px solid var(--line);
+  border: 2px solid var(--line);
 }
 .t-table th, .t-table td { border-bottom: 1px solid var(--line); padding: 8px 10px; vertical-align: middle; }
 .t-table tr:last-child td { border-bottom: 0; }
@@ -678,4 +701,14 @@ label.field textarea { min-height: 80px; resize: vertical; }
   .nav-updated { font-size: 12px; }
   .logo-text { font-size: 0.92rem; }
   .logo-img { height: 16px; }
+}
+
+.site-foot {
+  width: min(1280px, calc(100% - 32px));
+  margin: 0 auto 28px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }
