@@ -66,7 +66,7 @@
   function journalTable(node) {
     if (!node.journal || !node.journal.length) return `<p class="hint">등록된 분개가 없습니다.</p>`;
     return `<table class="t-table">
-      <thead><tr><th style="width:58px">구분</th><th style="width:72px">계정코드</th><th>계정과목</th><th style="width:128px">금액</th></tr></thead>
+      <thead><tr><th style="width:64px">구분</th><th style="width:88px">계정코드</th><th>계정과목</th><th style="width:148px">금액</th></tr></thead>
       <tbody>
         ${node.journal.map((l) => {
           const ex = JournalStore.exampleAmount(l, node.vat);
