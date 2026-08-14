@@ -5,7 +5,8 @@
     popular: document.getElementById("popular"),
     thread: document.getElementById("thread"),
     restart: document.getElementById("btnRestart"),
-    toast: document.getElementById("toast")
+    toast: document.getElementById("toast"),
+    updatedAt: document.getElementById("updatedAt")
   };
 
   const state = {
@@ -36,6 +37,25 @@
     els.popular.innerHTML = popularItems()
       .map((item) => `<button type="button" class="chip" data-popular-label="${escapeHtml(item.label)}" data-topic="${escapeHtml(item.topicId || "")}">${escapeHtml(item.label)}</button>`)
       .join("");
+  }
+
+  function formatUpdatedAt(iso) {
+    const d = new Date(iso);
+    if (!iso || isNaN(d.getTime())) return "";
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    const h = String(d.getHours()).padStart(2, "0");
+    const min = String(d.getMinutes()).padStart(2, "0");
+    return "최근 업데이트 : " + y + ". " + m + ". " + day + ". " + h + ":" + min;
+  }
+
+  function renderUpdatedAt() {
+    if (!els.updatedAt) return;
+    const data = JournalStore.loadData();
+    const text = data && data.isCustom ? formatUpdatedAt(data.updatedAt) : "";
+    els.updatedAt.textContent = text;
+    els.updatedAt.hidden = !text;
   }
 
   function formatWon(n) {
@@ -209,9 +229,16 @@
   JournalStore.hydrate().then(() => {
     renderPopular();
     renderThread();
+    renderUpdatedAt();
   });
-  window.addEventListener("journal-tree-changed", renderPopular);
+  window.addEventListener("journal-tree-changed", () => {
+    renderPopular();
+    renderUpdatedAt();
+  });
   window.addEventListener("storage", (e) => {
-    if (e.key === JournalStore.STORAGE_KEY) renderPopular();
+    if (e.key === JournalStore.STORAGE_KEY) {
+      renderPopular();
+      renderUpdatedAt();
+    }
   });
 })();
