@@ -337,13 +337,18 @@
             <h2>분개</h2>
             <button type="button" class="btn btn-ghost" id="btnAddLine">행 추가</button>
           </div>
+          <p class="hint">계정코드는 회사 계정과목표에 맞게 바꾸면 됩니다.</p>
           <div class="journal-editor" id="journalEditor">
-            ${(node.journal && node.journal.length ? node.journal : [{ side: "debit", account: "", memo: "" }]).map((l, i) => `
+            <div class="journal-cols" aria-hidden="true">
+              <span>구분</span><span>계정코드</span><span>계정과목</span><span>적요</span><span></span>
+            </div>
+            ${(node.journal && node.journal.length ? node.journal : [{ side: "debit", code: "", account: "", memo: "" }]).map((l, i) => `
               <div class="journal-row" data-idx="${i}">
                 <select data-field="side">
                   <option value="debit"${l.side === "debit" ? " selected" : ""}>차변</option>
                   <option value="credit"${l.side === "credit" ? " selected" : ""}>대변</option>
                 </select>
+                <input data-field="code" value="${escapeHtml(l.code || "")}" placeholder="예: 811" />
                 <input data-field="account" value="${escapeHtml(l.account)}" placeholder="계정과목" />
                 <input data-field="memo" value="${escapeHtml(l.memo)}" placeholder="적요" />
                 <button type="button" class="icon-btn" data-del-line>×</button>
@@ -389,9 +394,10 @@
     node.example = document.getElementById("resExample").value.trim();
     node.journal = Array.from(document.querySelectorAll("#journalEditor .journal-row")).map((row) => ({
       side: row.querySelector('[data-field="side"]').value,
+      code: row.querySelector('[data-field="code"]').value.trim(),
       account: row.querySelector('[data-field="account"]').value.trim(),
       memo: row.querySelector('[data-field="memo"]').value.trim()
-    })).filter((l) => l.account || l.memo);
+    })).filter((l) => l.account || l.code || l.memo);
   }
 
   function refreshEditor() {
@@ -566,7 +572,7 @@
       readCurrentNodeIntoData();
       const node = state.data.nodes[state.editingNodeId];
       node.journal = node.journal || [];
-      node.journal.push({ side: "debit", account: "", memo: "" });
+      node.journal.push({ side: "debit", code: "", account: "", memo: "" });
       renderEditor();
       return;
     }
