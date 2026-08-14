@@ -206,6 +206,11 @@
   function renderAsks() {
     if (!els.askList) return;
     if (els.askEmail) els.askEmail.value = JournalStore.getAskEmail();
+    const drafts = {};
+    els.askList.querySelectorAll(".ask-item").forEach((item) => {
+      const ta = item.querySelector(".ask-reply-form textarea");
+      if (ta && ta.value) drafts[item.dataset.askId] = ta.value;
+    });
     const asks = JournalStore.getAsks();
     if (!asks.length) {
       els.askList.innerHTML = '<p class="hint" style="padding:8px 0">아직 문의가 없습니다.</p>';
@@ -215,15 +220,36 @@
       const when = ask.createdAt
         ? new Date(ask.createdAt).toLocaleString("ko-KR", { dateStyle: "short", timeStyle: "short" })
         : "";
+      const replies = (ask.replies || []).map((rep) => {
+        const rWhen = rep.createdAt
+          ? new Date(rep.createdAt).toLocaleString("ko-KR", { dateStyle: "short", timeStyle: "short" })
+          : "";
+        const who = [rep.dept, rep.nick].filter(Boolean).join(" · ") || "익명";
+        return `<div class="ask-reply${rep.staff ? " is-staff" : ""}" data-reply-id="${escapeHtml(rep.id)}">
+          <div class="ask-meta">${escapeHtml(who)}${rep.staff ? " · 재경" : ""}${rWhen ? `<span>${escapeHtml(rWhen)}</span>` : ""}</div>
+          <p>${escapeHtml(rep.text)}</p>
+          <button type="button" class="ask-reply-del" data-reply-del>답글 삭제</button>
+        </div>`;
+      }).join("");
       return `<article class="ask-item${ask.done ? " is-done" : ""}" data-ask-id="${escapeHtml(ask.id)}">
         <div class="ask-meta">${escapeHtml(ask.dept)} · ${escapeHtml(ask.nick)}${when ? `<span>${escapeHtml(when)}</span>` : ""}</div>
         <p>${escapeHtml(ask.text)}</p>
+        ${replies ? `<div class="ask-replies">${replies}</div>` : ""}
+        <form class="ask-reply-form">
+          <textarea rows="2" maxlength="90" placeholder="재경팀 답글"></textarea>
+          <button type="submit" class="btn btn-ok">답글</button>
+        </form>
         <div class="ask-item-actions">
           <button type="button" class="btn btn-ghost" data-ask-done>${ask.done ? "미완료로" : "완료"}</button>
           <button type="button" class="btn btn-ghost" data-ask-del>삭제</button>
         </div>
       </article>`;
     }).join("");
+    els.askList.querySelectorAll(".ask-item").forEach((item) => {
+      const draft = drafts[item.dataset.askId];
+      const ta = item.querySelector(".ask-reply-form textarea");
+      if (ta && draft) ta.value = draft;
+    });
   }
 
   function popularLabels() {
@@ -622,7 +648,40 @@
       JournalStore.updateAsk(id, { done: !(ask && ask.done) });
       if (state.data) state.data.asks = JournalStore.getAsks();
       persist();
+      return;
     }
+    if (e.target.closest("[data-reply-del]")) {
+      const reply = e.target.closest("[data-reply-id]");
+      const replyId = reply && reply.getAttribute("data-reply-id");
+      if (!replyId) return;
+      JournalStore.removeAskReply(id, replyId);
+      if (state.data) state.data.asks = JournalStore.getAsks();
+      renderAsks();
+      showToast("답글을 삭제했습니다.");
+    }
+  });
+  els.askList?.addEventListener("submit", (e) => {
+    const form = e.target.closest(".ask-reply-form");
+    if (!form) return;
+    e.preventDefault();
+    const item = form.closest(".ask-item");
+    if (!item) return;
+    const ta = form.querySelector("textarea");
+    const text = ta ? ta.value.trim() : "";
+    if (!text) {
+      showToast("답글을 적어 주세요.");
+      return;
+    }
+    JournalStore.addAskReply(item.dataset.askId, {
+      dept: "재경팀",
+      nick: "관리자",
+      text,
+      staff: true
+    });
+    if (state.data) state.data.asks = JournalStore.getAsks();
+    if (ta) ta.value = "";
+    renderAsks();
+    showToast("답글을 남겼습니다. 안내 페이지에도 바로 보여요.");
   });
   els.btnAddNode.addEventListener("click", addNode);
 
