@@ -111,6 +111,10 @@ a { color: inherit; text-decoration: none; }
   color: var(--ink-soft);
   border-radius: 999px;
 }
+.nav-links .btn {
+  padding: 8px 14px;
+  font-size: 13px;
+}
 .nav-links a:hover { background: #f3f4f0; color: var(--ink); }
 .nav-cta {
   display: inline-flex;

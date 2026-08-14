@@ -543,7 +543,9 @@
     },
 
     seedEntries() {
-      return clone(SEED).map((e, i) => normalizeEntry(e, i));
+      const embedded = global.JOURNAL_EMBEDDED;
+      const source = Array.isArray(embedded) && embedded.length ? embedded : SEED;
+      return clone(source).map((e, i) => normalizeEntry(e, i));
     },
 
     loadEntries() {
