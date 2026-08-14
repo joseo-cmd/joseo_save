@@ -71,7 +71,7 @@ a { color: inherit; text-decoration: none; }
   letter-spacing: -0.04em;
 }
 .logo-img {
-  height: 28px;
+  height: 22px;
   width: auto;
   display: block;
 }
@@ -653,5 +653,5 @@ label.field textarea { min-height: 80px; resize: vertical; }
   .pane-chat { min-height: 420px; }
   .nav-updated { font-size: 12px; }
   .logo-text { font-size: 0.92rem; }
-  .logo-img { height: 24px; }
+  .logo-img { height: 20px; }
 }
