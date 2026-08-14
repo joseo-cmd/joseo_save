@@ -70,24 +70,10 @@ a { color: inherit; text-decoration: none; }
   font-weight: 800;
   letter-spacing: -0.04em;
 }
-.logo-mark {
-  width: 32px;
-  height: 32px;
-  border-radius: 12px;
-  background: var(--brand);
-  position: relative;
-  box-shadow: 0 8px 16px rgba(0, 200, 83, 0.28);
-}
-.logo-mark::after {
-  content: "";
-  position: absolute;
-  width: 14px;
-  height: 10px;
-  left: 9px;
-  top: 9px;
-  border: 2.4px solid #fff;
-  border-bottom: 0;
-  border-radius: 8px 8px 0 0;
+.logo-img {
+  height: 18px;
+  width: auto;
+  display: block;
 }
 .logo-text { font-size: 1.05rem; }
 .logo-text span { color: var(--brand-deep); }
@@ -667,4 +653,5 @@ label.field textarea { min-height: 80px; resize: vertical; }
   .pane-chat { min-height: 420px; }
   .nav-updated { font-size: 12px; }
   .logo-text { font-size: 0.92rem; }
+  .logo-img { height: 16px; }
 }
