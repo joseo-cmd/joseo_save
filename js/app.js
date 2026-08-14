@@ -38,17 +38,24 @@
       .join("");
   }
 
+  function formatWon(n) {
+    return Number(n || 0).toLocaleString("ko-KR") + "원";
+  }
+
   function journalTable(node) {
     if (!node.journal || !node.journal.length) return `<p class="hint">등록된 분개가 없습니다.</p>`;
     return `<table class="t-table">
-      <thead><tr><th style="width:64px">구분</th><th style="width:88px">계정코드</th><th>계정과목</th></tr></thead>
+      <thead><tr><th style="width:64px">구분</th><th style="width:88px">계정코드</th><th>계정과목</th><th style="width:148px">금액</th></tr></thead>
       <tbody>
-        ${node.journal.map((l) => `
-          <tr>
+        ${node.journal.map((l) => {
+          const ex = JournalStore.exampleAmount(l, node.vat);
+          return `<tr>
             <td class="${l.side === "debit" ? "side-debit" : "side-credit"}">${l.side === "debit" ? "차변" : "대변"}</td>
             <td class="account-code">${escapeHtml(l.code || "")}</td>
             <td class="account">${escapeHtml(l.account)}</td>
-          </tr>`).join("")}
+            <td class="amount">${formatWon(ex.amount)} <span class="amount-kind">(${escapeHtml(ex.label)})</span></td>
+          </tr>`;
+        }).join("")}
       </tbody>
     </table>`;
   }
@@ -59,14 +66,13 @@
       <div class="result-grid">
         <section class="vat-callout ${vat.tone}">
           <div class="kicker">부가세</div>
-          <h3>${escapeHtml(vat.short || vat.label)}</h3>
+          <h3>${escapeHtml(vat.label)}</h3>
         </section>
         <section class="panel journal-panel">
           <h4>분개</h4>
           ${journalTable(node)}
         </section>
       </div>
-      ${node.example ? `<section class="panel result-note"><h4>숫자 예시</h4><p class="example-text">${escapeHtml(node.example)}</p></section>` : ""}
       ${node.guide ? `<section class="panel result-note"><h4>안내</h4><p class="guide-text">${escapeHtml(node.guide)}</p></section>` : ""}
       ${node.caution ? `<section class="panel result-note"><h4>주의</h4><div class="caution-box">${escapeHtml(node.caution)}</div></section>` : ""}`;
   }

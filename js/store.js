@@ -16,7 +16,7 @@
     },
     taxable_purchase: {
       id: "taxable_purchase",
-      label: "매입세액 공제",
+      label: "매입세액 공제 가능",
       short: "공제 가능",
       tone: "ok",
       summary: "적격증빙이 있으면 세액을 부가세대급금으로 공제합니다."
@@ -37,7 +37,7 @@
     },
     no_deduct: {
       id: "no_deduct",
-      label: "매입세액 불공제",
+      label: "매입세액 공제 불가",
       short: "공제 불가",
       tone: "warn",
       summary: "세액까지 비용(또는 자산)에 포함합니다. 부가세대급금을 쓰지 마세요."
@@ -114,6 +114,23 @@
       }
     }
     return best;
+  }
+
+  function exampleAmount(line, vatId) {
+    const memo = String((line && line.memo) || "");
+    const account = String((line && line.account) || "");
+    const vat = String(vatId || "");
+    const splitVat = vat === "taxable_purchase" || vat === "taxable_sales" || vat === "case_by_case";
+    const taxInCost = vat === "no_deduct";
+    const isTax = /부가세(대급금|예수금)/.test(account) || (/세액/.test(memo) && !/포함|전액|합계/.test(memo));
+    const isTotal = /합계|전액|실지급|실입금|고지서 납부|출금액/.test(memo)
+      || (line && line.side === "credit" && /보통예금|미지급금/.test(account) && !/부가세/.test(account))
+      || (line && line.side === "debit" && /외상매출금|신용카드수취/.test(account) && /합계/.test(memo));
+    if (isTax) return { amount: splitVat ? 1000 : 0, label: "세액" };
+    if (isTotal || (taxInCost && /포함|전액/.test(memo))) {
+      return { amount: (splitVat || taxInCost) ? 11000 : 10000, label: "합계" };
+    }
+    return { amount: 10000, label: "공급가액" };
   }
 
   function withAccountCodes(journal) {
@@ -827,6 +844,8 @@
     vatList() {
       return Object.keys(VAT).map((id) => VAT[id]);
     },
+
+    exampleAmount,
 
     seedData,
 
