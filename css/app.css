@@ -310,6 +310,8 @@ a { color: inherit; text-decoration: none; }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
 .lock-screen { min-height: calc(100vh - 120px); display: grid; place-items: center; padding: 40px 16px; }
+.lock-screen[hidden],
+#adminApp[hidden] { display: none !important; }
 .lock-box {
   width: min(420px, 100%);
   background: #fff;
