@@ -206,31 +206,90 @@ a { color: inherit; text-decoration: none; }
   padding: 6px 10px;
   border-radius: 999px;
 }
-.ask-launch:hover { border-color: var(--brand); color: var(--brand-deep); background: var(--mint); }
-.ask-form {
+.ask-launch:hover,
+.ask-launch.is-on { border-color: var(--brand); color: var(--brand-deep); background: var(--mint); }
+.ask-board {
   margin-top: 10px;
-  padding: 12px;
+  padding: 10px;
   background: #fff;
   border: 1px solid var(--line);
   border-radius: 14px;
   display: grid;
   gap: 8px;
 }
-.ask-form .field { margin: 0; font-size: 12px; font-weight: 800; color: var(--muted); }
-.ask-form input, .ask-form textarea {
-  width: 100%;
-  margin-top: 4px;
+.ask-board-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.ask-board-head strong { font-size: 12px; }
+.ask-board-close {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  padding: 0;
+}
+.ask-feed {
+  display: grid;
+  gap: 6px;
+  max-height: 168px;
+  overflow: auto;
+}
+.ask-empty {
+  margin: 0;
+  padding: 8px 2px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+.ask-post {
+  padding: 8px 10px;
+  background: #f7f8f6;
   border: 1px solid var(--line);
   border-radius: 10px;
-  padding: 8px 10px;
-  font-size: 13px;
+}
+.ask-post-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--muted);
+  margin-bottom: 3px;
+}
+.ask-post p {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.ask-form { display: grid; gap: 6px; }
+.ask-form .field { margin: 0; font-size: 11px; font-weight: 800; color: var(--muted); }
+.ask-form input, .ask-form textarea {
+  width: 100%;
+  margin-top: 3px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 6px 8px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--ink);
   font-family: inherit;
 }
-.ask-form textarea { min-height: 64px; resize: vertical; }
-.ask-form .btn { padding: 8px 12px; font-size: 12px; }
-.ask-who { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.ask-form textarea { min-height: 44px; max-height: 66px; resize: none; }
+.ask-form .btn { padding: 7px 12px; font-size: 12px; width: 100%; }
+.ask-who { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
 .pane-chat {
   position: relative;
   isolation: isolate;

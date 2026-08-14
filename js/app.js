@@ -9,6 +9,8 @@
     toast: document.getElementById("toast"),
     updatedAt: document.getElementById("updatedAt"),
     btnAsk: document.getElementById("btnAsk"),
+    askBoard: document.getElementById("askBoard"),
+    askFeed: document.getElementById("askFeed"),
     askForm: document.getElementById("askForm"),
     askDept: document.getElementById("askDept"),
     askNick: document.getElementById("askNick"),
@@ -309,20 +311,56 @@
     if (els.askNick && !els.askNick.value) els.askNick.value = p.nick;
   }
 
-  if (els.btnAsk && els.askForm) {
-    els.btnAsk.addEventListener("click", () => {
-      const open = els.askForm.hidden;
-      els.askForm.hidden = !open;
-      if (open) {
-        fillAskProfile();
-        (els.askDept.value ? els.askText : els.askDept).focus();
-      }
-    });
+  function formatAskWhen(iso) {
+    const d = new Date(iso);
+    if (!iso || isNaN(d.getTime())) return "";
+    return (d.getMonth() + 1) + "." + d.getDate() + " " +
+      String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
   }
-  if (els.btnAskClose && els.askForm) {
-    els.btnAskClose.addEventListener("click", () => {
-      els.askForm.hidden = true;
-    });
+
+  function renderAskBoard() {
+    if (!els.askFeed) return;
+    const asks = JournalStore.getAsks().filter((a) => !a.done);
+    if (!asks.length) {
+      els.askFeed.innerHTML = '<p class="ask-empty">아직 문의가 없습니다. 2~3줄로 남겨 주세요.</p>';
+      return;
+    }
+    els.askFeed.innerHTML = asks.map((ask) => {
+      const who = [ask.dept, ask.nick].filter(Boolean).join(" · ") || "익명";
+      const when = formatAskWhen(ask.createdAt);
+      return `<article class="ask-post">
+        <div class="ask-post-meta"><span>${escapeHtml(who)}</span>${when ? `<span>${escapeHtml(when)}</span>` : ""}</div>
+        <p>${escapeHtml(ask.text)}</p>
+      </article>`;
+    }).join("");
+  }
+
+  let askPoll = 0;
+
+  function setAskBoardOpen(open) {
+    if (!els.askBoard) return;
+    els.askBoard.hidden = !open;
+    if (els.btnAsk) els.btnAsk.classList.toggle("is-on", open);
+    if (askPoll) {
+      clearInterval(askPoll);
+      askPoll = 0;
+    }
+    if (open) {
+      fillAskProfile();
+      renderAskBoard();
+      JournalStore.pullSharedAsks().then(renderAskBoard);
+      askPoll = setInterval(() => {
+        JournalStore.pullSharedAsks().then(renderAskBoard);
+      }, 25000);
+      (els.askDept && els.askDept.value ? els.askText : els.askDept).focus();
+    }
+  }
+
+  if (els.btnAsk && els.askBoard) {
+    els.btnAsk.addEventListener("click", () => setAskBoardOpen(els.askBoard.hidden));
+  }
+  if (els.btnAskClose && els.askBoard) {
+    els.btnAskClose.addEventListener("click", () => setAskBoardOpen(false));
   }
   if (els.askForm) {
     els.askForm.addEventListener("submit", (e) => {
@@ -331,24 +369,15 @@
       const nick = els.askNick.value.trim();
       const text = els.askText.value.trim();
       if (!dept || !nick || !text) {
-        showToast("부서, 닉네임, 질문을 모두 적어 주세요.");
+        showToast("부서, 닉네임, 문의를 모두 적어 주세요.");
         return;
       }
       JournalStore.saveAskProfile(dept, nick);
       JournalStore.addAsk({ dept, nick, text });
-      const email = JournalStore.getAskEmail();
-      const body = "부서: " + dept + "\n닉네임: " + nick + "\n\n" + text;
-      if (email) {
-        const href = "mailto:" + encodeURIComponent(email) +
-          "?subject=" + encodeURIComponent("[회계노트] " + dept + " / " + nick) +
-          "&body=" + encodeURIComponent(body);
-        window.location.href = href;
-        showToast("질문 창을 열었어요. 보내기만 누르면 재경팀에 전달됩니다.");
-      } else {
-        copyText(body).then(() => showToast("질문을 복사했어요. 재경팀에 보내 주세요.")).catch(() => showToast("질문을 남겼어요."));
-      }
       els.askText.value = "";
-      els.askForm.hidden = true;
+      renderAskBoard();
+      if (els.askFeed) els.askFeed.scrollTop = 0;
+      showToast("게시판에 남겼어요.");
     });
   }
 
@@ -356,16 +385,19 @@
     renderPopular();
     renderThread();
     renderUpdatedAt();
+    renderAskBoard();
   });
   window.addEventListener("journal-tree-changed", () => {
     renderPopular();
     renderUpdatedAt();
+    renderAskBoard();
     if (!state.history.length) renderThread();
   });
   window.addEventListener("storage", (e) => {
-    if (e.key === JournalStore.STORAGE_KEY) {
+    if (e.key === JournalStore.STORAGE_KEY || e.key === JournalStore.ASK_KEY) {
       renderPopular();
       renderUpdatedAt();
+      renderAskBoard();
       if (!state.history.length) renderThread();
     }
   });

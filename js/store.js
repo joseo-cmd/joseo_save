@@ -729,7 +729,7 @@
 
   function normalizeAsk(raw) {
     if (!raw || typeof raw !== "object") return null;
-    const text = String(raw.text || "").trim();
+    const text = String(raw.text || "").trim().slice(0, 90);
     if (!text) return null;
     return {
       id: String(raw.id || ("ask-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 6))),
@@ -887,6 +887,7 @@
 
   const api = {
     STORAGE_KEY,
+    ASK_KEY,
     ADMIN_UNLOCK_KEY,
     APP_PASS_SHA256,
     VAT,
@@ -918,6 +919,10 @@
         const localAt = local && local.updatedAt ? String(local.updatedAt) : "";
         if (local && (!shared || localAt >= sharedAt)) memory = local;
         else if (shared) memory = shared;
+        if (memory && shared) {
+          memory.asks = mergeAsks(memory.asks, shared.asks);
+          persistLocalAsks(mergeAsks(loadLocalAsks(), memory.asks));
+        }
       })();
       return hydratePromise;
     },
@@ -974,6 +979,19 @@
       return mergeAsks(data && data.asks, loadLocalAsks());
     },
 
+    pullSharedAsks() {
+      return fetchShared().then((shared) => {
+        const current = api.getAsks();
+        if (!shared) return current;
+        const asks = mergeAsks(current, shared.asks);
+        persistLocalAsks(asks);
+        if (memory) memory.asks = asks;
+        const sig = (list) => (list || []).map((a) => a.id + ":" + (a.done ? "1" : "0")).sort().join("|");
+        if (sig(asks) !== sig(current)) notify();
+        return asks;
+      });
+    },
+
     addAsk(input) {
       const item = normalizeAsk({
         id: "ask-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 6),
@@ -987,6 +1005,7 @@
       const rec = memory || loadRecord() || {};
       const asks = mergeAsks(rec.asks, loadLocalAsks());
       asks.unshift(item);
+      if (asks.length > 40) asks.length = 40;
       persistLocalAsks(asks);
       if (memory) memory.asks = asks;
       notify();

@@ -197,7 +197,7 @@
     if (els.askEmail) els.askEmail.value = JournalStore.getAskEmail();
     const asks = JournalStore.getAsks();
     if (!asks.length) {
-      els.askList.innerHTML = '<p class="hint" style="padding:8px 0">아직 질문이 없습니다.</p>';
+      els.askList.innerHTML = '<p class="hint" style="padding:8px 0">아직 문의가 없습니다.</p>';
       return;
     }
     els.askList.innerHTML = asks.map((ask) => {
@@ -596,11 +596,6 @@
   els.pagePopular.addEventListener("click", () => setPage("popular"));
   els.pageAsks?.addEventListener("click", () => setPage("asks"));
 
-  els.askEmailForm?.addEventListener("submit", (e) => {
-    e.preventDefault();
-    persist("질문 받을 메일을 저장했습니다.");
-  });
-
   els.askList?.addEventListener("click", (e) => {
     const item = e.target.closest(".ask-item");
     if (!item) return;
@@ -608,7 +603,7 @@
     if (e.target.closest("[data-ask-del]")) {
       JournalStore.removeAsk(id);
       if (state.data) state.data.asks = JournalStore.getAsks();
-      persist("질문을 삭제했습니다.");
+      persist("문의를 삭제했습니다.");
       return;
     }
     if (e.target.closest("[data-ask-done]")) {
@@ -784,11 +779,9 @@
     }
     if (state.page === "topics") currentTopicPatch();
     readWelcomeIntoData();
-    readAskEmailIntoData();
     const rec = JournalStore.saveData(state.data);
     state.data = JournalStore.loadData();
-    const published = Object.assign({}, rec, { asks: [] });
-    const blob = new Blob([JSON.stringify(published, null, 2)], { type: "application/json" });
+    const blob = new Blob([JSON.stringify(rec, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;

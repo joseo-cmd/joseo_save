@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>관리자 · 에이텍컴퓨터 회계노트</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
-  <link rel="stylesheet" href="css/app.css?v=pub4" />
+  <link rel="stylesheet" href="css/app.css?v=pub5" />
 </head>
 <body>
   <nav class="nav">
@@ -56,7 +56,7 @@
         </button>
         <button type="button" class="page-tab is-ask" id="pageAsks" data-page="asks">
           <span class="mode-kicker">소통</span>
-          <strong>재경팀 질문함</strong>
+          <strong>문의 게시판</strong>
           <em>부서 · 닉네임</em>
         </button>
       </div>
@@ -159,21 +159,17 @@
       </div>
 
       <div id="viewAsks" hidden>
-        <form class="card welcome-card" id="askEmailForm">
+        <div class="card welcome-card">
           <div class="card-head">
-            <h2>질문 받을 이메일</h2>
-            <button type="submit" class="btn btn-ok">저장</button>
+            <h2>문의 게시판</h2>
           </div>
           <div class="form-body">
-            <p class="help-box">안내 페이지에서 질문을 남기면 이 주소로 메일 창이 열립니다. 재경팀 공용 메일을 넣으면 됩니다.</p>
-            <label class="field">이메일
-              <input id="askEmail" type="email" placeholder="예: finance@ateccomputer.kr" />
-            </label>
+            <p class="help-box">안내 페이지 <b>문의남기기</b>에 접속자가 2~3줄로 남긴 글입니다. 완료하면 안내 페이지에서는 안 보이고, <b>다른 사람에게 보이기</b>를 하면 다른 사람 게시판에도 같이 올라갑니다.</p>
           </div>
-        </form>
+        </div>
         <div class="card">
           <div class="card-head">
-            <h2>받은 질문</h2>
+            <h2>받은 문의</h2>
           </div>
           <div class="form-body" id="askList"></div>
         </div>
@@ -182,7 +178,7 @@
   </section>
   <footer class="site-foot">Made by Seo</footer>
   <div class="toast" id="toast" role="status"></div>
-<script src="js/store.js?v=pub4"></script>
-<script src="js/admin.js?v=pub4"></script>
+<script src="js/store.js?v=pub5"></script>
+<script src="js/admin.js?v=pub5"></script>
 </body>
 </html>
