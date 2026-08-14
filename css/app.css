@@ -92,6 +92,12 @@ a { color: inherit; text-decoration: none; }
   color: #fff;
 }
 .nav-publish:hover { background: var(--brand-deep); }
+.nav-updated {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
 .shell {
   width: min(1280px, calc(100% - 32px));
   margin: 16px auto 18px;
