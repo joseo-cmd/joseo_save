@@ -198,64 +198,74 @@ a { color: inherit; text-decoration: none; }
 .chat-actions .back-q { margin-top: 0; }
 .ask-box {
   margin-top: auto;
-  background: #fff9e6;
-  border: 1px solid #f0d36a;
-  border-radius: 16px;
-  padding: 6px;
+  position: sticky;
+  bottom: 8px;
+  z-index: 5;
+  padding-top: 14px;
+  background: linear-gradient(180deg, transparent, rgba(255,255,255,0.94) 36%);
 }
 .ask-launch {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 6px;
-  width: 100%;
+  gap: 10px;
   border: 0;
-  background: transparent;
-  padding: 4px 8px 4px 4px;
-  border-radius: 12px;
+  background: #fff;
+  padding: 6px 14px 6px 6px;
+  border-radius: 999px;
   color: var(--ink);
   cursor: pointer;
+  box-shadow: 0 4px 14px rgba(17, 17, 17, 0.1);
 }
 .ask-launch-label {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 800;
 }
 .ask-bulb {
-  width: 22px;
-  height: 22px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   display: grid;
   place-items: center;
+  font-size: 26px;
+  line-height: 1;
   background: #ffe566;
-  flex: 0 0 auto;
+  box-shadow: 0 0 0 3px #f3d34a;
+  transition: box-shadow 0.25s ease, transform 0.25s ease, background 0.25s ease;
 }
-.ask-bulb svg { width: 14px; height: 14px; }
-.ask-launch:hover { background: #fff3c4; }
-.ask-box:has(.ask-launch.is-on) { background: #fff6d0; }
+.ask-launch:hover .ask-bulb {
+  transform: scale(1.06);
+  box-shadow: 0 0 16px 6px rgba(255, 214, 60, 0.45);
+}
+.ask-launch.is-on {
+  background: #fffceb;
+}
 .ask-launch.is-on .ask-bulb {
   background: #ffe034;
-  animation: bulb-pop 0.45s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+  box-shadow: 0 0 22px 8px rgba(255, 214, 40, 0.7);
+  animation: bulb-pop 0.55s cubic-bezier(0.2, 1.4, 0.4, 1) both, bulb-glow 1.4s ease-in-out 0.55s infinite;
 }
-.ask-launch.is-on .ask-bulb-glass { fill: #FFE566; }
 .ask-launch.is-on .ask-launch-label { color: var(--brand-deep); }
 @keyframes bulb-pop {
-  0% { transform: scale(0.86); }
-  40% { transform: scale(1.16); }
-  100% { transform: scale(1); }
+  0% { transform: scale(0.82); filter: brightness(0.75); }
+  40% { transform: scale(1.22); filter: brightness(1.45); }
+  70% { transform: scale(0.96); }
+  100% { transform: scale(1); filter: brightness(1); }
+}
+@keyframes bulb-glow {
+  0%, 100% { box-shadow: 0 0 18px 6px rgba(255, 214, 40, 0.45); }
+  50% { box-shadow: 0 0 28px 12px rgba(255, 214, 40, 0.8); }
 }
 @media (prefers-reduced-motion: reduce) {
   .ask-launch.is-on .ask-bulb { animation: none; }
 }
 .ask-board {
-  width: auto;
-  margin: 0;
-  padding: 6px 4px 4px;
-  background: transparent;
-  border: 0;
-  border-top: 1px solid #f0e0a0;
-  border-radius: 0;
+  margin-top: 10px;
+  padding: 10px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 14px;
   display: grid;
-  gap: 6px;
-  box-shadow: none;
+  gap: 8px;
 }
 .ask-board-head {
   display: flex;
@@ -276,59 +286,59 @@ a { color: inherit; text-decoration: none; }
 }
 .ask-feed {
   display: grid;
-  gap: 4px;
-  max-height: 88px;
+  gap: 6px;
+  max-height: 168px;
   overflow: auto;
 }
 .ask-empty {
   margin: 0;
-  padding: 4px 2px;
+  padding: 8px 2px;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
 }
 .ask-post {
-  padding: 5px 8px;
+  padding: 8px 10px;
   background: #f7f8f6;
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: 10px;
 }
 .ask-post-meta {
   display: flex;
   justify-content: space-between;
   gap: 8px;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 800;
   color: var(--muted);
   margin-bottom: 3px;
 }
 .ask-post p {
   margin: 0;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
-  line-height: 1.35;
+  line-height: 1.4;
   white-space: pre-wrap;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
-.ask-form { display: grid; gap: 4px; }
-.ask-form .field { margin: 0; font-size: 10px; font-weight: 800; color: var(--muted); }
+.ask-form { display: grid; gap: 6px; }
+.ask-form .field { margin: 0; font-size: 11px; font-weight: 800; color: var(--muted); }
 .ask-form input, .ask-form textarea {
   width: 100%;
-  margin-top: 2px;
+  margin-top: 3px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  padding: 5px 8px;
+  padding: 6px 8px;
   font-size: 12px;
   font-weight: 600;
   color: var(--ink);
   font-family: inherit;
 }
-.ask-form textarea { min-height: 36px; max-height: 48px; resize: none; }
-.ask-form .btn { padding: 6px 10px; font-size: 12px; width: 100%; }
+.ask-form textarea { min-height: 44px; max-height: 66px; resize: none; }
+.ask-form .btn { padding: 7px 12px; font-size: 12px; width: 100%; }
 .ask-who { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
 .pane-chat {
   position: relative;
