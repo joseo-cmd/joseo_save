@@ -359,8 +359,8 @@
     els.tabQuestion.classList.toggle("active", state.tab === "question");
     els.tabResult.classList.toggle("active", state.tab === "result");
     els.tabHelp.innerHTML = state.tab === "question"
-      ? "지금은 <b>파란 질문 탭</b>입니다. 왼쪽에서 위·아래로 순서를 바꾸세요. 맨 위가 검색 첫 질문입니다."
-      : "지금은 <b>초록 결과 탭</b>입니다. 왼쪽에서 위·아래로 결과 순서를 바꿀 수 있습니다.";
+      ? "질문마다 <b>답변 글씨</b>를 적고, 그 답을 고르면 어떤 <b>결과</b>(또는 다음 질문)로 갈지 오른쪽에서 연결하세요."
+      : "지금은 <b>초록 결과 탭</b>입니다. 부가세·분개를 만든 뒤, 질문 탭에서 답변과 연결하세요.";
     els.btnAddNode.textContent = state.tab === "question" ? "질문 추가" : "결과 추가";
   }
 
@@ -378,7 +378,7 @@
       const cls = active ? (n.type === "question" ? " active-q" : " active-r") : "";
       const label = n.type === "question" ? (n.prompt || "새 질문") : (n.title || "새 결과");
       const meta = n.type === "question"
-        ? `보기 ${(n.options || []).length}개`
+        ? `답변 ${(n.options || []).length}개`
         : (JournalStore.vatInfo(n.vat).short || "");
       return `<div class="node-item${cls}">
         <button type="button" class="node-pick" data-node="${escapeHtml(n.id)}">
@@ -413,19 +413,26 @@
           <label class="field">현업에게 물어볼 말
             <input id="nodePrompt" value="${escapeHtml(node.prompt)}" placeholder="예: 식대인가요, 기타 복리후생인가요?" />
           </label>
-          <p class="hint">보기 하나 = 현업이 고르는 답. 위·아래로 보기 순서를 바꿀 수 있습니다.</p>
+          <p class="hint">답변 글씨가 안내 페이지에 버튼으로 보입니다. 오른쪽에서 그 답을 고르면 어느 결과로 갈지 고르세요.</p>
           <div class="option-editor" id="optionEditor">
             ${(node.options || []).map((o, i) => `
               <div class="option-row" data-idx="${i}">
-                <input data-field="label" value="${escapeHtml(o.label)}" placeholder="보기 문구" />
-                <select data-field="nextId">${nextSelect(o.nextId)}</select>
-                <button type="button" class="icon-btn" data-opt-up ${i === 0 ? "disabled" : ""} aria-label="보기 위로">↑</button>
-                <button type="button" class="icon-btn" data-opt-down ${(node.options || []).length - 1 === i ? "disabled" : ""} aria-label="보기 아래로">↓</button>
-                <button type="button" class="icon-btn" data-del-opt aria-label="보기 삭제">×</button>
+                <span class="option-num">답변 ${i + 1}</span>
+                <label class="field">현업이 고르는 답
+                  <input data-field="label" value="${escapeHtml(o.label)}" placeholder="예: 세금계산서를 받았어요" />
+                </label>
+                <label class="field">이 답을 고르면
+                  <select data-field="nextId">${nextSelect(o.nextId)}</select>
+                </label>
+                <div class="option-tools">
+                  <button type="button" class="icon-btn" data-opt-up ${i === 0 ? "disabled" : ""} aria-label="답변 위로">↑</button>
+                  <button type="button" class="icon-btn" data-opt-down ${(node.options || []).length - 1 === i ? "disabled" : ""} aria-label="답변 아래로">↓</button>
+                  <button type="button" class="icon-btn" data-del-opt aria-label="답변 삭제">×</button>
+                </div>
               </div>`).join("")}
           </div>
           <div class="btn-row">
-            <button type="button" class="btn btn-ghost" id="btnAddOpt">보기 추가</button>
+            <button type="button" class="btn btn-ghost" id="btnAddOpt">답변 추가</button>
             <button type="button" class="btn btn-danger" id="btnDelNode">이 질문 삭제</button>
           </div>
         </div>`;
@@ -482,6 +489,12 @@
       </div>`;
   }
 
+  function nodeLabel(id) {
+    const n = state.data && state.data.nodes[id];
+    if (!n) return "";
+    return n.type === "question" ? (n.prompt || "다음 질문") : (n.title || "결과");
+  }
+
   function readCurrentNodeIntoData() {
     const node = state.data.nodes[state.editingNodeId];
     if (!node) return;
@@ -489,10 +502,14 @@
       const prompt = document.getElementById("nodePrompt");
       if (!prompt) return;
       node.prompt = prompt.value.trim();
-      node.options = Array.from(document.querySelectorAll("#optionEditor .option-row")).map((row) => ({
-        label: row.querySelector('[data-field="label"]').value.trim(),
-        nextId: row.querySelector('[data-field="nextId"]').value
-      })).filter((o) => o.label);
+      node.options = Array.from(document.querySelectorAll("#optionEditor .option-row")).map((row) => {
+        const nextId = row.querySelector('[data-field="nextId"]').value;
+        const typed = row.querySelector('[data-field="label"]').value.trim();
+        return {
+          label: typed || nodeLabel(nextId),
+          nextId
+        };
+      }).filter((o) => o.label || o.nextId);
       const asStart = document.getElementById("asStart");
       const topic = currentTopic();
       if (asStart && asStart.checked && topic) {
@@ -767,6 +784,8 @@
       node.options = node.options || [];
       node.options.push({ label: "", nextId: "" });
       renderEditor();
+      const labels = els.nodeEditor.querySelectorAll('[data-field="label"]');
+      if (labels.length) labels[labels.length - 1].focus();
       return;
     }
     if (e.target.id === "btnAddLine") {
@@ -821,6 +840,15 @@
       const idx = Number(delLine.closest(".journal-row").dataset.idx);
       state.data.nodes[state.editingNodeId].journal.splice(idx, 1);
       renderEditor();
+    }
+  });
+  els.nodeEditor.addEventListener("change", (e) => {
+    const sel = e.target.closest('[data-field="nextId"]');
+    if (!sel) return;
+    const row = sel.closest(".option-row");
+    const input = row && row.querySelector('[data-field="label"]');
+    if (input && !input.value.trim()) {
+      input.value = nodeLabel(sel.value);
     }
   });
 
