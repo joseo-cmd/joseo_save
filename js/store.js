@@ -4,7 +4,9 @@
 (function (global) {
   const STORAGE_KEY = "atec-journal-tree-v1";
   const ASK_KEY = "atec-ask-box-v1";
+  const ASK_REMOVED_KEY = "atec-ask-removed-v1";
   const ASK_PROFILE_KEY = "atec-ask-profile-v1";
+  const ASK_BOARD_URL = "https://jsonblob.iiif.arthistoricum.net/api/jsonBlob/24b492ff-97b3-11f1-bdf1-351353d74d75";
   const ADMIN_UNLOCK_KEY = "atec-journal-admin-unlocked";
   const APP_PASS_SHA256 = "4ec9599fc203d176a301536c2e091a19bc852759b255bd6818810a42c5fed14a";
 
@@ -759,12 +761,112 @@
     try { localStorage.setItem(ASK_KEY, JSON.stringify(list)); } catch {}
   }
 
+  function loadRemoved() {
+    try {
+      const parsed = JSON.parse(localStorage.getItem(ASK_REMOVED_KEY) || "[]");
+      return Array.isArray(parsed) ? parsed.map(String) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function persistRemoved(list) {
+    try { localStorage.setItem(ASK_REMOVED_KEY, JSON.stringify((list || []).slice(0, 100))); } catch {}
+  }
+
+  function dropRemoved(asks, removed) {
+    const ban = {};
+    (removed || []).forEach((id) => { ban[String(id)] = true; });
+    return (asks || []).filter((a) => a && !ban[a.id]);
+  }
+
+  function applyBoard(asks, removed) {
+    const next = dropRemoved(normalizeAsks(asks), removed).slice(0, 40);
+    persistLocalAsks(next);
+    persistRemoved(removed || []);
+    if (memory) memory.asks = next;
+    return next;
+  }
+
+  let boardWrite = Promise.resolve();
+
+  function enqueueBoard(job) {
+    const run = boardWrite.then(job, job);
+    boardWrite = run.then(function () {}, function () {});
+    return run;
+  }
+
+  async function fetchRemoteBoard() {
+    const ctrl = typeof AbortController === "function" ? new AbortController() : null;
+    const timer = ctrl ? setTimeout(() => ctrl.abort(), 8000) : null;
+    try {
+      const res = await fetch(ASK_BOARD_URL + "?t=" + Date.now(), {
+        cache: "no-store",
+        signal: ctrl ? ctrl.signal : undefined,
+        headers: { Accept: "application/json" }
+      });
+      if (!res.ok) return null;
+      const parsed = await res.json();
+      if (!parsed || typeof parsed !== "object") return null;
+      return {
+        asks: normalizeAsks(parsed.asks),
+        removed: Array.isArray(parsed.removed) ? parsed.removed.map(String) : []
+      };
+    } catch {
+      return null;
+    } finally {
+      if (timer) clearTimeout(timer);
+    }
+  }
+
+  async function saveRemoteBoard(asks, removed) {
+    const res = await fetch(ASK_BOARD_URL, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify({
+        asks: (asks || []).slice(0, 40),
+        removed: (removed || []).slice(0, 100)
+      })
+    });
+    if (!res.ok) throw new Error("board save failed");
+  }
+
+  async function pullRemoteAsks() {
+    const remote = await fetchRemoteBoard();
+    if (!remote) return dropRemoved(mergeAsks(loadLocalAsks(), memory && memory.asks), loadRemoved());
+    const removed = [].concat(remote.removed || [], loadRemoved());
+    const asks = dropRemoved(mergeAsks(remote.asks, loadLocalAsks()), removed).slice(0, 40);
+    applyBoard(asks, removed);
+    const remoteIds = {};
+    (remote.asks || []).forEach((a) => { remoteIds[a.id] = true; });
+    const hasNew = asks.some((a) => !remoteIds[a.id]);
+    if (hasNew) {
+      try { await saveRemoteBoard(asks, removed); } catch {}
+    }
+    return asks;
+  }
+
+  function commitBoard(mutator) {
+    return enqueueBoard(async () => {
+      const remote = await fetchRemoteBoard();
+      const removed = [].concat((remote && remote.removed) || [], loadRemoved());
+      const base = dropRemoved(mergeAsks(remote && remote.asks, loadLocalAsks()), removed);
+      const next = mutator(base.slice(), removed.slice()) || {};
+      const gone = (next.removed || removed).slice(0, 100);
+      const asks = dropRemoved(next.asks || base, gone).slice(0, 40);
+      applyBoard(asks, gone);
+      await saveRemoteBoard(asks, gone);
+      notify();
+      return asks;
+    });
+  }
+
   function mergeAsks(a, b) {
     const map = {};
     [].concat(a || [], b || []).forEach((item) => {
       const n = normalizeAsk(item);
       if (!n) return;
-      if (!map[n.id] || String(n.createdAt) > String(map[n.id].createdAt)) map[n.id] = n;
+      if (!map[n.id] || String(n.createdAt) >= String(map[n.id].createdAt)) map[n.id] = n;
     });
     return Object.keys(map).map((id) => map[id]).sort((x, y) => String(y.createdAt).localeCompare(String(x.createdAt)));
   }
@@ -923,6 +1025,7 @@
           memory.asks = mergeAsks(memory.asks, shared.asks);
           persistLocalAsks(mergeAsks(loadLocalAsks(), memory.asks));
         }
+        await pullRemoteAsks();
       })();
       return hydratePromise;
     },
@@ -976,20 +1079,11 @@
 
     getAsks() {
       const data = api.loadData();
-      return mergeAsks(data && data.asks, loadLocalAsks());
+      return dropRemoved(mergeAsks(data && data.asks, loadLocalAsks()), loadRemoved());
     },
 
     pullSharedAsks() {
-      return fetchShared().then((shared) => {
-        const current = api.getAsks();
-        if (!shared) return current;
-        const asks = mergeAsks(current, shared.asks);
-        persistLocalAsks(asks);
-        if (memory) memory.asks = asks;
-        const sig = (list) => (list || []).map((a) => a.id + ":" + (a.done ? "1" : "0")).sort().join("|");
-        if (sig(asks) !== sig(current)) notify();
-        return asks;
-      });
+      return pullRemoteAsks().catch(() => api.getAsks());
     },
 
     addAsk(input) {
@@ -1009,6 +1103,10 @@
       persistLocalAsks(asks);
       if (memory) memory.asks = asks;
       notify();
+      commitBoard((list, removed) => ({
+        asks: mergeAsks([item], list).slice(0, 40),
+        removed
+      })).catch(() => {});
       return item;
     },
 
@@ -1038,6 +1136,10 @@
       persistLocalAsks(asks);
       if (memory) memory.asks = asks;
       notify();
+      commitBoard((list, removed) => ({
+        asks: list.map((a) => a.id === id ? Object.assign({}, a, patch || {}) : a),
+        removed
+      })).catch(() => {});
       return asks;
     },
 
@@ -1046,6 +1148,11 @@
       persistLocalAsks(asks);
       if (memory) memory.asks = asks;
       notify();
+      commitBoard((list, removed) => {
+        const gone = removed.slice();
+        if (gone.indexOf(id) < 0) gone.push(id);
+        return { asks: list.filter((a) => a.id !== id), removed: gone };
+      }).catch(() => {});
       return asks;
     },
 

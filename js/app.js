@@ -351,7 +351,7 @@
       JournalStore.pullSharedAsks().then(renderAskBoard);
       askPoll = setInterval(() => {
         JournalStore.pullSharedAsks().then(renderAskBoard);
-      }, 25000);
+      }, 8000);
       (els.askDept && els.askDept.value ? els.askText : els.askDept).focus();
     }
   }

@@ -50,6 +50,7 @@
     page: "topics",
     editingNodeId: null
   };
+  let askPoll = 0;
 
   function escapeHtml(value) {
     return String(value || "")
@@ -188,8 +189,18 @@
     els.viewTopics.hidden = page !== "topics";
     els.viewPopular.hidden = page !== "popular";
     if (els.viewAsks) els.viewAsks.hidden = page !== "asks";
+    if (askPoll) {
+      clearInterval(askPoll);
+      askPoll = 0;
+    }
     if (page === "popular") renderPopularEditor();
-    if (page === "asks") renderAsks();
+    if (page === "asks") {
+      renderAsks();
+      JournalStore.pullSharedAsks().then(() => renderAsks());
+      askPoll = setInterval(() => {
+        JournalStore.pullSharedAsks().then(() => renderAsks());
+      }, 8000);
+    }
   }
 
   function renderAsks() {
