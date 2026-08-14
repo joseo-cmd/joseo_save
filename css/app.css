@@ -94,7 +94,7 @@ a { color: inherit; text-decoration: none; }
 }
 .shell {
   width: min(1280px, calc(100% - 32px));
-  margin: 16px auto 32px;
+  margin: 16px auto 18px;
   display: grid;
   grid-template-columns: 340px minmax(0, 1fr);
   gap: 16px;
@@ -693,4 +693,14 @@ label.field textarea { min-height: 80px; resize: vertical; }
   .nav-updated { font-size: 12px; }
   .logo-text { font-size: 0.92rem; }
   .logo-img { height: 16px; }
+}
+
+.site-foot {
+  width: min(1280px, calc(100% - 32px));
+  margin: 0 auto 28px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }
