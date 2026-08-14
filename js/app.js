@@ -340,7 +340,10 @@
   function setAskBoardOpen(open) {
     if (!els.askBoard) return;
     els.askBoard.hidden = !open;
-    if (els.btnAsk) els.btnAsk.classList.toggle("is-on", open);
+    if (els.btnAsk) {
+      els.btnAsk.classList.toggle("is-on", open);
+      els.btnAsk.setAttribute("aria-expanded", open ? "true" : "false");
+    }
     if (askPoll) {
       clearInterval(askPoll);
       askPoll = 0;

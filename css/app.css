@@ -198,16 +198,102 @@ a { color: inherit; text-decoration: none; }
 .chat-actions .back-q { margin-top: 0; }
 .ask-box { margin-top: auto; padding-top: 12px; }
 .ask-launch {
-  border: 1px solid var(--line);
-  background: #fff;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  background: transparent;
+  padding: 2px 4px 2px 2px;
   color: var(--ink-soft);
+  cursor: pointer;
+}
+.ask-launch-label {
   font-size: 12px;
   font-weight: 800;
-  padding: 6px 10px;
-  border-radius: 999px;
 }
-.ask-launch:hover,
-.ask-launch.is-on { border-color: var(--brand); color: var(--brand-deep); background: var(--mint); }
+.ask-bulb {
+  position: relative;
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  isolation: isolate;
+}
+.ask-bulb svg {
+  width: 36px;
+  height: 40px;
+  overflow: visible;
+  position: relative;
+  z-index: 1;
+}
+.ask-bulb-rays {
+  stroke: #f5c518;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  opacity: 0;
+  transform-origin: 32px 32px;
+}
+.ask-bulb-glass {
+  fill: #e8e8e8;
+  stroke: #9a9a9a;
+  stroke-width: 2;
+  transform-origin: 32px 34px;
+}
+.ask-bulb-filament {
+  stroke: #b0b0b0;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  fill: none;
+}
+.ask-bulb-base {
+  fill: #8d8d8d;
+}
+.ask-launch:hover .ask-bulb-glass {
+  fill: #fff4c2;
+  stroke: #e0b800;
+}
+.ask-launch:hover .ask-bulb-filament { stroke: #d4a017; }
+.ask-launch.is-on .ask-bulb::before {
+  content: "";
+  position: absolute;
+  inset: -10px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 214, 60, 0.55) 0%, rgba(255, 214, 60, 0.18) 42%, transparent 70%);
+  z-index: 0;
+  animation: bulb-glow 1.4s ease-in-out infinite;
+}
+.ask-launch.is-on .ask-bulb-glass {
+  fill: #ffe566;
+  stroke: #f0b400;
+  animation: bulb-pop 0.55s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+}
+.ask-launch.is-on .ask-bulb-filament { stroke: #c48400; }
+.ask-launch.is-on .ask-bulb-base { fill: #6e6e6e; }
+.ask-launch.is-on .ask-bulb-rays {
+  opacity: 1;
+  animation: bulb-rays 0.55s ease-out both;
+}
+.ask-launch.is-on .ask-launch-label { color: var(--brand-deep); }
+@keyframes bulb-pop {
+  0% { transform: scale(0.82); filter: brightness(0.7); }
+  40% { transform: scale(1.22); filter: brightness(1.45); }
+  70% { transform: scale(0.96); }
+  100% { transform: scale(1); filter: brightness(1); }
+}
+@keyframes bulb-rays {
+  0% { opacity: 0; transform: scale(0.4); }
+  60% { opacity: 1; transform: scale(1.12); }
+  100% { opacity: 1; transform: scale(1); }
+}
+@keyframes bulb-glow {
+  0%, 100% { opacity: 0.7; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.08); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ask-launch.is-on .ask-bulb-glass,
+  .ask-launch.is-on .ask-bulb-rays,
+  .ask-launch.is-on .ask-bulb::before { animation: none; }
+}
 .ask-board {
   margin-top: 10px;
   padding: 10px;
