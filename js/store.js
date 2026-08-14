@@ -628,6 +628,7 @@
       return {
         id: String(raw.id || api.newId("n")),
         type: "question",
+        topicId: String(raw.topicId || "").trim(),
         prompt: String(raw.prompt || "").trim() || "다음 중 어떤 경우인가요?",
         options: (Array.isArray(raw.options) ? raw.options : [])
           .map((o) => ({
@@ -651,6 +652,7 @@
     return {
       id: String(raw.id || api.newId("n")),
       type: "result",
+      topicId: String(raw.topicId || "").trim(),
       title: String(raw.title || "안내").trim() || "안내",
       vat,
       vatNote: String(raw.vatNote || "").trim(),
@@ -670,7 +672,9 @@
       id: String(raw.id || api.newId("t")),
       title: String(raw.title || "새 주제").trim() || "새 주제",
       keywords,
-      startNodeId: String(raw.startNodeId || "").trim()
+      startNodeId: String(raw.startNodeId || "").trim(),
+      questionOrder: Array.isArray(raw.questionOrder) ? raw.questionOrder.map((id) => String(id || "").trim()).filter(Boolean) : [],
+      resultOrder: Array.isArray(raw.resultOrder) ? raw.resultOrder.map((id) => String(id || "").trim()).filter(Boolean) : []
     };
   }
 
@@ -912,7 +916,7 @@
       const start = api.emptyQuestion();
       start.prompt = "어떤 경우인가요?";
       return {
-        topic: { id: api.newId("t"), title: "", keywords: [], startNodeId: start.id },
+        topic: { id: api.newId("t"), title: "", keywords: [], startNodeId: start.id, questionOrder: [start.id], resultOrder: [] },
         start
       };
     },
