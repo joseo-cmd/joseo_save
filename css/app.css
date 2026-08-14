@@ -437,8 +437,10 @@ a { color: inherit; text-decoration: none; }
 .vat-callout.warn { background: var(--warn-soft); }
 .vat-callout.check { background: var(--check-soft); }
 .vat-callout.mute { background: var(--mute-soft); }
-.vat-callout .kicker { font-size: 11px; font-weight: 800; color: var(--muted); letter-spacing: 0.04em; }
+.vat-callout .kicker { font-size: 14px; font-weight: 800; color: var(--muted); letter-spacing: 0.04em; }
 .vat-callout h3 { font-size: 18px; letter-spacing: -0.04em; margin: 6px 0 0; line-height: 1.25; }
+.vat-mark.is-no { color: #e11d48; }
+.vat-mark.is-ok { color: #2563eb; }
 .result-title {
   font-size: 22px;
   font-weight: 800;

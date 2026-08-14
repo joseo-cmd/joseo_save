@@ -109,13 +109,19 @@
     </table>`;
   }
 
+  function highlightVatLabel(label) {
+    return escapeHtml(label)
+      .replace(/불가/g, '<span class="vat-mark is-no">불가</span>')
+      .replace(/가능/g, '<span class="vat-mark is-ok">가능</span>');
+  }
+
   function resultHtml(node) {
     const vat = JournalStore.vatInfo(node.vat);
     return `<div class="result-title"><span>${escapeHtml(node.title)}</span></div>
       <div class="result-grid">
         <section class="vat-callout ${vat.tone}">
           <div class="kicker">부가세</div>
-          <h3>${escapeHtml(vat.label)}</h3>
+          <h3>${highlightVatLabel(vat.label)}</h3>
         </section>
         <section class="panel journal-panel">
           <div class="journal-head">
