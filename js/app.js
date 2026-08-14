@@ -66,7 +66,7 @@
   function journalTable(node) {
     if (!node.journal || !node.journal.length) return `<p class="hint">등록된 분개가 없습니다.</p>`;
     return `<table class="t-table">
-      <thead><tr><th style="width:64px">구분</th><th style="width:88px">계정코드</th><th>계정과목</th><th style="width:148px">금액</th></tr></thead>
+      <thead><tr><th style="width:64px">구분</th><th style="width:88px">계정코드</th><th>계정과목</th><th style="width:188px">금액</th></tr></thead>
       <tbody>
         ${node.journal.map((l) => {
           const ex = JournalStore.exampleAmount(l, node.vat);
@@ -74,7 +74,7 @@
             <td class="${l.side === "debit" ? "side-debit" : "side-credit"}">${l.side === "debit" ? "차변" : "대변"}</td>
             <td class="account-code">${escapeHtml(l.code || "")}</td>
             <td class="account">${escapeHtml(l.account)}</td>
-            <td class="amount">${formatWon(ex.amount)} <span class="amount-kind">(${escapeHtml(ex.label)})</span></td>
+            <td class="amount"><span class="amount-num">${formatWon(ex.amount)}</span><span class="amount-kind">(${escapeHtml(ex.label)})</span></td>
           </tr>`;
         }).join("")}
       </tbody>

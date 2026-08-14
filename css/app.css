@@ -619,12 +619,20 @@ label.field textarea { min-height: 80px; resize: vertical; }
   white-space: nowrap;
 }
 .amount {
+  display: grid;
+  grid-template-columns: minmax(7em, 1fr) 5.8em;
+  column-gap: 6px;
+  align-items: baseline;
   font-variant-numeric: tabular-nums;
   font-weight: 800;
   white-space: nowrap;
+}
+.amount-num {
   text-align: right;
+  font-variant-numeric: tabular-nums;
 }
 .amount-kind {
+  text-align: left;
   font-weight: 700;
   color: var(--muted);
   font-size: 12px;
