@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>세금계산서 미처리현황 · v0915</title>
+  <title>세금계산서 미처리현황 · v0916</title>
   <meta name="description" content="미처리 세금계산서의 예상담당자를 판정하고 ERP·국세청 금액을 비교합니다." />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
   <style>
@@ -327,8 +327,8 @@
     table.data col.col-kind { width: 42px; }
     table.data col.col-name { width: 168px; }
     table.data col.col-date { width: 46px; }
-    table.data col.col-owner { width: 132px; }
-    table.data col.col-judge { width: 86px; }
+    table.data col.col-owner { width: 108px; }
+    table.data col.col-judge { width: 118px; }
     table.data col.col-qty { width: 32px; }
     table.data col.col-money { width: 78px; }
     table.data th.col-owner, table.data td.col-owner,
@@ -336,7 +336,13 @@
       padding-left: 4px;
       padding-right: 4px;
     }
-    table.data td.col-owner .pill { white-space: normal; word-break: keep-all; }
+    table.data td.col-owner .pill {
+      display: block;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
     table.data td.col-judge .pill { white-space: nowrap; }
     table.data th.col-name,
     table.data td.col-name {
@@ -345,9 +351,10 @@
     }
     table.data td.col-name strong {
       display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
       line-height: 1.3;
-      word-break: keep-all;
-      overflow-wrap: break-word;
     }
     table.data td.col-name small {
       overflow: hidden;
@@ -370,8 +377,9 @@
     table.data th.sub-diff { background: #8d2a3e; text-align: right; }
     table.data td {
       border-bottom: 1px solid #eef1f4;
-      padding: 6px 5px;
-      vertical-align: top;
+      padding: 5px 5px;
+      vertical-align: middle;
+      height: 44px;
     }
     table.data td small { display: block; color: var(--muted); margin-top: 2px; }
     table.data tr:hover td { background: #f7f9fb; }
@@ -383,12 +391,15 @@
     tr.has-diff td { background: #fff8f8; }
     .judge-mail {
       display: block;
-      margin-top: 3px;
+      margin-top: 2px;
       font-size: 10px;
       color: #b4bac3;
       font-weight: 400;
-      line-height: 1.3;
-      word-break: break-all;
+      line-height: 1.2;
+      height: 12px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
     .empty-cell, .empty-inline { text-align: center; color: var(--muted); padding: 28px 8px; }
 
@@ -450,7 +461,7 @@
   </style>
 </head>
 <body>
-  <div class="verbar">v0915 · 이 노란 띠가 보이면 최신 파일입니다. 거래처·담당을 조금 넓히고 합계 쪽 빈 칸을 줄였습니다.</div>
+  <div class="verbar">v0916 · 이 노란 띠가 보이면 최신 파일입니다. 담당은 살짝 줄이고 판정은 늘렸습니다. 행 높이는 같게 맞춰 두었습니다.</div>
   <div class="topbar">
     <div class="topbar-inner">
       <span>ATEC · 회계 월마감</span>
@@ -465,7 +476,7 @@
           <span class="logo-ko">에이텍컴퓨터</span>
         </div>
         <p class="eyebrow">Month-end close</p>
-        <h1>세금계산서 미처리현황 <span style="font-size:13px;font-weight:600;color:#9aa6b4">v0915</span></h1>
+        <h1>세금계산서 미처리현황 <span style="font-size:13px;font-weight:600;color:#9aa6b4">v0916</span></h1>
       </div>
       <div class="header-meta">
         <strong id="closeMonthLabel">2026.07 마감</strong>
@@ -4005,12 +4016,12 @@ function renderTable(rows) {
             <small>${escapeHtml(row.counterpartBiz || "")}</small>
           </td>
           <td>${escapeHtml(formatShortDate(row.writeDate))}</td>
-          <td class="col-owner">
+          <td class="col-owner" title="${escapeHtml(row.owner)}">
             <span class="pill tone-${tone}">${escapeHtml(row.owner)}</span>
           </td>
           <td class="col-judge">
             <span class="pill rank-${row.rank}" title="${escapeHtml(row.reason)}">${escapeHtml(shortRankLabel(row.rank))}</span>
-            ${mail ? `<span class="judge-mail">${escapeHtml(mail)}</span>` : ""}
+            <span class="judge-mail">${escapeHtml(mail)}</span>
           </td>
           ${numCells("erp", row.erpQty, row.erpSupply, row.erpVat, row.erpTotal, false)}
           ${numCells("nts", row.ntsQty, row.ntsSupply, row.ntsVat, row.ntsTotal, false)}
