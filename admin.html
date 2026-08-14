@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>관리자 · 분개 안내</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
-  <link rel="stylesheet" href="css/app.css?v=pop1" />
+  <link rel="stylesheet" href="css/app.css?v=share1" />
 </head>
 <body>
   <nav class="nav">
@@ -15,7 +15,7 @@
         <span class="logo-text">분개<span>안내</span></span>
       </a>
       <div class="nav-right">
-        <span class="ver-pill">자주 찾는 항목 설정</span>
+        <span class="ver-pill">다른 사람에게 보이기</span>
         <a class="nav-cta" href="index.html">안내 페이지</a>
       </div>
     </div>
@@ -24,7 +24,7 @@
   <section class="lock-screen" id="lockScreen">
     <div class="lock-box">
       <h2>관리자 비밀번호</h2>
-      <p>로그인 후 검색 주제와 <b>자주 찾는 항목</b>을 바꿀 수 있습니다.</p>
+      <p>로그인 후 검색 주제와 자주 찾는 항목을 바꿀 수 있습니다. 다른 사람에게 보이게 하려면 한 번 연결이 필요합니다.</p>
       <div class="lock-preview">
         <div class="lock-preview-q">질문<br /><small>무엇을 물을지</small></div>
         <div class="lock-preview-r">결과<br /><small>부가세 · 분개</small></div>
@@ -38,6 +38,26 @@
 
   <section id="adminApp" hidden>
     <div class="wrap admin-page">
+      <div class="share-banner" id="shareBanner">
+        <div>
+          <strong id="shareTitle">다른 사람에게는 아직 안 보여요</strong>
+          <p id="shareHelp">지금은 <b>이 컴퓨터에만</b> 저장됩니다. 한 번만 연결하면 다른 사람도 같은 내용을 봅니다.</p>
+          <ol class="share-steps" id="shareSteps">
+            <li><a href="https://github.com/settings/tokens/new?scopes=public_repo&amp;description=joseo%20guide" target="_blank" rel="noopener">토큰 만들기</a>를 누릅니다.</li>
+            <li>페이지 맨 아래 <b>Generate token</b>을 누릅니다.</li>
+            <li>나온 코드를 복사해 아래에 붙여넣고 연결합니다. 이 코드는 비밀번호처럼 보관하세요.</li>
+          </ol>
+        </div>
+        <form id="shareForm" class="share-form">
+          <input id="githubToken" type="password" autocomplete="off" placeholder="복사한 토큰 붙여넣기" />
+          <button type="submit" class="btn btn-ok">연결하고 전체에 저장</button>
+        </form>
+        <div id="shareConnected" hidden>
+          <p class="hint">저장 버튼만 누르면 다른 사람 화면에도 반영됩니다.</p>
+          <button type="button" class="btn btn-ghost" id="btnShareDisconnect">연결 해제</button>
+        </div>
+      </div>
+
       <div class="page-tabs" role="tablist">
         <button type="button" class="page-tab active" id="pageTopics" data-page="topics">
           <span class="mode-kicker">내용</span>
@@ -135,7 +155,7 @@
     </div>
   </section>
   <div class="toast" id="toast" role="status"></div>
-  <script src="js/store.js?v=pop1"></script>
-  <script src="js/admin.js?v=pop1"></script>
+  <script src="js/store.js?v=share1"></script>
+  <script src="js/admin.js?v=share1"></script>
 </body>
 </html>

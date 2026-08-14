@@ -30,6 +30,14 @@
     popularPool: document.getElementById("popularPool"),
     popularCustom: document.getElementById("popularCustom"),
     btnAddPopular: document.getElementById("btnAddPopular"),
+    shareBanner: document.getElementById("shareBanner"),
+    shareTitle: document.getElementById("shareTitle"),
+    shareHelp: document.getElementById("shareHelp"),
+    shareSteps: document.getElementById("shareSteps"),
+    shareForm: document.getElementById("shareForm"),
+    shareConnected: document.getElementById("shareConnected"),
+    githubToken: document.getElementById("githubToken"),
+    btnShareDisconnect: document.getElementById("btnShareDisconnect"),
     toast: document.getElementById("toast")
   };
 
@@ -53,6 +61,34 @@
     els.toast.textContent = msg;
     els.toast.classList.add("show");
     setTimeout(() => els.toast.classList.remove("show"), 1800);
+  }
+
+  function renderShareBanner() {
+    const connected = JournalStore.hasPublishToken();
+    els.shareBanner.classList.toggle("is-ok", connected);
+    els.shareTitle.textContent = connected ? "다른 사람에게도 저장됩니다" : "다른 사람에게는 아직 안 보여요";
+    els.shareHelp.innerHTML = connected
+      ? "저장을 누르면 같은 안내 페이지를 보는 사람 화면에도 반영됩니다."
+      : "지금은 <b>이 컴퓨터에만</b> 저장됩니다. 한 번만 연결하면 다른 사람도 같은 내용을 봅니다.";
+    if (els.shareSteps) els.shareSteps.hidden = connected;
+    els.shareForm.hidden = connected;
+    els.shareConnected.hidden = !connected;
+  }
+
+  async function persist(okMsg) {
+    const result = await JournalStore.saveAndShare(state.data);
+    state.data = JournalStore.loadData();
+    renderShareBanner();
+    if (result.published) {
+      showToast(okMsg || "저장했습니다. 다른 사람 화면에도 반영됩니다.");
+      return result;
+    }
+    if (result.reason === "no-token") {
+      showToast("이 컴퓨터에만 저장됐습니다. 다른 사람에게 보이려면 위에서 연결하세요.");
+      return result;
+    }
+    showToast("이 컴퓨터에는 저장됐습니다. 전체 공개는 안 됐어요.");
+    return result;
   }
 
   function isUnlocked() {
@@ -441,7 +477,9 @@
     }
     try { sessionStorage.setItem(JournalStore.ADMIN_UNLOCK_KEY, "1"); } catch {}
     applyLock();
+    await JournalStore.hydrate();
     load();
+    renderShareBanner();
   });
 
   els.list.addEventListener("click", (e) => {
@@ -501,12 +539,10 @@
     }
   });
 
-  els.popularForm.addEventListener("submit", (e) => {
+  els.popularForm.addEventListener("submit", async (e) => {
     e.preventDefault();
-    JournalStore.saveData(state.data);
-    state.data = JournalStore.loadData();
+    await persist("자주 찾는 항목을 저장했습니다.");
     renderPopularEditor();
-    showToast("자주 찾는 항목을 저장했습니다. 안내 페이지에 반영됩니다.");
   });
 
   els.nodeList.addEventListener("click", (e) => {
@@ -566,40 +602,69 @@
     els.title.focus();
   });
 
-  els.form.addEventListener("submit", (e) => {
+  els.form.addEventListener("submit", async (e) => {
     e.preventDefault();
     currentTopicPatch();
     if (!els.title.value.trim()) {
       showToast("주제 이름을 입력하세요.");
       return;
     }
-    JournalStore.saveData(state.data);
-    state.data = JournalStore.loadData();
+    await persist("저장했습니다.");
     renderList();
     renderPopularEditor();
     refreshEditor();
-    showToast("저장했습니다. 안내 페이지 검색에 반영됩니다.");
   });
 
-  els.btnDelete.addEventListener("click", () => {
+  els.btnDelete.addEventListener("click", async () => {
     if (!state.topicId) return;
     if (!confirm("이 검색 주제를 삭제할까요? 질문·결과는 연결이 끊깁니다.")) return;
     state.data.topics = state.data.topics.filter((t) => t.id !== state.topicId);
-    JournalStore.saveData(state.data);
+    await persist("삭제했습니다.");
     state.topicId = state.data.topics[0] ? state.data.topics[0].id : null;
     load();
-    showToast("삭제했습니다.");
   });
 
-  els.btnReset.addEventListener("click", () => {
+  els.btnReset.addEventListener("click", async () => {
     if (!confirm("관리자가 저장한 내용을 지우고 기본값으로 되돌릴까요?")) return;
     state.data = JournalStore.resetToSeed();
     state.topicId = state.data.topics[0] ? state.data.topics[0].id : null;
     state.tab = "question";
+    await persist("기본값으로 되돌렸습니다.");
     load();
-    showToast("기본값으로 되돌렸습니다.");
+  });
+
+  els.shareForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const token = els.githubToken.value.trim();
+    if (!token) {
+      showToast("토큰을 붙여넣으세요.");
+      return;
+    }
+    JournalStore.setPublishToken(token);
+    els.githubToken.value = "";
+    if (state.page === "topics") currentTopicPatch();
+    const result = await JournalStore.saveAndShare(state.data);
+    renderShareBanner();
+    if (result.published) {
+      showToast("연결했습니다. 이제 다른 사람도 볼 수 있어요.");
+      return;
+    }
+    JournalStore.setPublishToken("");
+    renderShareBanner();
+    showToast("연결에 실패했습니다. 토큰을 다시 만들어 붙여넣으세요.");
+  });
+
+  els.btnShareDisconnect.addEventListener("click", () => {
+    JournalStore.setPublishToken("");
+    renderShareBanner();
+    showToast("연결을 해제했습니다. 이제 이 컴퓨터에만 저장됩니다.");
   });
 
   applyLock();
-  if (isUnlocked()) load();
+  if (isUnlocked()) {
+    JournalStore.hydrate().then(() => {
+      load();
+      renderShareBanner();
+    });
+  }
 })();

@@ -199,8 +199,10 @@
   });
   els.restart.addEventListener("click", reset);
 
-  renderPopular();
-  renderThread();
+  JournalStore.hydrate().then(() => {
+    renderPopular();
+    renderThread();
+  });
   window.addEventListener("journal-tree-changed", renderPopular);
   window.addEventListener("storage", (e) => {
     if (e.key === JournalStore.STORAGE_KEY) renderPopular();

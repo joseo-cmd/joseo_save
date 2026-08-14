@@ -646,7 +646,13 @@
     };
   }
 
+  const GITHUB_TOKEN_KEY = "atec-journal-github-token";
+  const DATA_PATH = "data/guide.json";
+  const DATA_REPO = { owner: "joseo-cmd", repo: "joseo_save" };
+  const DATA_BRANCHES = ["cursor/popular-keywords-admin-4d7f", "main"];
+
   let memory = null;
+  let hydratePromise = null;
 
   function loadRecord() {
     try {
@@ -664,11 +670,151 @@
     try { global.dispatchEvent(new CustomEvent("journal-tree-changed")); } catch {}
   }
 
+  function materialize(rec, extra) {
+    const nodes = {};
+    Object.keys((rec && rec.nodes) || {}).forEach((id) => {
+      const node = normalizeNode(rec.nodes[id]);
+      if (node) nodes[node.id] = node;
+    });
+    const topics = ((rec && rec.topics) || []).map(normalizeTopic).filter(Boolean);
+    return Object.assign({
+      topics,
+      nodes,
+      popular: normalizePopular(rec && rec.popular, topics),
+      isCustom: !!(rec && rec.topics),
+      updatedAt: (rec && rec.updatedAt) || null
+    }, extra || {});
+  }
+
+  function utf8ToBase64(text) {
+    const bytes = new TextEncoder().encode(String(text || ""));
+    let bin = "";
+    for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+    return btoa(bin);
+  }
+
+  function inferRefs() {
+    const refs = [];
+    try {
+      const href = String(global.location && location.href || "");
+      const fromPreview = href.match(/joseo_save\/(?:blob|raw|tree)\/([^/]+)\//);
+      if (fromPreview) refs.push(decodeURIComponent(fromPreview[1]));
+      if (location.hostname && location.hostname.endsWith("github.io")) refs.push("main");
+    } catch {}
+    DATA_BRANCHES.forEach((b) => refs.push(b));
+    const seen = new Set();
+    return refs.filter((r) => {
+      if (!r || seen.has(r)) return false;
+      seen.add(r);
+      return true;
+    });
+  }
+
+  function sharedUrls() {
+    const stamp = Date.now();
+    const urls = [DATA_PATH + "?t=" + stamp];
+    inferRefs().forEach((ref) => {
+      urls.push("https://raw.githubusercontent.com/" + DATA_REPO.owner + "/" + DATA_REPO.repo + "/" + ref + "/" + DATA_PATH + "?t=" + stamp);
+    });
+    return urls;
+  }
+
+  async function fetchJson(url) {
+    const ctrl = typeof AbortController === "function" ? new AbortController() : null;
+    const timer = ctrl ? setTimeout(() => ctrl.abort(), 8000) : null;
+    try {
+      const res = await fetch(url, { cache: "no-store", signal: ctrl ? ctrl.signal : undefined });
+      if (!res.ok) return null;
+      const parsed = await res.json();
+      if (!parsed || !Array.isArray(parsed.topics) || !parsed.nodes) return null;
+      return parsed;
+    } catch {
+      return null;
+    } finally {
+      if (timer) clearTimeout(timer);
+    }
+  }
+
+  async function fetchShared() {
+    const urls = sharedUrls();
+    for (let i = 0; i < urls.length; i++) {
+      const parsed = await fetchJson(urls[i]);
+      if (parsed) return parsed;
+    }
+    return null;
+  }
+
+  function getPublishToken() {
+    try { return localStorage.getItem(GITHUB_TOKEN_KEY) || ""; }
+    catch { return ""; }
+  }
+
+  function setPublishToken(token) {
+    const value = String(token || "").trim();
+    try {
+      if (value) localStorage.setItem(GITHUB_TOKEN_KEY, value);
+      else localStorage.removeItem(GITHUB_TOKEN_KEY);
+    } catch {}
+    return value;
+  }
+
+  async function githubContents(branch, token) {
+    const url = "https://api.github.com/repos/" + DATA_REPO.owner + "/" + DATA_REPO.repo + "/contents/" + DATA_PATH + "?ref=" + encodeURIComponent(branch);
+    const res = await fetch(url, {
+      headers: {
+        Accept: "application/vnd.github+json",
+        Authorization: "Bearer " + token
+      }
+    });
+    if (res.status === 404) return { sha: null };
+    if (!res.ok) {
+      const err = new Error("GitHub 파일을 읽지 못했습니다. (" + res.status + ")");
+      err.status = res.status;
+      throw err;
+    }
+    const body = await res.json();
+    return { sha: body.sha || null };
+  }
+
+  async function publishToBranch(record, token, branch) {
+    const current = await githubContents(branch, token);
+    const payload = {
+      message: "관리자: 안내 내용을 다른 사람에게도 보이게 저장",
+      content: utf8ToBase64(JSON.stringify(record, null, 2)),
+      branch
+    };
+    if (current.sha) payload.sha = current.sha;
+    const url = "https://api.github.com/repos/" + DATA_REPO.owner + "/" + DATA_REPO.repo + "/contents/" + DATA_PATH;
+    const res = await fetch(url, {
+      method: "PUT",
+      headers: {
+        Accept: "application/vnd.github+json",
+        Authorization: "Bearer " + token,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    });
+    if (res.status === 401 || res.status === 403) {
+      const err = new Error("토큰이 만료됐거나 저장 권한이 없습니다.");
+      err.status = res.status;
+      throw err;
+    }
+    if (!res.ok) {
+      const err = new Error("전체에 저장하지 못했습니다. (" + res.status + ")");
+      err.status = res.status;
+      throw err;
+    }
+    return true;
+  }
+
   const api = {
     STORAGE_KEY,
     ADMIN_UNLOCK_KEY,
+    GITHUB_TOKEN_KEY,
     APP_PASS_SHA256,
     VAT,
+    DATA_REPO,
+    DATA_PATH,
 
     newId(prefix) {
       return (prefix || "id") + "-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 6);
@@ -684,44 +830,80 @@
 
     seedData,
 
+    hydrate() {
+      if (hydratePromise) return hydratePromise;
+      hydratePromise = (async () => {
+        const shared = await fetchShared();
+        const local = loadRecord();
+        const sharedAt = shared && shared.updatedAt ? String(shared.updatedAt) : "";
+        const localAt = local && local.updatedAt ? String(local.updatedAt) : "";
+        if (local && (!shared || localAt >= sharedAt)) memory = local;
+        else if (shared) memory = shared;
+      })();
+      return hydratePromise;
+    },
+
     loadData() {
       const rec = memory || loadRecord();
-      if (rec) {
-        const nodes = {};
-        Object.keys(rec.nodes || {}).forEach((id) => {
-          const node = normalizeNode(rec.nodes[id]);
-          if (node) nodes[node.id] = node;
-        });
-        const topics = (rec.topics || []).map(normalizeTopic).filter(Boolean);
-        return {
-          topics,
-          nodes,
-          popular: normalizePopular(rec.popular, topics),
-          isCustom: true,
-          updatedAt: rec.updatedAt || null
-        };
-      }
+      if (rec) return materialize(rec, { isCustom: true });
       return Object.assign({ isCustom: false, updatedAt: null }, seedData());
     },
 
     saveData(data) {
-      const nodes = {};
-      Object.keys((data && data.nodes) || {}).forEach((id) => {
-        const node = normalizeNode(data.nodes[id]);
-        if (node) nodes[node.id] = node;
-      });
-      const topics = ((data && data.topics) || []).map(normalizeTopic).filter(Boolean);
+      const built = materialize(data, { isCustom: true });
       const record = {
         version: 1,
         updatedAt: nowIso(),
-        topics,
-        nodes,
-        popular: normalizePopular(data && data.popular, topics)
+        topics: built.topics,
+        nodes: built.nodes,
+        popular: built.popular
       };
       memory = record;
       try { localStorage.setItem(STORAGE_KEY, JSON.stringify(record)); } catch {}
       notify();
       return record;
+    },
+
+    hasPublishToken() {
+      return !!getPublishToken();
+    },
+
+    getPublishToken,
+
+    setPublishToken,
+
+    async publishData(record, token) {
+      const auth = String(token || getPublishToken() || "").trim();
+      if (!auth) {
+        const err = new Error("no-token");
+        err.status = 401;
+        throw err;
+      }
+      const branches = inferRefs();
+      const ok = [];
+      let lastErr = null;
+      for (let i = 0; i < branches.length; i++) {
+        try {
+          await publishToBranch(record, auth, branches[i]);
+          ok.push(branches[i]);
+        } catch (err) {
+          lastErr = err;
+          if (err && (err.status === 401 || err.status === 403)) throw err;
+        }
+      }
+      if (!ok.length) throw lastErr || new Error("전체에 저장하지 못했습니다.");
+      return { branches: ok };
+    },
+
+    async saveAndShare(data) {
+      const record = api.saveData(data);
+      if (!getPublishToken()) return { record, published: false, reason: "no-token" };
+      try {
+        await api.publishData(record);
+        return { record, published: true };
+      } catch (err) {
+        return { record, published: false, reason: String((err && err.message) || err) };
+      }
     },
 
     resetToSeed() {
