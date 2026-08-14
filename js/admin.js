@@ -30,6 +30,8 @@
     popularPool: document.getElementById("popularPool"),
     popularCustom: document.getElementById("popularCustom"),
     btnAddPopular: document.getElementById("btnAddPopular"),
+    welcomeForm: document.getElementById("welcomeForm"),
+    welcomeText: document.getElementById("welcomeText"),
     toast: document.getElementById("toast")
   };
 
@@ -56,9 +58,15 @@
   }
 
   function persist(okMsg) {
+    readWelcomeIntoData();
     JournalStore.saveData(state.data);
     state.data = JournalStore.loadData();
     showToast(okMsg || "저장했습니다. 안내 페이지에 반영됩니다.");
+  }
+
+  function readWelcomeIntoData() {
+    if (!els.welcomeText || els.welcomeText.dataset.ready !== "1") return;
+    state.data.welcome = els.welcomeText.value;
   }
 
   function isUnlocked() {
@@ -192,6 +200,10 @@
   }
 
   function renderPopularEditor() {
+    if (els.welcomeText) {
+      els.welcomeText.value = state.data.welcome || JournalStore.getWelcome();
+      els.welcomeText.dataset.ready = "1";
+    }
     const items = state.data.popular || [];
     if (!items.length) {
       els.popularList.innerHTML = `<div class="hint" style="padding:8px 0">아직 없습니다. 왼쪽에서 고르거나 직접 입력하세요.</div>`;
@@ -590,6 +602,14 @@
     persist("자주 찾는 항목을 저장했습니다.");
     renderPopularEditor();
   });
+
+  if (els.welcomeForm) {
+    els.welcomeForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      persist("첫 멘트를 저장했습니다. 안내 페이지에 반영됩니다.");
+      renderPopularEditor();
+    });
+  }
 
   els.nodeList.addEventListener("click", (e) => {
     const up = e.target.closest("[data-node-up]");
