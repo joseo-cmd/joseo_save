@@ -195,6 +195,7 @@ a { color: inherit; text-decoration: none; }
   max-width: 92%;
   animation: rise 0.25s ease;
 }
+.msg:has(.result-grid) { max-width: 100%; }
 @keyframes rise {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: none; }
@@ -242,10 +243,13 @@ a { color: inherit; text-decoration: none; }
 .badge.check { background: var(--check-soft); color: var(--check); }
 
 .vat-callout {
-  border-radius: 16px;
-  padding: 14px 16px;
+  border-radius: 14px;
+  padding: 12px 14px;
   background: var(--mint);
-  margin-bottom: 12px;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 .vat-callout.sales { background: var(--sales-soft); }
 .vat-callout.ok { background: var(--ok-soft); }
@@ -255,9 +259,17 @@ a { color: inherit; text-decoration: none; }
 .vat-callout.check { background: var(--check-soft); }
 .vat-callout.mute { background: var(--mute-soft); }
 .vat-callout .kicker { font-size: 11px; font-weight: 800; color: var(--muted); letter-spacing: 0.04em; }
-.vat-callout h3 { font-size: 20px; letter-spacing: -0.04em; margin: 4px 0 6px; }
+.vat-callout h3 { font-size: 18px; letter-spacing: -0.04em; margin: 6px 0 0; line-height: 1.25; }
 .result-title { font-size: 16px; font-weight: 800; margin-bottom: 10px; }
+.result-grid {
+  display: grid;
+  grid-template-columns: minmax(120px, 160px) minmax(0, 1fr);
+  gap: 10px;
+  align-items: stretch;
+}
 .panel { margin-top: 14px; }
+.journal-panel { margin-top: 0; }
+.result-note { margin-top: 10px; }
 .panel h4 { font-size: 13px; margin-bottom: 8px; }
 .panel h4::after {
   content: "";
@@ -285,7 +297,7 @@ a { color: inherit; text-decoration: none; }
   border-radius: 12px;
   border: 1px solid var(--line);
 }
-.t-table th, .t-table td { border-bottom: 1px solid var(--line); padding: 10px 12px; vertical-align: top; }
+.t-table th, .t-table td { border-bottom: 1px solid var(--line); padding: 8px 10px; vertical-align: middle; }
 .t-table tr:last-child td { border-bottom: 0; }
 .t-table th { background: #f7f8f4; font-size: 12px; text-align: left; color: var(--muted); }
 .side-debit { color: #0b7a3b; font-weight: 800; }
@@ -590,7 +602,7 @@ label.field textarea { min-height: 80px; resize: vertical; }
 }
 
 @media (max-width: 900px) {
-  .shell, .admin-layout, .two-col, .journal-cols, .journal-row, .option-row, .split-edit, .page-tabs { grid-template-columns: 1fr; }
+  .shell, .admin-layout, .two-col, .journal-cols, .journal-row, .option-row, .split-edit, .page-tabs, .result-grid { grid-template-columns: 1fr; }
   .journal-cols { display: none; }
   .pane-chat { min-height: 420px; }
 }
